@@ -10,7 +10,8 @@
   "assets": [
     "/lib/assets/images",
     "/lib/assets/javascripts/optional",
-    "/lib/assets/javascripts/manage-prototype"
+    "/lib/assets/javascripts/manage-prototype",
+    "/lib/assets/javascripts/kit.js"
   ],
   "nunjucksPaths": "/lib/nunjucks",
   "nunjucksFilters": "/lib/filters/core-filters.js",

@@ -22,7 +22,7 @@
   }) }}
 {% endblock %}
 
-{% if (GOVUKPrototypeKit.isDevelopment) %}
+{% if (NowPrototypeIt.isDevelopment or GOVUKPrototypeKit.isDevelopment) %}
   {% set footerItems = [
     {
       href: "/manage-prototype",

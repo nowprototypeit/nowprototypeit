@@ -591,12 +591,4 @@ body .nowprototypeit-manage-prototype-govuk-tag {
   border-bottom: 2px solid #b1b4b6;
 }
 
-.nowprototypeit-brand-header svg {
-  max-height: 1em;
-}
-
-.nowprototypeit-page,
-.nowprototypeit-page a,
-.nowprototypeit-page p {
-  font-family: sans-serif;
-}
+@import "nowprototypeit-branding";

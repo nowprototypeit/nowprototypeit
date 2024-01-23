@@ -131,7 +131,7 @@ async function initialiseGitRepo () {
   const commitMessage = 'Create prototype'
   await exec(`git commit -am "${commitMessage}"`)
     .catch(() =>
-      exec(`git -c "user.email=auto-commit@nowprototypeit.com" -c "user.name=Now Prototype It" commit -am "${commitMessage}"`)
+      exec(`git -c "user.email=auto-commit@nowprototype.it" -c "user.name=Now Prototype It" commit -am "${commitMessage}"`)
     )
     .catch(failSilently)
 }

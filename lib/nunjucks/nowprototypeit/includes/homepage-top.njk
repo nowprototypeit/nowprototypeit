@@ -1,11 +1,7 @@
-<h2 class="nowprototypeit-band-name">
-  Now Prototype It Kit
-</h2>
-
-{% if (NowPrototypeIt.isDevelopment) %}
+{% if (NowPrototypeIt.isDevelopment or GOVUKPrototypeKit.isDevelopment) %}
 <p>
   <a href="/manage-prototype">Manage your prototype</a>
 </p>
+<hr class="govuk-section-break govuk-section-break--visible govuk-section-break--xl">
 {% endif %}
 
-<hr class="govuk-section-break govuk-section-break--visible govuk-section-break--xl">
