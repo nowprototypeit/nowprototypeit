@@ -1,4 +1,4 @@
-{% extends "views/manage-prototype/layout.njk" %}
+{% extends "nowprototypeit/views/manage-prototype/layout.njk" %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
 
@@ -7,7 +7,7 @@
     <div class="govuk-grid-column-two-thirds">
 
       <div id="plugin-heading">
-        {% include "views/manage-prototype/plugin-header.njk" %}
+        {% include "nowprototypeit/views/manage-prototype/plugin-header.njk" %}
       </div>
 
       {% if dependencyHeading %}
@@ -80,7 +80,7 @@
           </div>
         </div>
 
-        <div hidden class="govuk-panel govuk-panel--confirmation" id="panel-complete">
+        <div hidden class="govuk-panel govuk-panel--confirmation nowprototypeit-panel--confirmation" id="panel-complete">
           <div class="govuk-panel__title govuk-!-font-size-27">
             {{ verb.title }} complete
           </div>

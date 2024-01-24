@@ -1,4 +1,4 @@
-{% extends "views/manage-prototype/layout.njk" %}
+{% extends "nowprototypeit/views/manage-prototype/layout.njk" %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 
 {% block content %}
@@ -18,6 +18,8 @@
           classes: "govuk-button--secondary",
           href: commonTemplatesDetails.installLink + '?returnTo=templates'
         }) }}
+      {% elseif availableTemplates.length == 0 %}
+        <p class="govuk-body">It looks like you don't have any plugins that provide templates.  Why not <a href="/manage-prototype/plugins">find a plugin</a></p>
       {% endif %}
 
       {% for plugin in availableTemplates %}

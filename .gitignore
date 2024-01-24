@@ -24,3 +24,4 @@ tmp/
 .vscode
 .tmuxp.*
 /coverage
+features/screenshots

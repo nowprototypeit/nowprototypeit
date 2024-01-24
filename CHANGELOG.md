@@ -1,6 +1,22 @@
 # Changelog
 
-## New Features
+## 0.0.2
+
+### New Features
+
+ - Replaced GDS Transport Font (due to licencing restrictions and branding)
+ - Added installed plugins to the Find Plugins page
+ - Added more plugins to the plugin list
+ - Explained that plugins aren't subject to an approval process
+ - Better separation of management pages and user's pages (using nunjucks paths)
+
+### Fixes
+
+- Removed the code that makes pages continually reload while investigating a proper fix
+
+## 0.0.1
+
+### New Features
 
  - Striped out GOV.UK References
  - Put in Now Prototype It branding (unstyled)

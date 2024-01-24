@@ -25,13 +25,14 @@
   <nav>
     <ul>
       <li><a href="/">View your prototype</a></li>
+      <li><a href="/">Manage your prototype</a></li>
       <li><a href="https://nowprototype.it/govuk/hosting" target="_blank">Find out about hosting</a></li>
     </ul>
   </nav>
-  </header>
 {% endblock %}
 </header>
 <main>
+  {% block headerNav %}{% endblock %}
   {% block content %}{% endblock %}
 </main>
 <footer>

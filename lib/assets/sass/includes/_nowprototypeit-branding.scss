@@ -1,20 +1,23 @@
-
-.nowprototypeit-page body {
-  min-width: 47.5rem;
-}
+$backgroundColour: #D0DDD2;
+$featureColour: #33894A;
+$darkFeatureColour: #2C6C30;
 
 .nowprototypeit-page,
 .nowprototypeit-page body,
 .nowprototypeit-header,
 .nowprototypeit-footer {
-  background: #33894A;
+  background: $featureColour;
   margin: 0;
   padding: 0;
 
   main {
-    background: #D0DDD2;
+    background: $backgroundColour;
     padding: 2em;
   }
+}
+
+.nowprototypeit-page body {
+  min-width: 25rem;
 }
 
 .nowprototypeit-header,
@@ -22,11 +25,14 @@
   color: #EFEFEF;
   margin: 0;
   padding: 1em;
+
   a {
     text-decoration: none;
+
     &:hover {
       text-decoration: underline;
     }
+
     &:focus {
       background: none;
       border: 0 none;
@@ -39,42 +45,54 @@
 
 .nowprototypeit-header {
   font-size: 1.5rem;
-  box-shadow: 0 5px 3px #2C6C30;
+  box-shadow: 0 5px 3px $darkFeatureColour;
   position: relative;
+
   nav ul {
     list-style: none;
     color: inherit;
-    display: inline-block;
-    position: absolute;
-    right: 1em;
-    top: 1.4em;
+    display: block;
+
     li {
-      display: inline-block;
       font-size: 1.2rem;
-      + li {
-        margin-left: 0.75em;
-        padding-left: 1em;
-        border-left: 1px solid #EFEFEF;
-      }
+      display: block;
+      text-align: right;
+      padding: 0.3em 0.5em;
+      margin: 0;
+
+
       a {
         color: inherit;
         text-decoration: none;
+
         &:hover {
           text-decoration: underline;
         }
       }
     }
+
+    @media screen and (min-width: 50rem) {
+      width: auto;
+      display: inline-block;
+      position: absolute;
+      right: 1em;
+      top: 0;
+    }
   }
+
 }
 
 .nowprototypeit-footer {
-  box-shadow: 0 -5px 3px #2C6C30;
+  box-shadow: 0 -5px 3px $darkFeatureColour;
+
   p {
     color: inherit;
   }
+
   a {
     color: inherit;
     text-decoration: none;
+
     &:hover {
       text-decoration: underline;
     }
@@ -95,6 +113,7 @@
   &:hover .nowprototypeit-band-name {
     text-decoration: underline;
   }
+
   color: inherit;
   text-decoration: none;
 }
@@ -102,5 +121,5 @@
 .nowprototypeit-page,
 .nowprototypeit-page a,
 .nowprototypeit-page p {
-  font-family: sans-serif;
+  font-family: Dosis, sans-serif;
 }

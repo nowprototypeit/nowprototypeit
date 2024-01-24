@@ -3,15 +3,15 @@
     "available": [
       "govuk-frontend",
       "@govuk-prototype-kit/common-templates",
+      "@x-govuk/govuk-prototype-filters",
+      "@x-govuk/govuk-prototype-components",
       "@govuk-prototype-kit/step-by-step",
       "@govuk-prototype-kit/task-list",
       "hmrc-frontend",
       "jquery",
-      "notifications-node-client"
-    ],
-    "required": [
-      "govuk-prototype-kit",
-      "govuk-frontend"
+      "notifications-node-client",
+      "@ministryofjustice/frontend",
+      "ome-office-kit"
     ],
     "proxyConfig": {
       "jquery": {

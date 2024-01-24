@@ -1,4 +1,4 @@
-{% extends "views/manage-prototype/layout.njk" %}
+{% extends "nowprototypeit/views/manage-prototype/layout.njk" %}
 
 {% block content %}
 
@@ -37,23 +37,6 @@
           {% endfor %}
         </ul>
       {% endif %}
-      <h2 class="govuk-heading-m">
-        <a href="{{ currentUrl }}/templates">Templates</a>
-      </h2>
-      <p>
-        Create pages from templates
-      </p>
-
-      <h2 class="govuk-heading-m">
-        <a href="{{ currentUrl }}/plugins">Plugins</a>
-      </h2>
-      <p>
-        Plugins provide you with new components, styles and other features
-      </p>
-
-      <a class="govuk-heading-m" href="{{ currentUrl }}/clear-data">
-        Clear session data
-      </a>
 
     </div>
   </div>

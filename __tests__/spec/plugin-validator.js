@@ -30,10 +30,10 @@ describe('plugin-validator', () => {
     const result = await runShellCommand('valid-plugin')
 
     expect(result.stdout).toEqual(`
-Config file exists, validating contents.
+Config file govuk-prototype-kit.config.json exists, validating contents.
 Validating whether config paths meet criteria.
 
-${ansiColors.green('The plugin config is valid.')}
+${ansiColors.green('The plugin config in govuk-prototype-kit.config.json is valid.')}
 
 `)
   })
@@ -71,7 +71,7 @@ ${ansiColors.red('Error: The following invalid keys exist in your config: scss,u
 
     expect(result.exitCode).toEqual(100)
     expect(result.stderr).toEqual(`
-${ansiColors.red('Error: The plugin does not have a govuk-prototype-kit.config.json file, all plugins must have this file to be valid.')}
+${ansiColors.red('Error: The plugin does not have a nowprototypeit.config.json or govuk-prototype-kit.config.json file, all plugins must have this file to be valid.')}
 
 `)
   })

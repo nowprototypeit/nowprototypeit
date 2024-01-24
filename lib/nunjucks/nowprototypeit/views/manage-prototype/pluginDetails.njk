@@ -1,14 +1,14 @@
-{% extends "views/manage-prototype/layout.njk" %}
+{% extends "nowprototypeit/views/manage-prototype/layout.njk" %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 
-{% block beforeContent %}
+{% block headerNav %}
     {{ super() }}
     <a href="/manage-prototype/plugins" class="govuk-back-link">Back to plugins</a>
 {% endblock %}
 
 {% block content %}
     <form method="post" action="">
-        {% include "views/manage-prototype/plugin-header.njk" %}
+        {% include "nowprototypeit/views/manage-prototype/plugin-header.njk" %}
 
         <div class="govuk-grid-row">
             <div class="govuk-grid-column-one-quarter">
@@ -47,14 +47,14 @@
                     <p class="govuk-body">Released <time title="{{ plugin.releaseDateTime }}" datetime="{{ plugin.releaseDateTime }}">{{ releaseTimeSummary }}</time></p>
                   {% endif %}
                   {% if preparedPluginLinks.releaseNotes %}
-                    <p><a href="{{ preparedPluginLinks.releaseNotes }}" class="govuk-link">Release notes</a></p>
+                    <p><a href="{{ preparedPluginLinks.releaseNotes }}">Release notes</a></p>
                   {% endif %}
                   {% if preparedPluginLinks.versionHistory %}
-                    <p><a href="{{ preparedPluginLinks.versionHistory }}" class="govuk-link">Version history</a></p>
+                    <p><a href="{{ preparedPluginLinks.versionHistory }}">Version history</a></p>
                   {% endif %}
                 </div>
               {% endif %}
-              <p class="govuk-body"><a href="https://prototype-kit.service.gov.uk/docs/support">Report</a></p>
+              <p><a href="https://github.com/nowprototypeit/govuk/issues" target="_blank">Report</a></p>
               {% if debugInfo %}
               <code><pre>
                    {{ debugInfo }}
@@ -68,7 +68,7 @@
               <p class="govuk-body">{{ pluginDescription | default('No description has been provided.') }}</p>
                 
               {% if preparedPluginLinks.documentation %}
-                <p class="govuk-heading-m"><a href="{{ preparedPluginLinks.documentation }}">How to use this plugin</a></p>
+                <p class="feature-link__container"><a href="{{ preparedPluginLinks.documentation }}">How to use this plugin</a></p>
               {% endif %}
                 
               {% if inThisPlugin.length %}

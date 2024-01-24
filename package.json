@@ -42,7 +42,7 @@
     "test:acceptance:plugins": "cucumber-js --tags \"@plugins\"",
     "test:acceptance:errors": "echo '***\nNot implemented yet\n***' && exit 1",
     "test:integration": "cross-env CREATE_KIT_TIMEOUT=240000 jest --detectOpenHandles --testTimeout=60000 __tests__",
-    "test:full": "npm test && npm run test:acceptance",
+    "test:full": "npm run lint && npm test && npm run test:acceptance",
     "test": "npm run test:unit && npm run test:integration && npm run lint"
   },
   "dependencies": {

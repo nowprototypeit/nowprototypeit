@@ -201,7 +201,7 @@ app.use((err, req, res, next) => {
     case 404: {
       const path = req.path
       res.status(err.status)
-      res.render('views/error-handling/page-not-found', {
+      res.render('nowprototypeit/views/error-handling/page-not-found', {
         path
       })
       break
@@ -209,7 +209,7 @@ app.use((err, req, res, next) => {
     default: {
       res.status(500)
       console.error(err.message)
-      res.render('views/error-handling/server-error', getErrorModel(err))
+      res.render('nowprototypeit/views/error-handling/server-error', getErrorModel(err))
       break
     }
   }
