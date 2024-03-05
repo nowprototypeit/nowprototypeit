@@ -1,3 +1,5 @@
 #!/bin/sh
 
-mkdir -p ~/projects/prototype-kits/ && rm -Rf ~/projects/prototype-kits/now-prototype-it-govuk-companion && ./bin/cli create --version=local-symlink ~/projects/prototype-kits/now-prototype-it-govuk-companion --use-njk-extensions
+mkdir -p ~/projects/prototype-kits/now-prototype-it-govuk-companion &&
+rm -Rf ~/projects/prototype-kits/now-prototype-it-govuk-companion/* &&
+./bin/cli create --version=local ~/projects/prototype-kits/now-prototype-it-govuk-companion --use-njk-extensions

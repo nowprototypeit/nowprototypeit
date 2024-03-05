@@ -238,7 +238,7 @@ async function runCreate () {
   const kitDependency = getChosenKitDependency()
 
   await fse.ensureDir(installDirectory)
-  if ((await fse.readdir(installDirectory)).length > 0) {
+  if ((await fse.readdir(installDirectory)).filter(filename => !filename.startsWith('.')).length > 0) {
     console.error(`Directory ${installDirectory} is not empty, please specify an empty location.`)
     process.exitCode = 3
     return
@@ -384,7 +384,7 @@ async function runDev () {
   console.log('')
   console.log('starting...')
 
-  await require('../lib/dev-server').runDevServer()
+  await require('../lib/dev-server/dev-server').runDevServer()
 }
 
 function runServe () {

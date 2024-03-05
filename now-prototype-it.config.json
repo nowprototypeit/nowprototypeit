@@ -1,0 +1,26 @@
+{
+  "version-2024-03": {
+    "meta": {
+      "description": "Quickly make interactive, accessible and realistic prototypes.",
+      "urls": {
+        "documentation": "https://nowprototype.it/",
+        "versionHistory": "https://github.com/nowprototypeit/govuk",
+        "releaseNotes": "https://github.com/nowprototypeit/govuk/blob/main/CHANGELOG.md"
+      }
+    },
+    "assets": [
+      "/lib/assets/images",
+      "/lib/assets/javascripts/optional"
+    ],
+    "nunjucksPaths": "/lib/nunjucks",
+    "nunjucksFilters": "/lib/filters/core-filters.js",
+    "scripts": [
+      "/lib/assets/javascripts/auto-store-data.js",
+      "/lib/assets/javascripts/kit.js"
+    ],
+    "importNunjucksMacrosInto": [
+      "/lib/nunjucks/prototype-core/layouts/govuk-branded.njk",
+      "/lib/nunjucks/prototype-core/layouts/unbranded.njk"
+    ]
+  }
+}

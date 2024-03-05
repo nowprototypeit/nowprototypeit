@@ -1,0 +1,40 @@
+{% extends "layouts/manage-prototype.njk" %}
+{% from "components/text-input.njk" import nowPrototypeItTextInput %}
+{% from "components/submit-button.njk" import nowPrototypeItSubmitButton %}
+
+{% block beforeContent %}
+  {{ super() }}
+  <a class="govuk-back-link" href="/manage-prototype/templates">Back</a>
+{% endblock %}
+
+{% block content %}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% if error %}
+        <p>There is a problem</p>
+        {{ error }}
+      {% endif %}
+
+      <h1 class="govuk-heading-l">{{ pageName }}</h1>
+
+      <form action="{{ currentUrl }}" method="post">
+
+        {{ nowPrototypeItTextInput({
+          errorMessage: {
+            text: error
+          } if error,
+          label: "Path for the new page",
+          hintText: "For example: /my-page or /my-folder/my-page",
+          nameAndId: "chosen-url",
+          value: chosenUrl
+        }) }}
+
+        {{ nowPrototypeItSubmitButton({
+          text: "Create page",
+          nameAndId: 'create-page-from-template'
+        }) }}
+      </form>
+    </div>
+  </div>
+{% endblock %}

@@ -6,7 +6,6 @@ const packageJsonFormat = { encoding: 'utf8', spaces: 2 }
 
 async function npmInstall (cwd, dependencies) {
   dependencies.push('--save-exact')
-  console.log('installing dependencies', dependencies)
   return spawn(
     'npm', [
       'install',

@@ -1,5 +1,4 @@
 // core dependencies
-const fsp = require('fs').promises
 const path = require('path')
 const url = require('url')
 
@@ -16,10 +15,9 @@ const { expressNunjucks, getNunjucksAppEnv, stopWatchingNunjucks } = require('./
 dotenv.config()
 
 // Local dependencies
-const { projectDir, packageDir, appViewsDir, finalBackupNunjucksDir } = require('./lib/utils/paths')
+const { projectDir, appViewsDir, finalBackupNunjucksDir } = require('./lib/utils/paths')
 const config = require('./lib/config.js').getConfig()
 const packageJson = require('./package.json')
-const { govukFrontendPaths } = require('./lib/govukFrontendPaths')
 const utils = require('./lib/utils')
 const sessionUtils = require('./lib/session.js')
 const plugins = require('./lib/plugins/plugins.js')
@@ -39,32 +37,27 @@ if (isSecure) {
   app.set('trust proxy', 1) // needed for secure cookies on heroku
 }
 
-// Find GOV.UK Frontend (via project, internal package fallback)
-const govukFrontend = govukFrontendPaths([projectDir, packageDir])
-
-// Find GOV.UK Frontend (via internal package, project fallback)
-const govukFrontendInternal = govukFrontendPaths([packageDir, projectDir])
-
 // Add variables that are available in all views
 app.locals.asset_path = '/public/'
 app.locals.useAutoStoreData = config.useAutoStoreData
 app.locals.releaseVersion = 'v' + releaseVersion
+app.locals.isRunningInPrototypeKit = true
 app.locals.serviceName = config.serviceName
-app.locals.GOVUKPrototypeKit = {
-  isProduction: config.isProduction,
-  isDevelopment: config.isDevelopment
-}
 if (plugins.legacyGovukFrontendFixesNeeded()) {
-  app.locals.GOVUKPrototypeKit.legacyGovukFrontendFixesNeeded = true
+  app.locals.NowPrototypeItKit = app.locals.NowPrototypeItKit || {}
+  app.locals.NowPrototypeItKit.legacyGovukFrontendFixesNeeded = true
 }
 // pluginConfig sets up variables used to add the scripts and stylesheets to each page.
 app.locals.pluginConfig = plugins.getAppConfig({
   scripts: utils.prototypeAppScripts
 })
 
-// Add GOV.UK Frontend paths to Nunjucks locals
-app.locals.govukFrontend = govukFrontend
-app.locals.govukFrontendInternal = govukFrontendInternal
+app.locals.govukFrontend = {
+  assetPath: '/dist/govuk/assets'
+}
+plugins.getNunjucksVariables().forEach(({ key, value }) => {
+  app.locals[key] = value
+})
 
 // keep extensionConfig around for backwards compatibility
 // TODO: remove in v14
@@ -95,8 +88,7 @@ nunjucksConfig.express = app
 // Finds GOV.UK Frontend via `getAppViews()` only if installed
 // but uses the internal package as a backup if uninstalled
 const nunjucksAppEnv = getNunjucksAppEnv(
-  plugins.getAppViews([appViewsDir, finalBackupNunjucksDir]),
-  govukFrontendInternal
+  plugins.getAppViews([appViewsDir, finalBackupNunjucksDir])
 )
 
 expressNunjucks(nunjucksAppEnv, app)
@@ -106,6 +98,47 @@ utils.addNunjucksFilters(nunjucksAppEnv)
 
 // Add Nunjucks functions
 utils.addNunjucksFunctions(nunjucksAppEnv)
+
+function prepareError (err) {
+  return {
+    name: err.name,
+    stack: err.stack,
+    code: err.code,
+    type: err.type
+  }
+}
+
+if (config.isDevelopment) {
+  const events = require('./lib/dev-server/dev-server-events')
+  const eventTypes = require('./lib/dev-server/dev-server-event-types')
+
+  events.listenExternal([eventTypes.TEMPLATE_PREVIEW_REQUEST])
+
+  events.on(eventTypes.TEMPLATE_PREVIEW_REQUEST, (info) => {
+    const id = info.id
+
+    const templatePath = info.templatePath
+
+    try {
+      nunjucksAppEnv.render(templatePath, {
+        ...app.locals
+      }, (err, result) => {
+        const response = { id }
+        if (err) {
+          response.error = prepareError(err)
+        } else {
+          response.result = { html: result }
+        }
+        events.emitExternal(eventTypes.TEMPLATE_PREVIEW_RESPONSE, response)
+      })
+    } catch (e) {
+      events.emitExternal(eventTypes.TEMPLATE_PREVIEW_RESPONSE, {
+        id,
+        error: prepareError(e)
+      })
+    }
+  })
+}
 
 // Set views engine
 app.set('view engine', 'njk')
@@ -133,9 +166,8 @@ app.use((req, res, next) => {
   next()
 })
 
-require('./lib/manage-prototype-routes.js')
 require('./lib/plugins/plugins-routes.js')
-const { getErrorModel } = require('./lib/utils/errorModel')
+
 utils.addRouters(app)
 
 // Strip .html, .htm and .njk if provided
@@ -168,13 +200,6 @@ app.get('/docs/tutorials-and-examples', (req, res) => {
   res.redirect('https://prototype-kit.service.gov.uk/docs')
 })
 
-app.get('/', async (req, res) => {
-  const starterHomepageCode = await fsp.readFile(path.join(packageDir, 'prototype-starter', 'app', 'views', 'index.njk'), 'utf8')
-  res.render('views/backup-homepage', {
-    starterHomepageCode
-  })
-})
-
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {
   const err = new Error(`Page not found: ${decodeURI(req.path)}`)
@@ -199,17 +224,24 @@ app.use((err, req, res, next) => {
   }
   switch (err.status) {
     case 404: {
-      const path = req.path
-      res.status(err.status)
-      res.render('nowprototypeit/views/error-handling/page-not-found', {
-        path
+      res.status(404)
+      res.send({
+        errorToBeDisplayedNicely: true,
+        originalUrl: req.originalUrl,
+        is404: true
       })
       break
     }
     default: {
       res.status(500)
-      console.error(err.message)
-      res.render('nowprototypeit/views/error-handling/server-error', getErrorModel(err))
+      res.send({
+        errorToBeDisplayedNicely: true,
+        isNunjucksError: true,
+        message: err.message,
+        type: err.type,
+        stack: err.stack,
+        name: err.name
+      })
       break
     }
   }

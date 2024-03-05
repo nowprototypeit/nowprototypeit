@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>{{ title | default('example title') }}</title>
+{% include "prototype-core/includes/stylesheets.njk" %}
+</head>
+<body>
+<main>
+{% block content %}
+  <p>Put your content here by using a <code><pre>&#123;% block content %}</pre></code>
+{% endblock %}
+</main>
+{% include "prototype-core/includes/scripts.njk" %}
+</body>
+</html>

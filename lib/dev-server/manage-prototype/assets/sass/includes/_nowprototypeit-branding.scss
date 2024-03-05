@@ -1,0 +1,134 @@
+$backgroundColour: #D0DDD2;
+$featureColour: #33894A;
+$darkFeatureColour: #2C6C30;
+$lightFontColor: #EFEFEF;
+$fontColor: #030303;
+$mediumFontColor: #333333;
+$mediumLightFontColor: #BBB;
+$tinyWidth: 50rem;
+$midWidth: 70rem;
+$fullWidth: 90rem;
+
+.nowprototypeit-page,
+.nowprototypeit-page body,
+.nowprototypeit-header,
+.nowprototypeit-footer {
+  background: $featureColour;
+  margin: 0;
+  padding: 0;
+  color: $fontColor;
+
+  main {
+    background: $backgroundColour;
+    padding: 2em;
+    min-height: 60vh;
+  }
+}
+
+.nowprototypeit-page body {
+  min-width: 25rem;
+}
+
+.nowprototypeit-header,
+.nowprototypeit-footer {
+  color: $lightFontColor;
+  margin: 0;
+  padding: 1em;
+
+  a {
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    &:focus {
+      background: none;
+      border: 0 none;
+      outline: 0 none;
+      box-shadow: none;
+      text-decoration: underline;
+    }
+  }
+}
+
+.nowprototypeit-header {
+  font-size: 1.5rem;
+  box-shadow: 0 5px 3px $darkFeatureColour;
+  position: relative;
+
+  nav ul {
+    list-style: none;
+    color: inherit;
+    display: block;
+
+    li {
+      font-size: 1.2rem;
+      display: block;
+      text-align: right;
+      padding: 0.3em 0.5em;
+      margin: 0;
+
+
+      a {
+        color: inherit;
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+
+    @media screen and (min-width: $tinyWidth) {
+      width: auto;
+      display: inline-block;
+      position: absolute;
+      right: 1em;
+      top: 0;
+    }
+  }
+
+}
+
+.nowprototypeit-footer {
+  box-shadow: 0 -5px 3px $darkFeatureColour;
+
+  p {
+    color: inherit;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+
+.nowprototypeit-brand-header svg,
+.nowprototypeit-footer svg,
+.nowprototypeit-band-name {
+  max-height: 1.5em;
+  vertical-align: middle;
+  fill: $lightFontColor;
+  padding-bottom: 0.2em;
+}
+
+.nowprototypeit-brand-header a {
+  &:hover .nowprototypeit-band-name {
+    text-decoration: underline;
+  }
+
+  color: inherit;
+  text-decoration: none;
+}
+
+.nowprototypeit-page,
+.nowprototypeit-page a,
+.nowprototypeit-page p {
+  font-family: Dosis, sans-serif;
+}

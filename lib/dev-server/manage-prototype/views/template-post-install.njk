@@ -1,0 +1,23 @@
+{% extends "layouts/manage-prototype.njk" %}
+
+{% block content %}
+
+  <div class="grid-row">
+    <div class="grid-column-readable-width">
+      <h1>{{ pageName }}</h1>
+
+      <p>View your page at
+        <a id="view-page-link" href="{{ url }}">{{ url }}</a></p>
+
+      <p>
+        To edit the file in your code editor, open <strong>{{ filePath }}</strong>
+      </p>
+
+      <p>
+        <a href="/manage-prototype/templates">
+          Back to templates
+        </a>
+      </p>
+    </div>
+  </div>
+{% endblock %}

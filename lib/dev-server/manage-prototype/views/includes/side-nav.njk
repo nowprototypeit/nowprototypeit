@@ -1,0 +1,11 @@
+{% for link in sideNavLinks %}
+  <div class="sub-nav {% if link.isCurrentPage %}sub-nav__current{%endif%}">
+    {% if not link.isCurrentPage %}
+      <a href="{{ link.url }}">
+          {{ link.text }}
+      </a>
+    {% else %}
+      {{ link.text }}
+    {% endif %}
+  </div>
+{% endfor %}

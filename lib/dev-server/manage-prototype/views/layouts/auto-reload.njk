@@ -1,0 +1,14 @@
+{% extends "layouts/manage-prototype.njk" %}
+
+{% block pageScripts %}
+  <noscript>
+    <meta id="remove-on-auto-reload-enable" http-equiv="refresh" content="5"/>
+  </noscript>
+  {% if lastReloadTimestamp %}
+    <script>
+    window.nowPrototypeItGOVUK = window.nowPrototypeItGOVUK || {}
+    window.nowPrototypeItGOVUK.lastReload={{lastReloadTimestamp}}
+    </script>
+  {% endif %}
+  <script src="/manage-prototype/assets/scripts/reloader-client.js"></script>
+{% endblock %}

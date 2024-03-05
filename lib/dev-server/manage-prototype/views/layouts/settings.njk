@@ -1,0 +1,29 @@
+{% extends "layouts/page-with-side-nav.njk" %}
+
+{% block introduction %}
+
+  {% if toast == 'saved-settings' %}
+    <div class="grid-row grid-standard-bottom-margin">
+      <div class="grid-column-full-width">
+        <div class="nowprototypeit-toast">
+          <h3>Settings saved</h3>
+          <p>Your prototype will now restart, if pages don't load just try again after a few seconds.</p>
+          {% if changedPort %}
+            <p><strong>You have changed the port, this will only take affect when you stop the kit and start it
+                again.</strong></p>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+  {% endif %}
+  <div class="grid-row grid-standard-bottom-margin">
+    <div class="grid-column-readable-width">
+      <h1>Settings</h1>
+      <p>
+        These settings control how the kit runs, we recommend that you
+        leave the default values whenever you can.
+      </p>
+    </div>
+  </div>
+{% endblock %}

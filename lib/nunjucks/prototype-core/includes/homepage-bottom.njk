@@ -1,0 +1,29 @@
+<p>
+  Install, uninstall and update plugins in <a href="/manage-prototype/plugins">the plugin pages</a>
+</p>
+<p>
+  Create a new page <a href="/manage-prototype/templates">by using a template</a>
+</p>
+<p>
+  Change your service name in <a href="/manage-prototype/settings">basic settings</a>
+</p>
+<p>You can remove this section by editing <strong>index.html</strong> and removing the include of <strong>homepage-bottom</strong></p>
+
+{% macro showPage(page) %}
+  <li class="nowprototypeit-page-item"><a href="{{ page.url }}" class="nowprototypeit-page-link"
+    >{{ page.name }}</a>{% if page.children %}{{ showPages(page.children) }}{% endif %}</li>
+{% endmacro %}
+
+{% macro showPages(pages) %}
+  {% if pages.length > 0 %}
+    <ul class="nowprototypeit-page-list">
+      {% for page in pages %}
+        {{ showPage(page) }}
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endmacro %}
+{% if foundPages %}
+  <h2>You have the following pages in your prototype:</h2>
+  {{ showPages(foundPages) }}
+{% endif %}

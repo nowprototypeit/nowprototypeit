@@ -1,0 +1,58 @@
+{% extends "layouts/manage-prototype.njk" %}
+{% from "components/submit-button.njk" import nowPrototypeItSubmitButton %}
+
+{% block content %}
+
+  <div class="grid-row">
+    <div class="grid-column-readable-width">
+
+      <h1>Templates</h1>
+
+      <p>
+        Create pages from templates
+      </p>
+
+      {% if commonTemplatesDetails %}
+        {{ nowPrototypeItSubmitButton({
+          text: 'Install common templates',
+          href: commonTemplatesDetails.installLink + '?returnTo=templates'
+        }) }}
+      {% elseif availableTemplates.length == 0 %}
+        <p>It looks like you don't have any plugins that provide templates.  Why not <a href="/manage-prototype/plugins">find a plugin</a></p>
+      {% endif %}
+
+      {% for plugin in availableTemplates %}
+
+        <div class="plugin-templates" data-plugin-package-name="{{ plugin.packageName }}">
+
+          <h2 class="plugin-templates-plugin-name">
+            {{ plugin.pluginDisplayName.name }}
+            {% if plugin.pluginDisplayName.scope %}
+              <span class="scope-caption">From {{ plugin.pluginDisplayName.scope }}</span>
+            {% endif %}
+          </h2>
+
+          <ul class="nowprototypeit-manage-prototype-template-list-template-list">
+            {% for template in plugin.templates %}
+              <li class="nowprototypeit-manage-prototype-template-list-template-list__item">
+                <div class="nowprototypeit-manage-prototype-template-list-template-list__item-name">
+                  {{ template.name }}
+                </div>
+                <div class="nowprototypeit-manage-prototype-template-list-template-list__item-links">
+                  <a class="nowprototypeit-manage-prototype-template-list-template-list__item-link--view
+                   nowprototypeit-manage-prototype-template-list-template-list__item-link"
+                     href="{{ template.viewLink }}">
+                    View<span class="visually-hidden"> {{ template.name }}</span></a>
+                  <a class="nowprototypeit-manage-prototype-template-list-template-list__item-link--create
+                  nowprototypeit-manage-prototype-template-list-template-list__item-link"
+                     href="{{ template.installLink }}">
+                    Create<span class="visually-hidden"> {{ template.name }}</span></a>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}

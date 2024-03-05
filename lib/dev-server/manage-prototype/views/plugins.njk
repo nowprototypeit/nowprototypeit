@@ -1,0 +1,59 @@
+{% extends "layouts/plugins.njk" %}
+{% from "components/submit-button.njk" import nowPrototypeItSubmitButton %}
+{% from "components/label.njk" import nowPrototypeItLabel %}
+{% from "components/text-input.njk" import nowPrototypeItTextInput %}
+{% from "components/plugin-card.njk" import nowPrototypeItPluginCard %}
+
+{% block mainPanel %}
+    {% if isSearchPage %}
+        <div class="govuk-!-margin-bottom-5">
+            <div id="search-container">
+                {{ nowPrototypeItLabel({
+                    text: "Search",
+                    classes:"govuk-!-font-weight-bold"
+                }) }}
+
+                <form action="{{ currentUrl }}" method="get">
+                    {{ nowPrototypeItTextInput({
+                        id: "search",
+                        nameAndId: "search",
+                        value: search
+                    }) }}
+
+                    {{ nowPrototypeItSubmitButton({
+                        text: "Search",
+                        classes: "nowprototypeit-form-item-wrapper-small-gap"
+                    }) }}
+                </form>
+
+                {% if search %}
+                    <a class="govuk-link govuk-link--no-visited-state" href="?">Clear search</a>
+                {% endif %}
+            </div>
+            <h3 class="govuk-body govuk-!-font-weight-bold">
+                {{ foundMessage }}
+            </h3>
+        </div>
+    {% endif %}
+
+    {% if plugins.length === 0 %}
+        {% if isInstalledPage %}
+            <p>It looks like you don't have any plugins installed.</p>
+        {% else %}
+            <p>We couldn't find any plugins, looks like something went wrong. Feel free to <a
+                        href="https://github.com/nowprototypeit/govuk/issues" target="_blank">raise us a ticket</a>.</p>
+        {% endif %}
+    {% else %}
+        <ul class="nowprototypeit-manage-prototype-plugin-list"
+        data-plugin-group-status="{{ status }}">
+        {% for plugin in plugins %}
+            {{ nowPrototypeItPluginCard({
+                plugin: plugin
+            }) }}
+        {% endfor %}
+    {% endif %}
+    </ul>
+    {% if showPluginLookup and isSearchPage %}
+        {% include "lookup-plugin.njk" %}
+    {% endif %}
+{% endblock %}

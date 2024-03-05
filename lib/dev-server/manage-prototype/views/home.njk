@@ -1,0 +1,20 @@
+{% extends "layouts/auto-reload.njk" %}
+{% from "components/submit-button.njk" import nowPrototypeItSubmitButton %}
+
+{% set bodyClasses = 'nowprototypeit-error-page' %}
+
+{% block pageTitle %}
+  Welcome to Now Prototype It
+{% endblock %}
+
+{% block content %}
+
+  {% include "prototype-core/includes/homepage-top.njk" %}
+
+  <h1>
+    Welcome to your new prototype.
+  </h1>
+
+  {% include "prototype-core/includes/homepage-bottom.njk" %}
+
+{% endblock %}

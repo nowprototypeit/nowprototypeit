@@ -1,0 +1,118 @@
+{% extends "layouts/auto-reload.njk" %}
+{% from "components/submit-button.njk" import nowPrototypeItSubmitButton %}
+
+{% set bodyClasses = 'nowprototypeit-error-page' %}
+
+{% block pageTitle %}
+  Error {% if fatal %}running your prototype{% else %}displaying your page{% endif %} – Now Prototype It
+{% endblock %}
+
+{% if fullError %}
+  {% set fullError %}
+    <div class="basic-source-code-wrapper error-stack">
+      <code>
+        <pre>{{ fullError }}</pre>
+      </code>
+    </div>
+  {% endset %}
+{% endif %}
+
+{% block content %}
+
+  <h1 class="govuk-heading-m">
+    {% if fatal %}
+      Your prototype failed to start
+    {% else %}
+      There was an error while loading your page
+    {% endif %}
+  </h1>
+
+  {% if parsedSuccessfully %}
+
+  {% set errorDetails %}
+
+    <dl class="error-description">
+      {% if filePath %}
+        <dt>File path:</dt>
+        <dd>{{ filePath }}</dd>
+      {% endif %}
+      {% if line %}
+        <dt>Line number:</dt>
+        <dd>{{ line }}</dd>
+      {% endif %}
+      {% if column %}
+        <dt>Column number:</dt>
+        <dd>{{ column }}</dd>
+      {% endif %}
+      {% if type %}
+        <dt>Error type:</dt>
+        <dd>{{ type }}</dd>
+      {% endif %}
+      {% if message %}
+        <dt>Error message:</dt>
+        <dd>{{ message }}</dd>
+      {% endif %}
+      {% if additionalInfoMarkup %}
+        <dt>Additional information:</dt>
+        <dd>{{ additionalInfoMarkup | safe }}</dd>
+      {% endif %}
+    </dl>
+    {% if sourceCodeLines %}
+      <h3>Source code</h3>
+      <div class="error-source-code">
+        {% for line in sourceCodeLines %}
+          <span class="error-source-code__line-number {% if line.highlighted %}error-source-code__line-number--highlighted{% endif %}">{{ line.number }}. </span><span
+          class="error-source-code__line-contents {% if line.highlighted %}error-source-code__line-contents--highlighted{% endif %}">{{ line.contents }}</span>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% if fullError %}
+        <div data-dom-widget="show-full-error" class="show-full-error-area">
+          {{ nowPrototypeItSubmitButton({
+            text: 'Show full error',
+            nameAndId: 'show-full-error',
+            classes: 'js-visible'
+          }) }}
+          <div class="reveal-area">
+            <h3>Stack trace</h3>
+            {{ fullError | safe }}
+          </div>
+        </div>
+    {% endif %}
+  {% endset %}
+    <h3>Error details</h3>
+
+    {% if recommendPlugin %}
+      <div class="important-info">
+        <h4>We think this problem is related to a plugin</h4>
+        <p>The plugin we think is causing the problem is {% if recommendPluginRef %}
+            <a href="/manage-prototype/plugin/{{ recommendPluginRef }}">{{ recommendPlugin }}</a>
+        {% else %}
+            {{ recommendPlugin }}
+        {% endif %}.  You could try installing, uninstalling or updating it.</p>
+        {% if recommendPluginRef %}
+          <p><a href="/manage-prototype/plugin/{{ recommendPluginRef }}">Manage the plugin {{ recommendPlugin }}</a></p>
+        {% endif %}
+      </div>
+
+      <div data-dom-widget="show-full-error" class="show-full-error-area" data-button-id="show-more-details">
+        {{ nowPrototypeItSubmitButton({
+          text: 'Show more details',
+          nameAndId: 'show-more-details',
+          classes: 'js-visible'
+        }) }}
+        <div class="reveal-area">
+          {{ errorDetails | safe }}
+        </div>
+      </div>
+    {% else %}
+      {{ errorDetails | safe }}
+    {% endif %}
+
+  {% else %}
+    {{ fullError | safe }}
+  {% endif %}
+
+  <!-- parsed by:  {{ parsedBy }} -->
+
+{% endblock %}

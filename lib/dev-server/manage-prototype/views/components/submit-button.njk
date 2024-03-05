@@ -1,0 +1,22 @@
+
+{% macro nowPrototypeItSubmitButton(params) %}
+<div class="nowprototypeit-form-item-wrapper {{ params.classes }}">
+  {% if params.href %}
+    <a
+      href="{{ params.href }}"
+      class="nowprototypeit-submit-button-link"
+      id="{{ params.nameAndId }}"
+    >{{ params.text }}</a>
+  {% else %}
+  <button
+    type="submit"
+    class="nowprototypeit-submit-button"
+    name="{{ params.nameAndId }}"
+    id="{{ params.nameAndId }}"
+    {% if params.formAction %}
+      formaction="{{ params.formAction }}"
+    {% endif %}
+  >{{ params.text }}</button>
+  {% endif %}
+</div>
+{% endmacro %}

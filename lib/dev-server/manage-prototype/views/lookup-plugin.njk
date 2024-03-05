@@ -1,0 +1,90 @@
+{% from "components/text-input.njk" import nowPrototypeItTextInput %}
+{% from "components/radio-buttons.njk" import nowPrototypeItRadioButtons %}
+{% from "components/submit-button.njk" import nowPrototypeItSubmitButton %}
+{% from "components/error.njk" import nowPrototypeItError %}
+
+{% set npm %}
+    {{ nowPrototypeItTextInput({
+        nameAndId: "npmPackage",
+        value: playback.npmPackage,
+        spellcheck: false,
+        label: "Package name",
+        hintText: "The package name is what you'd normally put after 'npm install'."
+    }) }}
+    {{ nowPrototypeItTextInput({
+        nameAndId: "npmVersion",
+        value: playback.npmVersion,
+        spellcheck: false,
+        isOneThird: true,
+        label: "Version number",
+        hintText: "If you want to install a specific version you can enter it here e.g. 5.0.1"
+    }) }}
+{% endset %}
+
+{% set github %}
+    {{ nowPrototypeItTextInput({
+        nameAndId: "githubOrg",
+        value: playback.githubOrg,
+        spellcheck: false,
+        label: "The organisation in Github"
+    }) }}
+    {{ nowPrototypeItTextInput({
+        nameAndId: "githubProject",
+        value: playback.githubProject,
+        spellcheck: false,
+        label: "The project name in Github"
+    }) }}
+    {{ nowPrototypeItTextInput({
+        nameAndId: "githubBranch",
+        value: playback.githubBranch,
+        spellcheck: false,
+        label: "The branch name in Github (optional)"
+    }) }}
+{% endset -%}
+
+{% set fs %}
+    {{ nowPrototypeItTextInput({
+        nameAndId: "fsPath",
+        spellcheck: false,
+        value: playback.fsPath,
+        label: "File system path",
+        hintText: "Use this if you're working on a plugin and want to try it before releasing."
+    }) }}
+{% endset -%}
+
+{% if playback.error == 'plugin-lookup-no-results' %}
+    {{ nowPrototypeItError({
+        titleText: "There is a problem",
+        errorList: [
+            {
+                text: "The package you requested couldn't be found"
+            }
+        ]
+    }) }}
+{% endif %}
+<h2>Lookup a plugin</h2>
+<form action="/manage-prototype/plugin" method="post">
+    {{ nowPrototypeItRadioButtons({
+        nameAndId: "source",
+        value: playback.source,
+        options: [
+            {
+                value: "npm",
+                text: "NPM",
+                conditionalReveal: npm
+            },
+            {
+                value: "github",
+                text: "Github",
+                conditionalReveal: github
+            },
+            {
+                value: "fs",
+                text: "File system",
+                conditionalReveal: fs
+            }
+        ]
+    }) }}
+    {{ nowPrototypeItSubmitButton({text: "Lookup"}) }}
+    <input type="hidden" name="notFoundErrorUrl" value="/manage-prototype/plugins?error=plugin-lookup-no-results"/>
+</form>

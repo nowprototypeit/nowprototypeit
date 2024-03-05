@@ -1,0 +1,14 @@
+{% extends "layouts/manage-prototype.njk" %}
+
+{% block content %}
+  {% block introduction %}{% endblock %}
+  <div class="grid-row">
+    <div class="grid-column-one-quarter">
+      {% block sideBar %}{% endblock %}
+    </div>
+
+    <div class="grid-column-three-quarters">
+      {% block mainPanel %}{% endblock %}
+    </div>
+  </div>
+{% endblock %}

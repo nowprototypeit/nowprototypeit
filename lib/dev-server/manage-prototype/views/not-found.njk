@@ -1,0 +1,24 @@
+{% extends "layouts/auto-reload.njk" %}
+{% from "components/submit-button.njk" import nowPrototypeItSubmitButton %}
+
+{% set bodyClasses = 'nowprototypeit-error-page' %}
+
+{% block pageTitle %}
+  404 Not Found – Now Prototype It
+{% endblock %}
+
+{% block content %}
+
+  <h1>
+    Page not found
+  </h1>
+
+  <p>This may be because:</p>
+
+  <ul>
+    <li>you typed or pasted the web address incorrectly</li>
+    <li>a link in your code is wrong</li>
+    <li>a form in your code is wrong</li>
+    <li>you have not created the page yet</li>
+  </ul>
+{% endblock %}

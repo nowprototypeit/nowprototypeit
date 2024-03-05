@@ -1,0 +1,48 @@
+{% extends "layouts/settings.njk" %}
+{% from "components/text-input.njk" import nowPrototypeItTextInput %}
+{% from "components/radio-buttons.njk" import nowPrototypeItRadioButtons %}
+{% from "components/submit-button.njk" import nowPrototypeItSubmitButton %}
+
+{% block mainPanel %}
+<form action="{{ currentUrl }}" method="post">
+  {% for field in fields %}
+    {% if field.type == 'text' or field.type == 'int' %}
+      {{ nowPrototypeItTextInput({
+        label: field.name,
+        hintText: field.description,
+        nameAndId: field.key,
+        value: field.value,
+        additionalClasses: 'nowprototypeit-form-text-input-small' if field.type == 'int'
+      }) }}
+    {% elseif field.type == 'bool' %}
+      {{ nowPrototypeItRadioButtons({
+        label: field.name,
+        hintText: field.description,
+        nameAndId: field.key,
+        value: field.value,
+        options: [
+          {
+            value: "true",
+            text: "On"
+          },
+          {
+            value: "false",
+            text: "Off"
+          },
+          {
+            value: "__default__",
+            text: "I don't have a preference"
+          }
+        ]
+      }) }}
+    {% else %}
+      <p>Unknown [{{ field.type }}]: {{ field.name }}</p> 
+    {% endif %}
+  {% endfor %}
+  {{ nowPrototypeItSubmitButton({
+    text: "Save changes"
+  }) }}
+  
+  
+</form>
+{% endblock %}

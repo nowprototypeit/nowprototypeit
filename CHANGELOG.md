@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.0.3
+
+### New Features
+
+ - Seperated the user's kit from the management pages
+ - Added settings page in Manage Prototype
+ - All HTML pages now auto-refresh regardless of the template used (this includes basic output from routes)
+ - Added cucumberjs browser tests
+ - Plugin install/update/uninstall now happens faster and more reliably
+ - Allowing plugins to specify settings which turn into nunjucks/sass variables
+
+### Fixes
+
+ - The page refresh issue which caused continual reloading is now resolved
+ - In separating the user's kit from the management pages lots of changes were needed, a lot of things like error handling have needed an overhaul as part of that work
+
 ## 0.0.2
 
 ### New Features

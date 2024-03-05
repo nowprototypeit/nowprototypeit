@@ -1,0 +1,106 @@
+{% extends "layouts/manage-prototype.njk" %}
+{% from "components/submit-button.njk" import nowPrototypeItSubmitButton %}
+
+
+{% block content %}
+  <div class="govuk-grid-row nowprototypeit-manage-prototype-plugin-processing">
+    <div class="govuk-grid-column-two-thirds">
+
+      {% set pluginHeaderPrefix = verb.progressiveTitle + " " %}
+      
+      <div id="plugin-heading">
+        {% include "plugin-header.njk" %}
+      </div>
+
+      <div class="js-visible" aria-live="polite"
+           class="plugin-command-runner"
+           data-dom-widget="plugin-command-runner"
+           data-action-url="{{ currentUrl }}"
+        {% if requiresUserInput %}
+          data-start-on-button-press="plugin-action-button"
+        {% endif %}
+      >
+      {% if dependencyHeading %}
+        <div id="dependency-heading">
+
+          <p class="govuk-notification-banner__heading">
+            {{ dependencyHeading }}
+          </p>
+
+          {% if relatedPlugins|length %}
+            <div>
+              <ul class="govuk-list govuk-list--bullet">
+                {% for plugin in relatedPlugins %}
+                  <li class="affected-plugin">{{ plugin.name }}{% if plugin.scope %} from {{ plugin.scope }} {% endif %}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <div id="panel-manual-instructions" class="nowprototypeit-manage-prototype-plugin-instructions js-hidden">
+        <p>
+          In terminal, press <strong>ctrl + c</strong> to stop your prototype, then run:
+        </p>
+        <p>
+          <code>{{ command }}</code>
+        </p>
+        <p>
+          When you've {{ verb.status }} the plugin, restart your prototype in the terminal by typing:
+        </p>
+        <p>
+          <code>npm run dev</code>
+        </p>
+      </div>
+        {% if relatedPlugins|length %}
+          <div id="plugin-action-confirmation">
+            <div class="govuk-button-group">
+              {{ nowPrototypeItSubmitButton({
+                text: verb.title + ' these plugins',
+                nameAndId: "plugin-action-button"
+              }) }}
+
+              <a class="govuk-link" href="{{ cancelLink }}">Cancel {{ verb.para }}</a>
+            </div>
+          </div>
+        {% elseif not isSameOrigin %}
+          <div id="plugin-action-confirmation">
+            <p class="govuk-body">
+              Are you sure you want to {{ verb.para }} this plugin?
+            </p>
+            {{ nowPrototypeItSubmitButton({
+              text: verb.title,
+              nameAndId: "plugin-action-button"
+            }) }}
+          </div>
+        {% endif %}
+
+        <div hidden class="panel-error govuk-panel govuk-panel--confirmation" id="panel-error">
+          <p>
+            There was a problem {{ verb.progressive }}
+          </p>
+          <p>
+            <a href="https://github.com/nowprototypeit/govuk/issues" target="_blank">
+              If you think this is a problem with Now Prototype It please raise an issue.
+            </a>
+          </p>
+        </div>
+
+        <div hidden class="" id="instructions-complete">
+          <h3>Successfully {{ verb.status }} {{ plugin.name }}</h3>
+          <p class="govuk-body">
+            If you are using Git you can commit this change.
+          </p>
+          <p class="govuk-body">
+            <a href="{{ returnLink.href }}">
+              {{ returnLink.text }}
+            </a>
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+{% endblock %}

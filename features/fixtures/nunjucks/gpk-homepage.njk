@@ -1,0 +1,16 @@
+{% extends "layouts/main.html" %}
+
+{% set pageName="Home" %}
+
+{% block content %}
+
+
+  {% include "prototype-core/includes/homepage-top.njk" %}
+
+  <h1>
+    {{ serviceName }}
+  </h1>
+
+  {% include "prototype-core/includes/homepage-bottom.njk" %}
+
+{% endblock %}

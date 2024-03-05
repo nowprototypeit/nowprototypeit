@@ -1,0 +1,36 @@
+{
+  "version-2024-03": {
+    "meta": {
+      "description": "Marsha P. Johnson was an African American transgender woman and revolutionary LGBTQ rights activist. She is credited for being an instigator in the Stonewall riots."
+    },
+    "sass": [
+      "/styles/variables.scss",
+      "/styles/mixins.scss",
+      "/styles/styles.scss"
+    ],
+    "nunjucksPaths": [
+      "/nunjucks"
+    ],
+    "nunjucksMacros": [
+      {
+        "importFrom": "marsha-p-johnson/components/info-about-marsha.njk",
+        "macroName": "infoAboutMarsha"
+      }
+    ],
+    "templates": [
+      {
+        "name": "The first pride was a riot",
+        "path": "/templates/pride.html",
+        "type": "nunjucks"
+      },
+      {
+        "name": "Full example",
+        "path": "/templates/example-with-layout-component-scripts-and-styles.njk",
+        "type": "nunjucks"
+      }
+    ],
+    "importNunjucksMacrosInto": [
+      "/nunjucks/marsha-p-johnson/layouts/example-layout.njk"
+    ]
+  }
+}
