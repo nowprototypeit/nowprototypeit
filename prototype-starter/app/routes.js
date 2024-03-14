@@ -1,6 +1,6 @@
 //
 // For guidance on how to create routes see:
-// https://prototype-kit.service.gov.uk/docs/create-routes
+// https://docs.nowprototype.it/__VERSION__/routers/create-routes
 //
 
 const govukPrototypeKit = require('@nowprototypeit/govuk')

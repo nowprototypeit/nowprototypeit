@@ -239,11 +239,6 @@ app.post(/^\/([^.]+)$/, (req, res) => {
   )
 })
 
-// redirect old local docs to the docs site
-app.get('/docs/tutorials-and-examples', (req, res) => {
-  res.redirect('https://prototype-kit.service.gov.uk/docs')
-})
-
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {
   const err = new Error(`Page not found: ${decodeURI(req.path)}`)

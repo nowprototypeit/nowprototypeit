@@ -22,9 +22,9 @@ if (process.argv.indexOf('--suppress-node-version-warning') === -1 || (process.a
 const path = require('path')
 
 const fse = require('fs-extra')
+const fsp = require('fs').promises
 const { spawn, exec } = require('../lib/exec')
 const { parse } = require('./utils/argv-parser')
-const { prepareMigration, preflightChecks } = require('../migrator')
 const { validatePlugin } = require('../lib/plugins/plugin-validator')
 const { npmInstall, packageJsonFormat, splitSemverVersion } = require('./utils')
 const { recursiveDirectoryContentsSync } = require('../lib/utils')
@@ -284,6 +284,15 @@ async function createStarterFiles (installDirectory) {
       ...renameAllHtmlFilesToNjk()
     ])
   }
+
+  await Promise.all(recursiveDirectoryContentsSync(installDirectory)
+    .filter(x => x.startsWith('app' + path.sep))
+    .map(async (filePath) => {
+      const fileContents = await fsp.readFile(path.join(installDirectory, filePath), 'utf8')
+      if (fileContents.includes('__VERSION__')) {
+        await fsp.writeFile(path.join(installDirectory, filePath), fileContents.replace(/__VERSION__/g, kitVersion), 'utf8')
+      }
+    }))
 }
 
 async function runInit () {
@@ -308,50 +317,6 @@ async function runInit () {
     updatePackageJson(path.join(installDirectory, 'package.json'))
   ])
     .then(initialiseGitRepo)
-}
-
-async function runMigrate () {
-  if (process.argv[3] !== '--') {
-    // stage one
-    const kitDependency = getChosenKitDependency()
-    const projectDirectory = process.cwd()
-
-    const preflightChecksPassed = await preflightChecks()
-
-    if (!preflightChecksPassed) {
-      process.exitCode = 1
-      return
-    }
-
-    await prepareMigration(kitDependency, projectDirectory)
-
-    await spawn('npx', ['now-prototype-it-govuk', 'migrate', '--', projectDirectory], {
-      stdio: 'inherit'
-    })
-      .catch(e => {
-        console.error('Failed to complete migration.')
-        console.error(e)
-        process.exit(0)
-      })
-  } else {
-    // stage two
-    if (process.argv.length !== 5) {
-      usage()
-      process.exitCode = 2
-      return
-    }
-
-    const projectDirectory = process.argv[4]
-
-    await Promise.all([
-      updatePackageJson(path.join(projectDirectory, 'package.json')),
-      fse.writeFile(path.join(projectDirectory, '.npmrc'), npmrc, 'utf8'),
-      fse.access(path.join(projectDirectory, '.gitignore'))
-        .catch(() => fse.writeFile(path.join(projectDirectory, '.gitignore'), gitignore, 'utf8'))
-    ])
-
-    await require('../migrator').migrate()
-  }
 }
 
 async function runDev () {
@@ -387,8 +352,6 @@ async function runValidatePlugin () {
       return runServe()
     case 'serve':
       return runServe()
-    case 'migrate':
-      return runMigrate()
     case 'validate-plugin':
       return runValidatePlugin()
     case 'failed-to-launch':

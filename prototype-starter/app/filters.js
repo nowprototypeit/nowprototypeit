@@ -1,6 +1,6 @@
 //
 // For guidance on how to create filters see:
-// https://prototype-kit.service.gov.uk/docs/filters
+// https://docs.nowprototype.it/__VERSION__/nunjucks/filters
 //
 
 const govukPrototypeKit = require('@nowprototypeit/govuk')

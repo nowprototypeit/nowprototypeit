@@ -1,6 +1,6 @@
 //
 // For guidance on how to add JavaScript see:
-// https://prototype-kit.service.gov.uk/docs/adding-css-javascript-and-images
+// https://docs.nowprototype.it/__VERSION__/in-browser-javascript
 //
 
 window.nowPrototypeItGOVUK.documentReady(() => {
