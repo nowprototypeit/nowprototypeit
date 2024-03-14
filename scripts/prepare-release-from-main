@@ -27,9 +27,6 @@ const branchName = process.argv[2] || 'main'
   await exec('npm install', {
     cwd: kitDir
   })
-  await exec('npm install github:nowprototypeit/design-system#trial-branding-a', {
-    cwd: kitDir
-  })
   await exec('npm run build:destructive', {
     cwd: kitDir
   })
