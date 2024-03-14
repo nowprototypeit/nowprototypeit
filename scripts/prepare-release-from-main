@@ -8,39 +8,41 @@ const execTools = require("../lib/exec");
 
 const branchName = process.argv[2] || 'main'
 
-const wait = time => new Promise((resolve) => setTimeout(resolve, time))
+;(async () => {
+  const wait = time => new Promise((resolve) => setTimeout(resolve, time))
 
-const tmpDir = await mkTmpDir()
-console.log('tmpDir:', tmpDir)
-const kitDir = path.join(tmpDir, 'govuk');
-await exec('git clone git@github.com:nowprototypeit/govuk.git', {
-  cwd: tmpDir
+  const tmpDir = await mkTmpDir()
+  console.log('tmpDir:', tmpDir)
+  const kitDir = path.join(tmpDir, 'govuk');
+  await exec('git clone git@github.com:nowprototypeit/govuk.git', {
+    cwd: tmpDir
+  })
+  await exec(`git checkout ${branchName}`, {
+    cwd: kitDir
+  })
+  await checkForUnpublishedDependencies(kitDir)
+  await exec(`git checkout -b release-prep-${Date.now()}`, {
+    cwd: kitDir
+  })
+  await exec('npm install', {
+    cwd: kitDir
+  })
+  await exec('npm install github:nowprototypeit/design-system#trial-branding-a', {
+    cwd: kitDir
+  })
+  await exec('npm run build:destructive', {
+    cwd: kitDir
+  })
+  await exec('git commit -am "Destructively built ready for release"', {
+    cwd: kitDir
+  })
+  const result = await execAndCaptureStdout('npm pack', {
+    cwd: kitDir
+  })
+  const dependency = path.join(kitDir, result)
+  await testRunPasses(dependency)
+  await updateChangelogAndPublish(kitDir)
 })
-await exec(`git checkout ${branchName}`, {
-  cwd: kitDir
-})
-await checkForUnpublishedDependencies(kitDir)
-await exec(`git checkout -b release-prep-${Date.now()}`, {
-  cwd: kitDir
-})
-await exec('npm install', {
-  cwd: kitDir
-})
-await exec('npm install github:nowprototypeit/design-system#trial-branding-a', {
-  cwd: kitDir
-})
-await exec('npm run build:destructive', {
-  cwd: kitDir
-})
-await exec('git commit -am "Destructively built ready for release"', {
-  cwd: kitDir
-})
-const result = await execAndCaptureStdout('npm pack', {
-  cwd: kitDir
-})
-const dependency = path.join(kitDir, result)
-await testRunPasses(dependency)
-await updateChangelogAndPublish(kitDir)
 
 async function mkTmpDir() {
   const tmpDir = path.join(os.tmpdir(), 'now-prototype-it', 'release', '' + Date.now())
