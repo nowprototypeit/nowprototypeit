@@ -170,18 +170,16 @@ async function updateChangelogAndPublish(kitDir) {
   const prBodyFile = path.join(kitDir, '..', '.git-pr-body')
   await fsp.writeFile(prBodyFile, partialChangelog.join('\n'))
 
-  await execAndPrintStdout(`gh release create "v${newVersion}" --notes-file "${prBodyFile}" --target "${branchName}"  --title "v${newVersion}" --latest`, standardExecOptions)
-
   let loggedInAsCorrectNpmUser = false
   const correctNpmUser = 'nowprototypeit'
 
   do {
     await wait(2000)
-    const output = await exec('npm whoami', {allowStderr: true, allowErrorCode: true, hideStd: true})
+    const output = await execAndCaptureStdout('npm whoami', {allowStderr: true, allowErrorCode: true, hideStd: true})
     if ((output || '').trim() === correctNpmUser) {
       loggedInAsCorrectNpmUser = true
     } else if (output) {
-      console.log(`Currently logged in as [${output}], should be loggd in as [${correctNpmUser}].  Run [npm login] in another terminal.`)
+      console.log(`Currently logged in as [${output}], should be logged in as [${correctNpmUser}].  Run [npm login] in another terminal.`)
     } else {
       console.log(`Please log in as [${correctNpmUser}] to continue by running [npm login] in another terminal.`)
     }
@@ -189,7 +187,10 @@ async function updateChangelogAndPublish(kitDir) {
 
   await execAndPrintStdout('npm publish')
 
-  await exec('npm logout')
+  await execAndPrintStdout({
+    command: 'gh',
+    args: ['release', 'create', `v${newVersion}`, '--notes-file', prBodyFile, '--target', branchName, '--title', `v${newVersion}`, '--latest']
+  }, standardExecOptions)
 }
 
 async function checkForUnpublishedDependencies (kitDir) {
