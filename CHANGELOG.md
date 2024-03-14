@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.1.0
+
 ### New Features
 
  - Seperated the user's kit from the management pages
