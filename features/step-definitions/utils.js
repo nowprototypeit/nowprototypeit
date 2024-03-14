@@ -54,6 +54,7 @@ async function startKit (config = {}) {
   if (config.kitDependency) {
     const dep = config.kitDependency
     const command = `npx -y --package="${dep}" now-prototype-it-govuk create --version=${dep} ${dir}`
+    console.log('kit create command:', command)
     await exec(command, {
       env: { ...process.env }
     })
