@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{% block pageTitle %}{% endblock %}</title>
+  <style>
+      * {
+          font-family: sans-serif;
+      }
+      .error {
+          color: red;
+          font-weight: bold;
+      }
+      label {
+          font-weight: bold;
+      }
+  </style>
+</head>
+<body>
+{% block content %}{% endblock %}
+</body>
+</html>

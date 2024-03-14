@@ -2,7 +2,8 @@
 Feature: Handle plugin update
     
     Scenario: When a dependency is now required
-      Given I install the "npm:@govuk-prototype-kit/common-templates:1.1.1" plugin
+      Given I install the "npm:govuk-frontend" plugin
+      And I install the "npm:@govuk-prototype-kit/common-templates:1.1.1" plugin
       And I uninstall the "govuk-frontend" plugin using the console
       When I visit the installed plugins page
       Then I should not see the plugin "GOV.UK Frontend" in the list

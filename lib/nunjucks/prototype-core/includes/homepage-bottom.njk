@@ -1,13 +1,19 @@
-<p>
-  Install, uninstall and update plugins in <a href="/manage-prototype/plugins">the plugin pages</a>
-</p>
-<p>
-  Create a new page <a href="/manage-prototype/templates">by using a template</a>
-</p>
-<p>
-  Change your service name in <a href="/manage-prototype/settings">basic settings</a>
-</p>
-<p>You can remove this section by editing <strong>index.html</strong> and removing the include of <strong>homepage-bottom</strong></p>
+<p>You can use the <a href="/manage-prototype" class="nowprototypeit-focus-link">management pages</a> to:</p>
+
+<ul class="nowprototypeit-bullet-list">
+  <li>
+    Install, uninstall, and update plugins in <a href="/manage-prototype/plugins" class="nowprototypeit-focus-link">the plugin pages</a>
+  </li>
+  <li>
+    Create a new page <a href="/manage-prototype/templates" class="nowprototypeit-focus-link">by using a template</a>
+  </li>
+  <li>
+    Change your service name in <a href="/manage-prototype/settings" class="nowprototypeit-focus-link">basic settings</a>
+  </li>
+</ul>
+
+<p>You can replace this page with your own by adding an "<strong>index.{{ defaultViewExtension }}</strong>" file in "<strong>app/views</strong>", you can also do this
+  <a href="/manage-prototype/templates" class="nowprototypeit-focus-link">by using a template</a> and using the path "<strong>/index</strong>".</p>
 
 {% macro showPage(page) %}
   <li class="nowprototypeit-page-item"><a href="{{ page.url }}" class="nowprototypeit-page-link"
@@ -16,14 +22,14 @@
 
 {% macro showPages(pages) %}
   {% if pages.length > 0 %}
-    <ul class="nowprototypeit-page-list">
+    <ul class="nowprototypeit-bullet-list">
       {% for page in pages %}
         {{ showPage(page) }}
       {% endfor %}
     </ul>
   {% endif %}
 {% endmacro %}
-{% if foundPages %}
+{% if foundPages | length > 0 %}
   <h2>You have the following pages in your prototype:</h2>
   {{ showPages(foundPages) }}
 {% endif %}

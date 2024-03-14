@@ -2,12 +2,18 @@
 
 {% block content %}
   {% block introduction %}{% endblock %}
-  <div class="grid-row">
-    <div class="grid-column-one-quarter">
-      {% block sideBar %}{% endblock %}
+  <div class="nowprototypeit-grid-row">
+    <div class="nowprototypeit-grid-column-one-third-first">
+      {% if pinSideBar %}
+      <div data-dom-widget="pin-to-page-top-on-scroll" data-distance-from-top="{{ pinnedDistanceFromTop | default(40) }}" class="nowprototypeit-no-top-margin-on-first-element">
+        {% endif %}
+        {% block sideBar %}{% endblock %}
+        {% if pinSideBar %}
+      </div>
+      {% endif %}
     </div>
 
-    <div class="grid-column-three-quarters">
+    <div class="nowprototypeit-grid-column-two-thirds">
       {% block mainPanel %}{% endblock %}
     </div>
   </div>

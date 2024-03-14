@@ -1,0 +1,90 @@
+.nowprototypeit-manage-prototype-plugin-list {
+  padding: 0;
+  margin: 0;
+}
+.plugin-details-link {
+  display: block;
+  padding: 1rem;
+  margin: 0 0 $standardSpace 0;
+  border: 1px solid $darkFeatureColour;
+
+  h4 {
+    margin: 0;
+    padding: 0;
+  }
+
+  p:first-child {
+    margin-top: 0;
+  }
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+
+  .nowprototypeit-manage-prototype-plugin-list-item-description {
+    margin: $standardSpace 0;
+  }
+
+  .plugin-details__additional-error-details {
+    font-size: 0.8rem;
+    opacity: 0.7;
+  }
+}
+
+a.plugin-details-link:hover,
+a.plugin-details-link:focus {
+  outline: 3px solid $featureColour;
+  margin-right: 3px;
+
+  .nowprototypeit-page &, & {
+    text-decoration: none;
+
+    .nowprototypeit-manage-prototype-plugin-list-plugin-name {
+      text-decoration: underline;
+    }
+  }
+}
+
+.plugin-title-with-scope {
+  .nowprototypeit-page &, & {
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+}
+
+.plugin-scope,
+.plugin-version {
+  .nowprototypeit-page &, & {
+    opacity: 0.7;
+    margin-top: 0;
+  }
+}
+
+.plugin-scope--with-version {
+  .nowprototypeit-page &, & {
+    margin-bottom: 0;
+  }
+}
+
+.govuk-prototype-kit-plugin-install-button:first-child,
+.nowprototypeit-plugin-update-button:first-child,
+.nowprototypeit-plugin-uninstall-button:first-child {
+  margin-top: 0.2rem; // hack
+}
+
+progress {
+  width: 80%;
+  height: 1.5rem;
+  border: 2px solid $darkFeatureColour
+}
+progress::-webkit-progress-bar {
+  background-color: $backgroundColour;
+  border-radius: 0;
+}
+progress::-webkit-progress-value {
+  background-color: $darkFeatureColour;
+  border-radius: 0;
+}
+progress::-moz-progress-bar {
+  /* style rules */
+}

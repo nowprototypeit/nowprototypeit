@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.3
+## Unreleased
 
 ### New Features
 
@@ -10,6 +10,11 @@
  - Added cucumberjs browser tests
  - Plugin install/update/uninstall now happens faster and more reliably
  - Allowing plugins to specify settings which turn into nunjucks/sass variables
+ - Added a messaging feature to manage prototype for things like update alerts and warnings if a security vulnerability is found
+ - Added plugin details page
+ - Added a plugin lookup for finding plugins which aren't listed
+ - Added new Now Prototype It branding
+ - Pre-building assets for a quicker prototype startup
 
 ### Fixes
 

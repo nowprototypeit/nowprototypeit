@@ -9,7 +9,8 @@ const firefox = require('selenium-webdriver/firefox')
 const path = require('path')
 const os = require('os')
 const uuid = require('uuid')
-const { fork } = require('../../lib/exec')
+const { fork, execv2 } = require('../../lib/exec')
+const exec = execv2
 const chaiPromise = import('chai')
 
 let currentSharedKitAndBrowser
@@ -48,13 +49,22 @@ async function findAvailablePort () {
 
 async function startKit (config = {}) {
   const dir = config.dir ?? path.join(os.tmpdir(), `nowprototypeit-govuk-cucumberjs-${uuid.v4()}`)
-  const binCli = config.binCli ?? path.join(__dirname, '../../bin/cli')
   const nextRestartListeners = []
-  const kitCreationThread = fork(binCli, {
-    passThroughEnv: true,
-    args: config.createArgs ?? ['create', '--version=local', dir]
-  })
-  await kitCreationThread.finishedPromise
+
+  if (config.kitDependency) {
+    const dep = config.kitDependency
+    const command = `npx -y --package="${dep}" now-prototype-it-govuk create --version=${dep} ${dir}`
+    await exec(command, {
+      env: { ...process.env }
+    })
+  } else {
+    const binCli = config.binCli ?? path.join(__dirname, '../../bin/cli')
+    const kitCreationThread = fork(binCli, {
+      passThroughEnv: true,
+      args: config.createArgs ?? ['create', '--version=local', dir]
+    })
+    await kitCreationThread.finishedPromise
+  }
   let finishedRes
   const kitStartedPromise = new Promise((resolve) => {
     finishedRes = resolve
@@ -175,8 +185,8 @@ async function getBrowser (config = {}) {
   return self
 }
 
-async function getPrototypeKit ({ afterCleanup } = {}) {
-  return await startKit({ afterCleanup })
+async function getPrototypeKit ({ afterCleanup, kitDependency } = {}) {
+  return await startKit({ afterCleanup, kitDependency })
 }
 
 async function getPrototypeKitAndBrowser () {
@@ -191,7 +201,8 @@ async function getPrototypeKitAndBrowser () {
   }
   const [kit, browser] = await Promise.all([
     getPrototypeKit({
-      afterCleanup: cleanup
+      afterCleanup: cleanup,
+      kitDependency: process.env.TEST_KIT_DEPENDENCY
     }),
     getBrowser({
       afterCleanup: cleanup
@@ -282,11 +293,11 @@ module.exports = {
   makeGetRequest,
   waitForConditionToBeMet,
   timeoutMultiplier,
-  kitStartTimeout: { timeout: 30 * 1000 * timeoutMultiplier },
+  kitStartTimeout: { timeout: (process.env.TEST_KIT_DEPENDENCY ? 90 : 30) * 1000 * timeoutMultiplier },
   pluginActionTimeout: { timeout: 40 * 1000 * timeoutMultiplier },
   pluginActionPageTimeout: { timeout: 20 * 1000 * timeoutMultiplier },
   mediumActionTimeout: { timeout: 10 * 1000 * timeoutMultiplier },
   pageRefreshTimeout: { timeout: 10 * 1000 * timeoutMultiplier },
   intentionalDelayTimeout: { timeout: 60 * 60 * 1000 },
-  styleBuildTimeout: { timeout: 20 * 1000 * timeoutMultiplier }
+  styleBuildTimeout: { timeout: 30 * 1000 * timeoutMultiplier }
 }

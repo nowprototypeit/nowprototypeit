@@ -1,0 +1,23 @@
+{% extends "layouts/manage-prototype.njk" %}
+{% from "components/submit-button.njk" import nowPrototypeItSubmitButton %}
+
+{% block content %}
+
+  <div class="grid-row">
+    <div class="grid-column-readable-width">
+      <h1>{{ pageName }}</h1>
+
+      <p>View your page at
+        <a id="view-page-link" class="nowprototypeit-focus-link" href="{{ url }}">{{ url }}</a></p>
+
+      <p>
+        To edit the file in your code editor, open <strong>{{ filePath }}</strong>
+      </p>
+
+      {{ nowPrototypeItSubmitButton({
+        text: "Back to templates",
+        href: "/manage-prototype/templates"
+      }) }}
+    </div>
+  </div>
+{% endblock %}

@@ -19,7 +19,7 @@ Feature: Styles
   Scenario: Using SASS variables to control plugin styles
     Given I have the demo plugin "marsha-p-johnson" installed
     And I create a page at "/abc" using the "Full example" template from the "Marsha P Johnson" plugin
-    When I visit "/example"
+    When I visit "/abc"
     And I create a file "app/assets/sass/settings.scss" with contents "$marsha-p-johnson-background-color: red;"
     Then the body background color should become "rgb(255, 0, 0)"
 

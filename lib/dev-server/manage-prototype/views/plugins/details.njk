@@ -1,0 +1,87 @@
+{% set pinSideBar = true %}
+{% set pinnedDistanceFromTop = 40 %}
+
+{% extends "layouts/page-with-side-bar.njk" %}
+{% from "components/submit-button.njk" import nowPrototypeItSubmitButton %}
+
+{% block introduction %}
+  {% include "plugins/includes/plugin-details-header.njk" %}
+{% endblock %}
+
+{% block sideBar %}
+  {% if newerLink %}
+    <p><a href="{{ newerLink }}">Latest version: {{ newerVersion }}</a></p>
+  {% endif %}
+  {% if installedLinkAsDifferentLink %}
+    <p><a href="{{ installedLinkAsDifferentLink }}">Installed version: {{ installedLinkAsDifferentVersion }}</a>
+    </p>
+  {% endif %}
+
+  <form action="{{ currentUrl }}" method="post">
+    {% if installLink %}
+      {{ nowPrototypeItSubmitButton({
+        nameAndId: 'action-install',
+        text: installLinkText | default('Install'),
+        classes: 'govuk-prototype-kit-plugin-install-button',
+        href: installLink
+      }) }}
+    {% endif %}
+    {% if updateLink %}
+      {{ nowPrototypeItSubmitButton({
+        nameAndId: 'action-update',
+        text: 'Update',
+        classes: 'nowprototypeit-plugin-update-button',
+        href: updateLink
+      }) }}
+    {% endif %}
+    {% if uninstallLink %}
+      {{ nowPrototypeItSubmitButton({
+        nameAndId: 'action-uninstall',
+        text: 'Uninstall',
+        classes: 'nowprototypeit-plugin-uninstall-button',
+        href: uninstallLink
+      }) }}
+    {% endif %}
+  </form>
+
+  {% if plugin.releaseDateTime or preparedPluginLinks.releaseNotes or preparedPluginLinks.versionHistory %}
+    <div class="govuk-prototype-kit-manage-prototype-plugin-details-links">
+      {% if plugin.releaseDateTime %}
+        <p class="govuk-body">Released
+          <time title="{{ plugin.releaseDateTime }}"
+                datetime="{{ plugin.releaseDateTime }}">{{ releaseTimeSummary }}</time>
+        </p>
+      {% endif %}
+      {% if preparedPluginLinks.releaseNotes %}
+        <p><a href="{{ preparedPluginLinks.releaseNotes }}">Release notes</a></p>
+      {% endif %}
+      {% if preparedPluginLinks.versionHistory %}
+        <p><a href="{{ preparedPluginLinks.versionHistory }}">Version history</a></p>
+      {% endif %}
+    </div>
+  {% endif %}
+  <p><a href="https://github.com/nowprototypeit/govuk/issues" target="_blank">Report</a></p>
+{% endblock %}
+            
+{% block mainPanel %}
+  <h2 class="govuk-heading-l">About this plugin</h2>
+
+  <p class="govuk-body">{{ pluginDescription | default('No description has been provided.') }}</p>
+
+  {% if preparedPluginLinks.documentation %}
+    <p class="feature-link__container"><a href="{{ preparedPluginLinks.documentation }}">How to use this plugin</a></p>
+  {% endif %}
+
+  {% if inThisPlugin.length %}
+    <h3 class="nowprototypeit-heading-m">Included in this plugin</h3>
+    {% for section in inThisPlugin %}
+      <h4>{{ section.title }}</h4>
+      <ul class="nowprototypeit-bullet-list">
+        {% for item in section.items %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    {% endfor %}
+  {% endif %}
+
+{% endblock %}

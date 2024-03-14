@@ -43,25 +43,16 @@ app.locals.useAutoStoreData = config.useAutoStoreData
 app.locals.releaseVersion = 'v' + releaseVersion
 app.locals.isRunningInPrototypeKit = true
 app.locals.serviceName = config.serviceName
-if (plugins.legacyGovukFrontendFixesNeeded()) {
-  app.locals.NowPrototypeItKit = app.locals.NowPrototypeItKit || {}
-  app.locals.NowPrototypeItKit.legacyGovukFrontendFixesNeeded = true
-}
 // pluginConfig sets up variables used to add the scripts and stylesheets to each page.
 app.locals.pluginConfig = plugins.getAppConfig({
   scripts: utils.prototypeAppScripts
 })
 
-app.locals.govukFrontend = {
-  assetPath: '/dist/govuk/assets'
-}
+utils.addGovukFrontendSpecificValuesToAppLocalSync(app.locals)
+
 plugins.getNunjucksVariables().forEach(({ key, value }) => {
   app.locals[key] = value
 })
-
-// keep extensionConfig around for backwards compatibility
-// TODO: remove in v14
-app.locals.extensionConfig = app.locals.pluginConfig
 
 // Support session data storage
 app.use(sessionUtils.getSessionMiddleware())
@@ -85,7 +76,6 @@ if (config.isDevelopment) {
 
 nunjucksConfig.express = app
 
-// Finds GOV.UK Frontend via `getAppViews()` only if installed
 // but uses the internal package as a backup if uninstalled
 const nunjucksAppEnv = getNunjucksAppEnv(
   plugins.getAppViews([appViewsDir, finalBackupNunjucksDir])
@@ -167,8 +157,62 @@ app.use((req, res, next) => {
 })
 
 require('./lib/plugins/plugins-routes.js')
+const { encryptPassword } = require('./lib/utils')
 
 utils.addRouters(app)
+
+// Clear all data in session
+// Render password page with a returnURL to redirect people to where they came from
+// Check authentication password
+app.get('/manage-prototype/password', function (req, res) {
+  const error = req.query.error
+  res.render('prototype-core/views/password.njk', {
+    ...req.app.locals,
+    error,
+    currentUrl: req.originalUrl
+  })
+})
+
+app.post('/manage-prototype/password', function (req, res) {
+  const passwords = config.passwords
+  const submittedPassword = req.body.password
+  const providedUrl = req.query.returnURL
+
+  const processedRedirectUrl = (!providedUrl || providedUrl.startsWith('/manage-prototype/password')) ? '/' : providedUrl
+  if (passwords.some(password => submittedPassword === password)) {
+    // see lib/middleware/authentication.js for explanation
+    res.cookie('authentication', encryptPassword(submittedPassword), {
+      maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+      sameSite: 'None', // Allows GET and POST requests from other domains
+      httpOnly: true,
+      secure: true
+    })
+    res.redirect(processedRedirectUrl)
+  } else {
+    res.redirect('/manage-prototype/password?error=wrong-password&returnURL=' + encodeURIComponent(processedRedirectUrl))
+  }
+})
+
+app.get('/manage-prototype/clear-data', function (req, res) {
+  if (!req.query.returnUrl && req.headers.referer) {
+    const relativeUrl = '/' + (req.headers.referer.split('/').slice(3).join('/') || '')
+    res.redirect(req.originalUrl + (req.originalUrl.includes('?') ? '&' : '?') + 'returnUrl=' + encodeURIComponent(relativeUrl))
+    return
+  }
+  res.render('prototype-core/views/clear-data.njk', {
+    ...req.app.locals,
+    currentUrl: req.originalUrl
+  })
+})
+
+app.post('/manage-prototype/clear-data', function (req, res) {
+  req.session.data = {}
+  res.render('prototype-core/views/clear-data.njk', {
+    ...req.app.locals,
+    stage: 'completed',
+    returnUrl: req.query.returnUrl
+  })
+})
 
 // Strip .html, .htm and .njk if provided
 app.get(/\.(html|htm|njk)$/i, (req, res) => {
@@ -225,23 +269,37 @@ app.use((err, req, res, next) => {
   switch (err.status) {
     case 404: {
       res.status(404)
-      res.send({
-        errorToBeDisplayedNicely: true,
-        originalUrl: req.originalUrl,
-        is404: true
-      })
+      if (config.showJsonErrors) {
+        res.send({
+          errorToBeDisplayedNicely: true,
+          originalUrl: req.originalUrl,
+          is404: true
+        })
+      } else {
+        res.render('prototype-core/views/error.njk', {
+          heading: 'Page not found',
+          text: 'The page you are looking for does not exist.'
+        })
+      }
       break
     }
     default: {
       res.status(500)
-      res.send({
-        errorToBeDisplayedNicely: true,
-        isNunjucksError: true,
-        message: err.message,
-        type: err.type,
-        stack: err.stack,
-        name: err.name
-      })
+      if (config.showJsonErrors) {
+        res.send({
+          errorToBeDisplayedNicely: true,
+          isNunjucksError: true,
+          message: err.message,
+          type: err.type,
+          stack: err.stack,
+          name: err.name
+        })
+      } else {
+        res.render('prototype-core/views/error.njk', {
+          heading: 'An error occurred',
+          text: err.message
+        })
+      }
       break
     }
   }

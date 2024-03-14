@@ -84,9 +84,9 @@ usage-data-config.json
 
 const packageJson = {
   scripts: {
-    dev: 'now-prototype-it-govuk dev',
-    serve: 'now-prototype-it-govuk serve',
-    start: 'now-prototype-it-govuk start'
+    dev: 'now-prototype-it-govuk dev || npx -y @nowprototypeit/govuk@latest failed-to-launch serve $?',
+    serve: 'now-prototype-it-govuk serve || npx -y @nowprototypeit/govuk@latest failed-to-launch serve $?',
+    start: 'now-prototype-it-govuk start || npx -y @nowprototypeit/govuk@latest failed-to-launch start $?'
   }
 }
 
@@ -217,19 +217,6 @@ function getArgumentsToPassThrough () {
 }
 
 async function runCreate () {
-  // Install as a two-stage bootstrap process.
-  //
-  // In stage one (`create`) we create an empty project folder and install
-  // @nowprototypeit/govuk and govuk-frontend, then bootstrap stage two from
-  // the newly installed package.
-  //
-  // In stage two (`init`) we do the actual setup of the starter files.
-  //
-  // Doing it this way means we can be sure the version of the cli matches
-  // the version of the kit the user ends up with. Try to put as much logic
-  // as possible into stage two; stage one should ideally be able to install
-  // any future version of the kit.
-
   verboseLogger('Cli running from', __filename)
 
   console.log('')
@@ -250,7 +237,7 @@ async function runCreate () {
 
   progressLogger('Installing dependencies')
 
-  await npmInstall(installDirectory, [kitDependency, 'govuk-frontend', '@govuk-prototype-kit/common-templates'])
+  await npmInstall(installDirectory, [kitDependency])
 
   if ((argv.options.version || argv.options.v) === 'local-symlink') {
     const dependencyInstallLocation = path.join(installDirectory, 'node_modules', kitProjectName)
@@ -260,7 +247,7 @@ async function runCreate () {
 
   progressLogger('Setting up your prototype')
 
-  await spawn('npx', ['@nowprototypeit/govuk', 'init', '--running-within-create-script', installDirectory, `--created-from-version=${kitVersion}`, ...(getArgumentsToPassThrough()), '--suppress-node-version-warning'], {
+  await spawn('npx', ['-y', 'now-prototype-it-govuk', 'init', '--running-within-create-script', installDirectory, `--created-from-version=${kitVersion}`, ...(getArgumentsToPassThrough()), '--suppress-node-version-warning'], {
     cwd: installDirectory,
     stdio: 'inherit'
   })
@@ -324,18 +311,6 @@ async function runInit () {
 }
 
 async function runMigrate () {
-  // migrate as a two-stage bootstrap process.
-  //
-  // In stage one we install govuk-prototype-kit, then bootstrap stage two
-  // from the newly installed package.
-  //
-  // In stage two (with the magic arguments) we do the actual migration with
-  // the starter files.
-  //
-  // Doing it this way means we can be sure the version of the cli matches
-  // the version of the kit the user ends up with. Try to put as much logic
-  // as possible into stage two; stage one should ideally be able to migrate
-  // to any future version of the kit.
   if (process.argv[3] !== '--') {
     // stage one
     const kitDependency = getChosenKitDependency()
@@ -350,7 +325,7 @@ async function runMigrate () {
 
     await prepareMigration(kitDependency, projectDirectory)
 
-    await spawn('npx', ['@nowprototypeit/govuk', 'migrate', '--', projectDirectory], {
+    await spawn('npx', ['now-prototype-it-govuk', 'migrate', '--', projectDirectory], {
       stdio: 'inherit'
     })
       .catch(e => {
@@ -416,6 +391,11 @@ async function runValidatePlugin () {
       return runMigrate()
     case 'validate-plugin':
       return runValidatePlugin()
+    case 'failed-to-launch':
+      console.log()
+      console.log('Your prototype kit failed to launch.  You might want to try running `npm install` to ensure all dependencies are installed.')
+      console.log()
+      break
     case 'version':
       console.log(kitVersion)
       break

@@ -7,19 +7,28 @@ const path = require('path')
 
 async function getTemplateList (browser) {
   await browser.openUrl('/manage-prototype/templates')
-  const pluginSectionsNames = await browser.queryClass('plugin-templates')
-  return await Promise.all(pluginSectionsNames.map(async section => {
-    const templateRows = await section.findElements(By.className('nowprototypeit-manage-prototype-template-list-template-list__item'))
+  const pluginSections = await browser.queryClass('plugin-templates')
+  return await Promise.all(pluginSections.map(async section => {
+    const templateRows = await section.findElements(By.className('template-list__item'))
     const processedTemplateRows = await Promise.all(templateRows.map(async row => {
       return {
-        name: await (await row.findElement(By.className('nowprototypeit-manage-prototype-template-list-template-list__item-name'))).getText(),
-        viewButton: await row.findElement(By.className('nowprototypeit-manage-prototype-template-list-template-list__item-link--view')),
-        createButton: await row.findElement(By.className('nowprototypeit-manage-prototype-template-list-template-list__item-link--create'))
+        name: await (await row.findElement(By.className('plugin-templates-template-name'))).getText(),
+        viewButton: await row.findElement(By.className('template-list__item-link--view')),
+        createButton: await row.findElement(By.className('template-list__item-link--create'))
       }
     }))
 
+    async function getPluginName () {
+      const pluginName = await (await section.findElement(By.className('manage-prototype-template-plugin-name'))).getText()
+      const scopeElem = (await section.findElements(By.className('plugin-scope')))[0]
+      if (scopeElem) {
+        return [pluginName, await scopeElem.getText()].join(' ')
+      }
+      return pluginName
+    }
+
     return {
-      pluginName: await (await section.findElement(By.className('plugin-templates-plugin-name'))).getText(),
+      pluginName: await getPluginName(),
       templates: processedTemplateRows
     }
   }))

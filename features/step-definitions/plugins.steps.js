@@ -20,11 +20,11 @@ Given('I have the demo plugin {string} installed', { timeout: 40 * 1000 * timeou
 })
 
 When('I visit the installed plugins page', kitStartTimeout, async function () {
-  await this.browser.openUrl('/manage-prototype/plugins-installed')
+  await this.browser.openUrl('/manage-prototype/plugins/installed')
 })
 
 When('I visit the available plugins page', async function () {
-  await this.browser.openUrl('/manage-prototype/plugins')
+  await this.browser.openUrl('/manage-prototype/plugins/discover')
 })
 
 Then('I should see the plugin {string} in the list', async function (pluginName) {

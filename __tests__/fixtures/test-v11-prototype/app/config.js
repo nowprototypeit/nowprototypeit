@@ -7,6 +7,6 @@ module.exports = {
   useCookieSessionStore: 'false',
   useDocumentation: 'false',
   useHttps: 'true',
-  useBrowserSync: 'true',
+  autoReloadPages: 'true',
   extra: 'true'
 }

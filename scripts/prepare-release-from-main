@@ -1,0 +1,219 @@
+#!/usr/bin/env node
+
+const os = require('node:os')
+const path = require("node:path");
+const fsp = require('node:fs').promises
+
+const execTools = require("../lib/exec");
+
+const branchName = process.argv[2] || 'main'
+
+const wait = time => new Promise((resolve) => setTimeout(resolve, time))
+
+const tmpDir = await mkTmpDir()
+console.log('tmpDir:', tmpDir)
+const kitDir = path.join(tmpDir, 'govuk');
+await exec('git clone git@github.com:nowprototypeit/govuk.git', {
+  cwd: tmpDir
+})
+await exec(`git checkout ${branchName}`, {
+  cwd: kitDir
+})
+await checkForUnpublishedDependencies(kitDir)
+await exec(`git checkout -b release-prep-${Date.now()}`, {
+  cwd: kitDir
+})
+await exec('npm install', {
+  cwd: kitDir
+})
+await exec('npm install github:nowprototypeit/design-system#trial-branding-a', {
+  cwd: kitDir
+})
+await exec('npm run build:destructive', {
+  cwd: kitDir
+})
+await exec('git commit -am "Destructively built ready for release"', {
+  cwd: kitDir
+})
+const result = await execAndCaptureStdout('npm pack', {
+  cwd: kitDir
+})
+const dependency = path.join(kitDir, result)
+await testRunPasses(dependency)
+await updateChangelogAndPublish(kitDir)
+
+async function mkTmpDir() {
+  const tmpDir = path.join(os.tmpdir(), 'now-prototype-it', 'release', '' + Date.now())
+  await fsp.mkdir(tmpDir, {recursive: true})
+  return tmpDir
+}
+
+async function execAndCaptureStdout(command, options) {
+  let stdout = ''
+  await exec(command, {
+    ...options,
+    stdoutHandlers: {
+      data: (data) => {
+        stdout += data.toString()
+      }
+    }
+  })
+  return stdout.trim()
+}
+
+async function execAndPrintStdout(command, options) {
+  await exec(command, options, (data) => {
+    process.stdout.write(data.toString())
+  }, (data) => {
+    process.stderr.write(data.toString())
+  })
+}
+
+async function exec(command, options) {
+  console.log('running command:', command)
+  const result = execTools.execv2(command, {
+    passThroughEnv: true,
+    ...options
+  })
+  await result.finishedPromise
+}
+
+async function runBrowserTests(dependency) {
+  await exec('npm run test:browser:all', {
+    env: {
+      ...process.env,
+      TEST_KIT_DEPENDENCY: dependency,
+      SHOW_BROWSER: 'true'
+    },
+    cwd: path.join(__dirname, '..')
+  })
+}
+
+function findIndexOfFirstMatchingLine(changelogLines, regExp) {
+  return changelogLines
+    .map((x, index) => x.match(regExp) ? index : undefined)
+    .filter(x => x !== undefined)
+    .at(0)
+}
+
+async function updateChangelogAndPublish(kitDir) {
+  const changelogPath = path.join(kitDir, 'CHANGELOG.md')
+  const standardExecOptions = {cwd: kitDir}
+  try {
+    await fsp.access(changelogPath)
+  } catch (e) {
+    console.error(`The directory provided does not include a changelog.  Directory was [${kitDir}]`)
+    process.exit(12)
+  }
+
+  const changelogLines = (await fsp.readFile(changelogPath, 'utf8')).split('\n')
+
+  const unreleasedLineIndex = findIndexOfFirstMatchingLine(changelogLines, /^#+\s+Unreleased\s*$/i)
+  const previousReleaseLineIndex = findIndexOfFirstMatchingLine(changelogLines, /^#+\s+\d+\.\d+\.\d+\s*$/i)
+  const firstFixes = findIndexOfFirstMatchingLine(changelogLines, /^#+\s+Fixes\s*$/i)
+  const firstNewFeatures = findIndexOfFirstMatchingLine(changelogLines, /^#+\s+New Features\s*$/i)
+  const firstBreakingChanges = findIndexOfFirstMatchingLine(changelogLines, /^#+\s+Breaking changes\s*$/i)
+
+  let releaseType
+
+  if (firstBreakingChanges > unreleasedLineIndex && firstBreakingChanges < previousReleaseLineIndex) {
+    releaseType = 'major'
+  } else if (firstNewFeatures > unreleasedLineIndex && firstNewFeatures < previousReleaseLineIndex) {
+    releaseType = 'minor'
+  } else if (firstFixes > unreleasedLineIndex && firstFixes < previousReleaseLineIndex) {
+    releaseType = 'patch'
+  }
+
+  if (!releaseType) {
+    console.error('No changes were detected, cannot continue with release.')
+    process.exit(13)
+  }
+
+  const command = `npm --no-git-tag-version version ${releaseType}`
+  const newVersion = await execAndCaptureStdout(command, standardExecOptions).then(stdout => stdout.split('v')[1].trim())
+
+  console.log('new version', newVersion)
+
+  const newChangelogLines = [].concat(changelogLines)
+  newChangelogLines.splice(unreleasedLineIndex + 1, 0, '', `## ${newVersion}`)
+
+  await fsp.writeFile(changelogPath, newChangelogLines.join('\n'))
+
+  const partialChangelog = changelogLines
+    .slice(unreleasedLineIndex + 1, previousReleaseLineIndex - 1)
+    .filter((value, index, arr) => {
+      if (value !== '') {
+        return true
+      }
+      if (arr[index + 1].startsWith('#') || (index > 0 && arr[index - 1].startsWith('#'))) {
+        return true
+      }
+      return false
+    })
+
+  const branchName = `release-${newVersion}`
+
+  await execAndPrintStdout(`git checkout -b ${branchName}`, standardExecOptions)
+
+  await execAndPrintStdout('git commit -am "Updated changelog automatically."', standardExecOptions)
+
+  await execAndPrintStdout(`git push -u origin ${branchName}`, standardExecOptions)
+
+  const prBodyFile = path.join(kitDir, '..', '.git-pr-body')
+  await fsp.writeFile(prBodyFile, partialChangelog.join('\n'))
+
+  await execAndPrintStdout(`gh release create "v${newVersion}" --notes-file "${prBodyFile}" --target "${branchName}"  --title "v${newVersion}" --latest`, standardExecOptions)
+
+  let loggedInAsCorrectNpmUser = false
+  const correctNpmUser = 'nowprototypeit'
+
+  do {
+    await wait(2000)
+    const output = await exec('npm whoami', {allowStderr: true, allowErrorCode: true, hideStd: true})
+    if ((output || '').trim() === correctNpmUser) {
+      loggedInAsCorrectNpmUser = true
+    } else if (output) {
+      console.log(`Currently logged in as [${output}], should be loggd in as [${correctNpmUser}].  Run [npm login] in another terminal.`)
+    } else {
+      console.log(`Please log in as [${correctNpmUser}] to continue by running [npm login] in another terminal.`)
+    }
+  } while (!loggedInAsCorrectNpmUser)
+
+  await execAndPrintStdout('npm publish')
+
+  await exec('npm logout')
+}
+
+async function testRunPasses(dependency) {
+  let remainingTestRuns = 3
+  let testRunPassCount = 0
+  let testRunFailCount = 0
+  const requiredTestRunPassCount = 1
+  while (remainingTestRuns-- > 0 && testRunPassCount < requiredTestRunPassCount) {
+    try {
+      await runBrowserTests(dependency)
+    } catch (e) {
+      testRunFailCount++
+      console.log('Test run failed:', e)
+    }
+    testRunPassCount++
+  }
+  const summary = `it took [${testRunFailCount + testRunPassCount}] attempts to pass [${testRunPassCount}] times`
+  if (testRunPassCount < requiredTestRunPassCount) {
+    throw new Error('Test run failed to pass the required number of times, ' + summary)
+  }
+  console.log('test run passed,', summary)
+}
+
+async function checkForUnpublishedDependencies (kitDir) {
+  const packageJson = JSON.parse(await fsp.readFile(path.join(kitDir, 'package.json'), 'utf8'))
+  const dependencies = Object.assign({}, packageJson.devDependencies, packageJson.dependencies)
+  const unpublishedDependencies = Object.keys(dependencies)
+    .filter(x => dependencies[x].startsWith('file:') || dependencies[x].startsWith('github:'))
+    .map(x => x + ' -> ' + dependencies[x])
+  if (unpublishedDependencies.length > 0) {
+    console.error('Unpublished dependencies detected, cancelling release.', unpublishedDependencies)
+    process.exit(11)
+  }
+  console.log('No unpublished dependencies detected, continuing.')
+}

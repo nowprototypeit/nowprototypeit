@@ -13,6 +13,7 @@ monitorEventLoop('prototype')
 
 if (config.isProduction) {
   server.listen(config.port)
+  console.log('Your prototype is running on port', config.port)
 } else {
   const listener = server.listen(() => {
     events.emitExternal(eventTypes.KIT_STARTED, {

@@ -20,6 +20,25 @@
         {% endif %}
       </div>
 
+      {% if messages.length > 0 %}
+        <h2 class="govuk-heading-m">
+          Messages from the Now Prototype It Team:
+        </h2>
+        <ul class="nowprototypeit-manage-prototype-messages nowprototypeit-bullet-list">
+          {% for message in messages %}
+          <li class="nowprototypeit-manage-prototype-messages__item">
+            {% if message.html %}
+              {{ message.html | safe }}
+            {% elseif message.url %}
+              <a href="{{ message.url }}">{{ message.text }}</a>
+            {% else %}
+              {{ message.text }}
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
       {% if tasks.length > 0 %}
         <h2 class="govuk-heading-m">
           Start a new prototype

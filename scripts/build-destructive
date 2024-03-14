@@ -1,0 +1,10 @@
+#!/usr/bin/env node
+
+const {buildBeforeRelease} = require("../lib/dev-server/manage-prototype/build");
+const {exec} = require("../lib/exec");
+
+(async () => {
+  await buildBeforeRelease()
+
+  await exec('npm uninstall @nowprototypeit/design-system')
+})()

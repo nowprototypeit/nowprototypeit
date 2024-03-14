@@ -1,0 +1,12 @@
+
+<div class="grid-row grid-standard-bottom-margin">
+  <div class="grid-column-readable-width">
+    <h1 class="{% if plugin.scope %} plugin-title-with-scope {% endif %}">{{ plugin.name }}</h1>
+    {% if plugin.scope %}
+      <p class="plugin-scope {% if plugin.version %} plugin-scope--with-version {% endif %}">From {{ plugin.scope }}</p>
+    {% endif %}
+    {% if plugin.version %}
+      <p class="plugin-version">Version {{ plugin.version }}</p>
+    {% endif %}
+  </div>
+</div>

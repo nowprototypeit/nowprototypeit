@@ -14,8 +14,8 @@ usage-data-config.json
 /cypress/temp
 /cypress/videos
 /cypress/fixtures/plugins/*/package-lock.json
-/govuk-prototype-kit*.zip
-/govuk-prototype-kit*.tgz
+/nowprototypeit-govuk*.zip
+/nowprototypeit-govuk*.tgz
 tmp/
 
 # General ignores

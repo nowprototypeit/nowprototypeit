@@ -1,0 +1,22 @@
+{% extends "prototype-core/layouts/blank.njk" %}
+
+{% block pageTitle %}Clear session data{% endblock %}
+
+{% block content %}
+  {% if stage == 'completed' %}
+    <h1>Your session data has been cleared</h1>
+    {% if returnUrl %}
+      <p><a href="{{ returnUrl }}">Go back the previous page</a></p>
+    {% else %}
+      <p><a href="/">Go back to the prototype</a></p>
+    {% endif %}
+  {% else %}
+    <h1>Clear session data</h1>
+    <form action="{{ currentUrl }}" method="post">
+      <p>Clearing your session data will reset the information you've provided, this includes
+      any form inputs, any query strings.  All your pages will still be in tact, it will be just
+      like you're a new user coming to the same prototype.</p>
+      <button type="submit">Clear your session data</button>
+    </form>
+  {% endif %}
+{% endblock %}

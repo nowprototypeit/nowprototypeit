@@ -1,0 +1,55 @@
+{% extends "../layouts/manage-prototype.njk" %}
+
+{% set htmlClasses='nowprototypeit-template-page' %}
+
+{% block content %}
+
+  <h1>Templates</h1>
+
+  <p>
+    Create pages from templates
+  </p>
+
+  {% if commonTemplatesDetails %}
+    {{ nowPrototypeItSubmitButton({
+      text: 'Install common templates',
+      href: commonTemplatesDetails.installLink + '?returnTo=templates'
+    }) }}
+  {% elseif availableTemplates.length == 0 %}
+    <p>It looks like you don't have any plugins that provide templates. Why not <a href="/manage-prototype/plugins">find
+        a plugin</a></p>
+  {% endif %}
+
+  {% for plugin in availableTemplates %}
+
+    <div class="plugin-templates" data-plugin-package-name="{{ plugin.packageName }}">
+
+      {% if plugin.pluginDisplayName.scope %}
+        <h2 class="plugin-name-with-scope manage-prototype-template-plugin-name">
+          {{ plugin.pluginDisplayName.name }}
+        </h2>
+        <p class="plugin-scope manage-prototype-template-plugin-scope">From {{ plugin.pluginDisplayName.scope }}</p>
+      {% else %}
+        <h2 class="manage-prototype-template-plugin-name">{{ plugin.pluginDisplayName.name }}</h2>
+      {% endif %}
+
+      <ul class="template-list">
+        {% for template in plugin.templates %}
+          <li class="template-list__item">
+            <div class="plugin-templates-template-name">
+              {{ template.name }}
+            </div>
+            <a class="template-list__item-link--view
+                 template-list__item-link"
+               href="{{ template.viewLink }}">
+              View<span class="now-prototype-it-visually-hidden"> {{ template.name }}</span></a>
+            <a class="template-list__item-link--create
+                template-list__item-link"
+               href="{{ template.installLink }}">
+              Create<span class="now-prototype-it-visually-hidden"> {{ template.name }}</span></a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endfor %}
+{% endblock %}
