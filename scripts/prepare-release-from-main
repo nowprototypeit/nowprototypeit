@@ -42,7 +42,7 @@ const branchName = process.argv[2] || 'main'
   const dependency = path.join(kitDir, result)
   await testRunPasses(dependency)
   await updateChangelogAndPublish(kitDir)
-})
+})()
 
 async function mkTmpDir() {
   const tmpDir = path.join(os.tmpdir(), 'now-prototype-it', 'release', '' + Date.now())
