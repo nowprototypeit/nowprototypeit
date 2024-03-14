@@ -6,10 +6,13 @@ const fsp = require('node:fs').promises
 
 const execTools = require("../lib/exec");
 
-const branchName = process.argv[2] || 'main'
+const branchName = process.argv[2] && process.argv[2] !== '--dry-run' ? process.argv[2] : 'main'
+
+const isDryRun = process.argv.includes('--dry-run')
+
+const wait = time => new Promise((resolve) => setTimeout(resolve, time))
 
 ;(async () => {
-  const wait = time => new Promise((resolve) => setTimeout(resolve, time))
 
   const tmpDir = await mkTmpDir()
   console.log('tmpDir:', tmpDir)
@@ -37,7 +40,8 @@ const branchName = process.argv[2] || 'main'
     cwd: kitDir
   })
   const dependency = path.join(kitDir, result)
-  await testRunPasses(dependency)
+  console.log('dependency:', dependency)
+  await runBrowserTests(dependency)
   await updateChangelogAndPublish(kitDir)
 })()
 
@@ -156,6 +160,11 @@ async function updateChangelogAndPublish(kitDir) {
 
   await execAndPrintStdout('git commit -am "Updated changelog automatically."', standardExecOptions)
 
+  if (isDryRun) {
+    console.log('Dry run, skipping push and release.')
+    return
+  }
+
   await execAndPrintStdout(`git push -u origin ${branchName}`, standardExecOptions)
 
   const prBodyFile = path.join(kitDir, '..', '.git-pr-body')
@@ -181,27 +190,6 @@ async function updateChangelogAndPublish(kitDir) {
   await execAndPrintStdout('npm publish')
 
   await exec('npm logout')
-}
-
-async function testRunPasses(dependency) {
-  let remainingTestRuns = 3
-  let testRunPassCount = 0
-  let testRunFailCount = 0
-  const requiredTestRunPassCount = 1
-  while (remainingTestRuns-- > 0 && testRunPassCount < requiredTestRunPassCount) {
-    try {
-      await runBrowserTests(dependency)
-    } catch (e) {
-      testRunFailCount++
-      console.log('Test run failed:', e)
-    }
-    testRunPassCount++
-  }
-  const summary = `it took [${testRunFailCount + testRunPassCount}] attempts to pass [${testRunPassCount}] times`
-  if (testRunPassCount < requiredTestRunPassCount) {
-    throw new Error('Test run failed to pass the required number of times, ' + summary)
-  }
-  console.log('test run passed,', summary)
 }
 
 async function checkForUnpublishedDependencies (kitDir) {

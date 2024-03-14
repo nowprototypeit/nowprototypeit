@@ -53,11 +53,16 @@ async function startKit (config = {}) {
 
   if (config.kitDependency) {
     const dep = config.kitDependency
-    const command = `npx -y --package="${dep}" now-prototype-it-govuk create --version=${dep} ${dir}`
-    console.log('kit create command:', command)
-    await exec(command, {
+    const command = 'npx'
+    const args = ['-y', `-package=${dep}`, 'now-prototype-it-govuk', 'create', `--version=${dep}`, dir]
+    console.log('kit create command:', command, args)
+    const execResult = exec({
+      command,
+      args
+    }, {
       env: { ...process.env }
     })
+    await execResult.finishedPromise
   } else {
     const binCli = config.binCli ?? path.join(__dirname, '../../bin/cli')
     const kitCreationThread = fork(binCli, {
