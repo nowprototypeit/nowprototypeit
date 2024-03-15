@@ -64,6 +64,13 @@ async function execAndCaptureStdout(command, options) {
   return stdout.trim()
 }
 
+async function execWithStdio(command, options) {
+  await exec(command, {
+    ...options,
+    stdio: 'inherit'
+  })
+}
+
 async function execAndPrintStdout(command, options) {
   await exec(command, options, (data) => {
     process.stdout.write(data.toString())
@@ -185,7 +192,7 @@ async function updateChangelogAndPublish(kitDir) {
     }
   } while (!loggedInAsCorrectNpmUser)
 
-  await execAndPrintStdout('npm publish')
+  await execWithStdio('npm publish', standardExecOptions)
 
   await execAndPrintStdout({
     command: 'gh',
