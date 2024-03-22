@@ -5,6 +5,7 @@ const path = require('node:path')
 const fsp = require('node:fs').promises
 
 const execTools = require('../lib/exec')
+const {sleep} = require("../lib/utils");
 
 const branchName = process.argv[2] && process.argv[2] !== '--dry-run' ? process.argv[2] : 'main'
 
@@ -33,6 +34,9 @@ const wait = time => new Promise((resolve) => setTimeout(resolve, time))
     cwd: kitDir
   })
   await exec('npm run build:destructive', {
+    cwd: kitDir
+  })
+  await exec('git add -A .', {
     cwd: kitDir
   })
   await exec('git commit -am "Destructively built ready for release"', {
@@ -201,9 +205,14 @@ async function updateChangelogAndPublish (kitDir) {
     args: ['release', 'create', `v${newVersion}`, '--notes-file', prBodyFile, '--target', branchName, '--title', `v${newVersion}`, '--latest']
   }, standardExecOptions)
 
-  await exec(`git checkout main && git checkout -b post-${branchName}`, standardExecOptions)
-  await exec(`git cherry-pick post-${branchName}`, standardExecOptions)
+  await sleep(2000)
+
+  await exec(`git checkout main`, standardExecOptions)
+  await exec(`git checkout -b post-${branchName}`, standardExecOptions)
+  await exec(`git cherry-pick ${branchName}`, standardExecOptions)
   await exec(`git push -u origin post-${branchName}`, standardExecOptions)
+
+  await sleep(2000)
 
   await execAndPrintStdout({
     command: 'gh',

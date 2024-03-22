@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.2.0
+
 ### New Features
 
  - Created a "variant" system alongside the plugin system, this allows authors to define how a new kit should be created
