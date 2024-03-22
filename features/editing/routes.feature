@@ -1,6 +1,7 @@
 @routes
 Feature: Routes
 
+  @no-variant
   Scenario: Custom get route
     Given I append the file "app/routes.js" with contents "router.get('/hello/:name', function (req, res) {res.send('<h1>hello ' + req.params.name + '</h1>')})"
     When I visit "/hello/world"
@@ -8,6 +9,7 @@ Feature: Routes
     When I visit "/hello/you"
     Then the main heading should be updated to "hello you"
 
+  @no-variant
   @auto-reload
   Scenario: Custom get route
     Given I visit "/example2"

@@ -5,7 +5,7 @@ const parser = require('./argv-parser')
 
 const addStandardArgs = arr => [
   '/Users/user.name/.nvm/versions/node/node.version/bin/node',
-  '/Users/user.name/.nvm/versions/node/node.version/bin/govuk-prototype-kit',
+  '/Users/user.name/.nvm/versions/node/node.version/bin/now-prototype-it-govuk',
   ...arr
 ]
 

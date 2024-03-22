@@ -1,33 +1,53 @@
 const http = require('node:http')
-const url = require('node:url')
 
+const url = require('node:url')
 const net = require('node:net')
-const fsp = require('node:fs').promises
+const fs = require('node:fs')
+const fsp = fs.promises
+const path = require('path')
+const os = require('os')
+
+const uuid = require('uuid')
+const chaiPromise = import('chai')
 const { Builder, By } = require('selenium-webdriver')
 const chrome = require('selenium-webdriver/chrome')
 const firefox = require('selenium-webdriver/firefox')
-const path = require('path')
-const os = require('os')
-const uuid = require('uuid')
 const { fork, execv2 } = require('../../lib/exec')
+const execv1 = require('../../lib/exec').exec
 const exec = execv2
-const chaiPromise = import('chai')
+const { flattenArray } = require('../../lib/utils/arrayTools')
 
-let currentSharedKitAndBrowser
-const allKits = []
-const allBrowsers = []
+const kitAndBrowserStore = (() => {
+  const store = {}
+  const getKeyFromOptions = options => JSON.stringify(options || {})
+
+  return {
+    get: (options) => store[getKeyFromOptions(options)],
+    set: (kitAndBrowser, options) => { store[getKeyFromOptions(options)] = kitAndBrowser },
+    remove: (options) => delete store[getKeyFromOptions(options)],
+    getAllKits: () => flattenArray(Object.values(store).map(({ kit }) => kit)),
+    getAllBrowsers: () => flattenArray(Object.values(store).map(({ browser }) => browser))
+  }
+})()
 
 async function cleanupEverything (deleteKit = true) {
   await Promise.all([
-    ...allKits.map(async (kitPromise) => {
+    ...kitAndBrowserStore.getAllKits().map(async (kitPromise) => {
       const kit = await kitPromise
+      if (kit.resetPromise) {
+        await kit.resetPromise
+      }
       await kit.close()
       if (deleteKit) {
         await kit.cleanup()
       }
     }),
-    ...allBrowsers.map(async (browser) => {
-      await (await browser).quit()
+    ...kitAndBrowserStore.getAllBrowsers().map(async (browser) => {
+      const theBrowser = await browser
+      if (!theBrowser) {
+        return
+      }
+      await theBrowser.close()
     })
   ])
 }
@@ -49,25 +69,40 @@ async function findAvailablePort () {
 
 async function startKit (config = {}) {
   const dir = config.dir ?? path.join(os.tmpdir(), `nowprototypeit-govuk-cucumberjs-${uuid.v4()}`)
-  const nextRestartListeners = []
+  const nextKitRestartListeners = []
+  const nextManagementAppRestartListeners = []
+
+  const additionalCliArgs = []
+
+  if (config.variantPluginName) {
+    additionalCliArgs.push(`--variant=${config.variantPluginName}`)
+  }
+
+  if (config.variantPluginDependency) {
+    additionalCliArgs.push(`--variant-dependency=${config.variantPluginDependency}`)
+  }
 
   if (config.kitDependency) {
     const dep = config.kitDependency
     const command = 'npx'
-    const args = ['-y', `-package=${dep}`, 'now-prototype-it-govuk', 'create', `--version=${dep}`, dir]
-    console.log('kit create command:', command, args)
+    const args = ['-y', `-package=${dep}`, 'now-prototype-it-govuk', 'create', ...additionalCliArgs, `--version=${dep}`, dir]
     const execResult = exec({
       command,
       args
     }, {
-      env: { ...process.env }
+      env: { ...process.env },
+      hideStdout: process.env.SHOW_KIT_STDIO !== 'true',
+      hideStderr: process.env.SHOW_KIT_STDIO !== 'true'
     })
     await execResult.finishedPromise
   } else {
     const binCli = config.binCli ?? path.join(__dirname, '../../bin/cli')
+    const args = config.createArgs ?? ['create', ...additionalCliArgs, '--version=local', dir]
     const kitCreationThread = fork(binCli, {
       passThroughEnv: true,
-      args: config.createArgs ?? ['create', '--version=local', dir]
+      hideStdout: process.env.SHOW_KIT_STDIO !== 'true',
+      hideStderr: process.env.SHOW_KIT_STDIO !== 'true',
+      args
     })
     await kitCreationThread.finishedPromise
   }
@@ -77,8 +112,13 @@ async function startKit (config = {}) {
   })
 
   const kitPort = await findAvailablePort()
-  const kitThread = fork(path.join(dir, 'node_modules', '@nowprototypeit', 'govuk', 'bin', 'cli'), {
+  const pathToCli = path.join(dir, 'node_modules', '@nowprototypeit', 'govuk', 'bin', 'cli')
+  if (!fs.existsSync(pathToCli)) {
+    throw new Error('Could not find the CLI at ' + pathToCli)
+  }
+  const kitThread = fork(pathToCli, {
     hideStdout: process.env.SHOW_KIT_STDIO !== 'true',
+    hideStderr: process.env.SHOW_KIT_STDIO !== 'true',
     passThroughEnv: true,
     neverRejectFinishedPromise: true,
     env: {
@@ -93,21 +133,30 @@ async function startKit (config = {}) {
           finishedRes()
         }
         if (str.includes('Your prototype was restarted.')) {
-          while (nextRestartListeners.length > 0) {
-            nextRestartListeners.pop()()
+          while (nextKitRestartListeners.length > 0) {
+            nextKitRestartListeners.pop()()
+          }
+        }
+        if (str.includes('Prototype Management app restarted.')) {
+          while (nextManagementAppRestartListeners.length > 0) {
+            nextManagementAppRestartListeners.pop()()
           }
         }
       }
     }
   })
 
-  await kitStartedPromise.catch(e => {})
+  await kitStartedPromise.catch(e => {
+  })
 
   const returnValue = {
     dir,
     url: `http://localhost:${kitPort}`,
-    addNextRestartListener: (listener) => {
-      nextRestartListeners.push(listener)
+    addNextKitRestartListener: (listener) => {
+      nextKitRestartListeners.push(listener)
+    },
+    addNextManagementAppRestartListener: (listener) => {
+      nextManagementAppRestartListeners.push(listener)
     },
     close: async () => {
       await kitThread.close()
@@ -123,9 +172,13 @@ async function startKit (config = {}) {
     },
     sendStdin: (str) => {
       kitThread.stdio.stdin.write(str + '\n')
-    }
+    },
+    reset: async () => {
+      await resetKit(returnValue)
+    },
+    startupConfig: JSON.stringify(config, null, 2),
+    id: uuid.v4()
   }
-  allKits.push(returnValue)
   return returnValue
 }
 
@@ -143,9 +196,9 @@ async function getBrowser (config = {}) {
   }
   const driver = builder.build()
   const getFullUrl = (url) => url.startsWith('/') && baseUrl ? baseUrl + url : url
-  allBrowsers.push(driver)
   const self = {
     driver,
+    id: uuid.v4(),
     getTitle: () => driver.getTitle(),
     setBaseUrl: (newBaseUrl) => {
       baseUrl = newBaseUrl
@@ -170,19 +223,31 @@ async function getBrowser (config = {}) {
     queryTag: async (tag) => {
       return await driver.findElements(By.tagName(tag))
     },
+    setWindowSizeToPageSize: async () => {
+      try {
+        const height = await driver.executeScript('return document.body.parentNode.scrollHeight')
+        const width = await driver.executeScript('return document.body.parentNode.scrollWidth')
+        await driver.manage().window().setSize({ width, height })
+      } catch (e) {
+        console.error('failed to set window size:')
+        console.error(e)
+      }
+    },
     close: async () => {
       await driver.quit()
       if (config.afterCleanup) {
         config.afterCleanup()
       }
-    }
+    },
+    kitStartConfig: config.kitStartConfig
   }
   self.getPluginDetails = async () => {
     const pluginElements = await Promise.all(await self.queryClass('nowprototypeit-manage-prototype-plugin-list__item'))
     return await Promise.all(pluginElements.map(async elem => ({
       name: await (await elem.findElement(By.className('nowprototypeit-manage-prototype-plugin-list-plugin-name'))).getText(),
       scope: await (await elem.findElements(By.className('nowprototypeit-manage-prototype-plugin-list-plugin-scope')))[0]?.getText(),
-      hasInstalledFlag: (await elem.findElements(By.className('nowprototypeit-manage-prototype-plugin-list-item-installed-details'))).length > 0
+      hasInstalledFlag: (await elem.findElements(By.className('nowprototypeit-manage-prototype-plugin-list-item-installed-details'))).length > 0,
+      updateAvailable: (await elem.findElements(By.className('nowprototypeit-info-box'))).length > 0
     })))
   }
   ;['wait'].forEach(key => {
@@ -191,33 +256,37 @@ async function getBrowser (config = {}) {
   return self
 }
 
-async function getPrototypeKit ({ afterCleanup, kitDependency } = {}) {
-  return await startKit({ afterCleanup, kitDependency })
-}
-
-async function getPrototypeKitAndBrowser () {
+async function getPrototypeKitAndBrowser (options = {}) {
+  const currentSharedKitAndBrowser = kitAndBrowserStore.get(options)
   if (currentSharedKitAndBrowser) {
-    return { ...currentSharedKitAndBrowser, isReused: true }
+    let isReset = false
+    if (currentSharedKitAndBrowser.kit.resetPromise) {
+      await currentSharedKitAndBrowser.kit.resetPromise
+      isReset = true
+    }
+    return { ...currentSharedKitAndBrowser, isReused: true, isReset }
   }
   const combinationForSharing = {}
   const cleanup = async () => {
-    if (currentSharedKitAndBrowser === combinationForSharing) {
-      currentSharedKitAndBrowser = undefined
-    }
+    kitAndBrowserStore.remove(options)
+  }
+  const kitStartConfig = {
+    afterCleanup: cleanup,
+    kitDependency: options.kitDependency || process.env.TEST_KIT_DEPENDENCY,
+    variantPluginName: options.variantPluginName,
+    variantPluginDependency: options.variantPluginDependency
   }
   const [kit, browser] = await Promise.all([
-    getPrototypeKit({
-      afterCleanup: cleanup,
-      kitDependency: process.env.TEST_KIT_DEPENDENCY
-    }),
+    startKit(kitStartConfig),
     getBrowser({
-      afterCleanup: cleanup
+      afterCleanup: cleanup,
+      kitStartConfig: JSON.stringify(kitStartConfig, null, 2)
     })
   ])
+  combinationForSharing.kit = kit
+  combinationForSharing.browser = browser
   browser.setBaseUrl(kit.url)
-  combinationForSharing.kit = await kit
-  combinationForSharing.browser = await browser
-  currentSharedKitAndBrowser = combinationForSharing
+  kitAndBrowserStore.set(combinationForSharing, options)
   return { ...combinationForSharing, isReused: false }
 }
 
@@ -282,25 +351,92 @@ function waitForConditionToBeMet (timeoutDeclaration, isCorrect, errorCallback) 
   })
 }
 
+async function setupKitAndBrowserForTestScope (that, options) {
+  const { kit, browser, isReused, isReset } = await getPrototypeKitAndBrowser(options)
+
+  if (isReused && !isReset) {
+    console.log('reused kit was not previously reset, resetting now')
+    await resetKit(kit)
+  }
+
+  that.kit = kit
+  that.browser = browser
+
+  if (!that.browser) {
+    throw new Error('No browser set up, something is wrong')
+  }
+
+  if (!that.kit) {
+    throw new Error('No kit set up, something is wrong')
+  }
+}
+
+async function resetKit (kit) {
+  const runCommand = async (command) => {
+    let result = ''
+    const stdHandler = (data) => {
+      result += data.toString()
+    }
+    try {
+      await execv1(command, {
+        cwd: kit.dir
+      }, stdHandler)
+      return result
+    } catch (e) {
+      console.error('Failed to run command', command)
+      console.error(e)
+      throw e
+    }
+  }
+
+  let resetPromiseResolve
+  kit.resetPromise = new Promise((resolve) => { resetPromiseResolve = resolve })
+
+  const status = await runCommand('git status')
+
+  await runCommand('git add -A .')
+  await runCommand('git reset --hard HEAD')
+
+  if (status.includes('package.json')) {
+    await runCommand('npm install')
+    await runCommand('npm prune')
+
+    const restartPromise = Promise.all([
+      new Promise((resolve) => {
+        kit.addNextKitRestartListener(() => {
+          resolve()
+        })
+      }),
+      new Promise((resolve) => {
+        kit.addNextKitRestartListener(() => {
+          resolve()
+        })
+      })
+    ])
+    kit.sendStdin('rs')
+
+    await restartPromise
+
+    resetPromiseResolve()
+  } else {
+    resetPromiseResolve()
+  }
+}
+
 const timeoutMultiplier = Number(process.env.TIMEOUT_MULTIPLIER || path.sep === '/' ? 1 : 3)
 
 module.exports = {
   cleanupEverything,
-  cleanupAllBrowsers: async function () {
-    await Promise.all(allBrowsers.map(async (browser) => {
-      await (await browser).quit()
-    }))
-  },
-  getPrototypeKitAndBrowser,
   expect: async function () {
     const chai = await chaiPromise
     return chai.expect(...arguments)
   },
   makeGetRequest,
   waitForConditionToBeMet,
+  setupKitAndBrowserForTestScope,
   timeoutMultiplier,
-  kitStartTimeout: { timeout: (process.env.TEST_KIT_DEPENDENCY ? 90 : 30) * 1000 * timeoutMultiplier },
-  pluginActionTimeout: { timeout: 40 * 1000 * timeoutMultiplier },
+  kitStartTimeout: { timeout: (process.env.TEST_KIT_DEPENDENCY ? 90 : 40) * 1000 * timeoutMultiplier },
+  pluginActionTimeout: { timeout: 60 * 1000 * timeoutMultiplier },
   pluginActionPageTimeout: { timeout: 20 * 1000 * timeoutMultiplier },
   mediumActionTimeout: { timeout: 10 * 1000 * timeoutMultiplier },
   pageRefreshTimeout: { timeout: 10 * 1000 * timeoutMultiplier },

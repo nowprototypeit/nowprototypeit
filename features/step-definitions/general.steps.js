@@ -3,7 +3,10 @@ const { expect } = require('./utils')
 const { sleep } = require('../../lib/utils')
 const { intentionalDelayTimeout, pageRefreshTimeout, waitForConditionToBeMet, makeGetRequest } = require('./utils')
 const path = require('node:path')
-const { promises: fsp } = require('node:fs')
+const fs = require('node:fs')
+const { mediumActionTimeout } = require('./utils')
+const { promises: fsp } = fs
+const kitVersion = require('../../package.json').version
 
 Given('I do nothing', function () {
 })
@@ -14,6 +17,7 @@ Given('I wait for {int} seconds', intentionalDelayTimeout, async function (secon
   if (ms > maxMs) {
     throw new Error(`The requested timeout is too long, maximum is [${maxMs}], requested wsa [${ms}]`)
   }
+
   await sleep(ms)
 })
 
@@ -47,6 +51,18 @@ Then('the main heading should be updated to {string}', pageRefreshTimeout, async
 Then('the page title should read {string}', async function (expectedTitle) {
   const actualH1 = await (await this.browser.getTitle())
   ;(await expect(actualH1)).to.equal(expectedTitle)
+})
+
+Then('the page title should become {string}', mediumActionTimeout, async function (expectedTitle) {
+  const start = Date.now()
+  let actualTitleText
+  while (actualTitleText !== expectedTitle) {
+    if (Date.now() - start > (mediumActionTimeout.timeout - 600)) {
+      throw new Error(`Gave up waiting for title [${actualTitleText}] to become equal to [${expectedTitle}]`)
+    }
+    await sleep(100)
+    actualTitleText = await this.browser.getTitle()
+  }
 })
 Given('I am viewing a {int} page at {string}', async function (statusCode, url) {
   const [response] = await Promise.all([
@@ -95,6 +111,22 @@ Then('there should be an {string} element with the text {string}', async functio
   } catch (e) {
     console.error('All elements with requested tag:', allElemsText)
     throw e
+  }
+})
+
+Then('the file {string} should contain {string}', async function (relativeFilePath, expectedString) {
+  const fileContents = await fsp.readFile(path.join(this.kit.dir, relativeFilePath), 'utf8')
+  const expectedStringAfterReplacement = expectedString.replaceAll('(kit_version)', kitVersion)
+  ;(await expect(fileContents)).to.include(expectedStringAfterReplacement)
+})
+
+Then('I should have the {string} plugin installed properly', async function (pluginName) {
+  const packageJson = JSON.parse(await fsp.readFile(path.join(this.kit.dir, 'package.json'), 'utf8'))
+  ;(await expect(Object.keys(packageJson.dependencies))).to.contain(pluginName)
+  const modulePath = path.join(this.kit.dir, 'node_modules', pluginName)
+  const exists = fs.existsSync(modulePath)
+  if (!exists) {
+    throw new Error(`Plugin not installed properly - ${modulePath} does not exist`)
   }
 })
 

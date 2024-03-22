@@ -22,13 +22,12 @@ if (process.argv.indexOf('--suppress-node-version-warning') === -1 || (process.a
 const path = require('path')
 
 const fse = require('fs-extra')
-const fsp = require('fs').promises
 const { spawn, exec } = require('../lib/exec')
 const { parse } = require('./utils/argv-parser')
+const { verboseLogger, progressLogger } = require('./utils/loggers')
+const { npmInstall } = require('./utils')
+const { projectDir } = require('../lib/utils/paths')
 const { validatePlugin } = require('../lib/plugins/plugin-validator')
-const { npmInstall, packageJsonFormat, splitSemverVersion } = require('./utils')
-const { recursiveDirectoryContentsSync } = require('../lib/utils')
-const { appViewsDir } = require('../lib/utils/paths')
 
 // Avoid requiring any kit server code at the top-level as we might want to
 // change environment variables below.
@@ -42,60 +41,6 @@ const argv = parse(process.argv, {
   booleans: ['no-version-control', 'verbose', 'running-within-create-script', 'use-njk-extensions', 'suppress-node-version-warning']
 })
 
-const verboseLogger = !argv.options.verbose
-  ? () => {}
-  : function () {
-    console.log('[verbose]', ...arguments)
-  }
-
-const progressLogger = function () {
-  if (argv.command === 'init') {
-    const versionOfInstaller = argv.options['created-from-version']
-    if (!versionOfInstaller) {
-      return
-    }
-    const version = splitSemverVersion(versionOfInstaller)
-    if (version.major === 13 && version.minor < 2) {
-      return
-    }
-  }
-
-  console.log(' - ', ...arguments)
-}
-
-const npmrc = `
-audit=false
-`.trimStart()
-
-const gitignore = `
-# Node.js ignores
-node_modules/
-
-# Prototype ignores - per-user
-.tmp/
-.env
-migrate.log
-usage-data-config.json
-
-# General ignores
-.DS_Store
-.idea
-`.trimStart()
-
-const packageJson = {
-  scripts: {
-    dev: 'now-prototype-it-govuk dev || npx -y @nowprototypeit/govuk@latest failed-to-launch serve $?',
-    serve: 'now-prototype-it-govuk serve || npx -y @nowprototypeit/govuk@latest failed-to-launch serve $?',
-    start: 'now-prototype-it-govuk start || npx -y @nowprototypeit/govuk@latest failed-to-launch start $?'
-  }
-}
-
-async function updatePackageJson (packageJsonPath) {
-  let newPackageJson = Object.assign({}, packageJson)
-  newPackageJson = Object.assign(newPackageJson, await fse.readJson(packageJsonPath))
-  await fse.writeJson(packageJsonPath, newPackageJson, packageJsonFormat)
-}
-
 function displaySuccessMessage () {
   console.log('')
   console.log('Prototype created')
@@ -108,32 +53,6 @@ function displaySuccessMessage () {
   console.log('To run your prototype:')
   console.log('  npm run dev')
   console.log('')
-}
-
-async function initialiseGitRepo () {
-  const noVersionControlArg = 'no-version-control'
-  if (argv.options[noVersionControlArg]) {
-    verboseLogger(`User specified --${noVersionControlArg}, skipping.`)
-    return
-  }
-  progressLogger('Initialising git')
-  try {
-    await exec('git init --initial-branch=main && git add -A .', {})
-  } catch (e) {
-    verboseLogger('Failed to initialise git')
-    verboseLogger(e.message)
-    verboseLogger(e.errorOutput)
-    return
-  }
-
-  const failSilently = () => {}
-
-  const commitMessage = 'Create prototype'
-  await exec(`git commit -am "${commitMessage}"`)
-    .catch(() =>
-      exec(`git -c "user.email=auto-commit@nowprototype.it" -c "user.name=Now Prototype It" commit -am "${commitMessage}"`)
-    )
-    .catch(failSilently)
 }
 
 function usage () {
@@ -231,13 +150,18 @@ async function runCreate () {
     return
   }
 
-  console.log('Creating your prototype')
+  const variantName = getVariantName(false)
+
+  if (variantName) {
+    console.log(`Creating your prototype using the variant ${variantName}`)
+    console.log('')
+  }
 
   await writeEmptyPackageJson(installDirectory)
 
   progressLogger('Installing dependencies')
 
-  await npmInstall(installDirectory, [kitDependency])
+  await npmInstall(installDirectory, [kitDependency, getVariantDependency()])
 
   if ((argv.options.version || argv.options.v) === 'local-symlink') {
     const dependencyInstallLocation = path.join(installDirectory, 'node_modules', kitProjectName)
@@ -259,40 +183,81 @@ async function runCreate () {
     })
 }
 
-async function createStarterFiles (installDirectory) {
-  await fse.copy(path.join(kitRoot, 'prototype-starter'), installDirectory)
+function getVariantName (fallback = true) {
+  if (argv.options.variant) {
+    return argv.options.variant
+  }
+  if (fallback) {
+    return '@nowprototypeit/govuk'
+  }
+  return undefined
+}
 
-  async function addToConfigFile (key, value) {
-    const configFileLocation = path.join(installDirectory, 'app', 'config.json')
-    const config = await fse.readJson(configFileLocation)
-    config[key] = value
-    await fse.writeJson(configFileLocation, config, { spaces: 2 })
+function getVariantDependency () {
+  return argv.options['variant-dependency'] || getVariantName()
+}
+
+function getModelFromTree (inheritanceTree, key) {
+  const output = []
+
+  function getConfigFromTreePosition (position) {
+    if (!inheritanceTree[position]) {
+      return
+    }
+    if (inheritanceTree[position].variantFile[key]) {
+      inheritanceTree[position].variantFile[key].forEach(value => {
+        if (value === '__INHERIT__') {
+          getConfigFromTreePosition(position + 1)
+        } else {
+          output.push({
+            packageName: inheritanceTree[position].name,
+            value
+          })
+        }
+      })
+    } else {
+      getConfigFromTreePosition(position + 1)
+    }
   }
 
-  function renameAllHtmlFilesToNjk () {
-    return recursiveDirectoryContentsSync(appViewsDir)
-      .filter(filePath => filePath.endsWith('.html'))
-      .map(filePath => fse.move(
-        path.join(appViewsDir, filePath),
-        path.join(appViewsDir, filePath.substring(0, filePath.length - '.html'.length) + '.njk')
-      ))
+  getConfigFromTreePosition(0)
+  return output
+}
+
+async function buildVariantDefinition () {
+  async function readVariantFile (variantName) {
+    const variantFileObj = await fse.readJson(path.join(projectDir, 'node_modules', variantName, 'now-prototype-it.variant.json'))
+    if (variantFileObj['version-2024-03']) {
+      return variantFileObj['version-2024-03']
+    }
+    throw new Error('Variant file does not contain an appropriate version key.  The only acceptable version at this time is "version-2024-03"')
   }
 
-  if (argv.options['use-njk-extensions']) {
-    await Promise.all([
-      addToConfigFile('useNjkExtensions', true),
-      ...renameAllHtmlFilesToNjk()
-    ])
-  }
+  const variantFile = await readVariantFile(getVariantName())
+  const inheritanceTree = await Promise.all((variantFile.inheritFrom || []).map(async name => ({
+    name,
+    variantFile: await readVariantFile(name)
+  })))
+  inheritanceTree.unshift({
+    name: getVariantName(),
+    variantFile
+  })
 
-  await Promise.all(recursiveDirectoryContentsSync(installDirectory)
-    .filter(x => x.startsWith('app' + path.sep))
-    .map(async (filePath) => {
-      const fileContents = await fsp.readFile(path.join(installDirectory, filePath), 'utf8')
-      if (fileContents.includes('__VERSION__')) {
-        await fsp.writeFile(path.join(installDirectory, filePath), fileContents.replace(/__VERSION__/g, kitVersion), 'utf8')
-      }
-    }))
+  const variantDefinition = {}
+
+  const nodeModulesDir = path.join(projectDir, 'node_modules')
+
+  variantDefinition.dependencies = getModelFromTree(inheritanceTree, 'installedPackages').map(({ value }) => value)
+  variantDefinition.dirsToCopy = getModelFromTree(inheritanceTree, 'starterFileDirectories').map(({
+    packageName,
+    value
+  }) => path.join(nodeModulesDir, packageName, value))
+  variantDefinition.commands = getModelFromTree(inheritanceTree, 'postCreateScripts').map(({
+    packageName,
+    value
+  }) => [path.join(nodeModulesDir, packageName, value), ...(getArgumentsToPassThrough())].join(' '))
+
+  return variantDefinition
 }
 
 async function runInit () {
@@ -305,18 +270,18 @@ async function runInit () {
     return
   }
 
-  const installDirectory = getInstallLocation()
+  const installLocation = getInstallLocation()
+  const variantDefinition = await buildVariantDefinition()
 
-  const copyFile = (fileName) => fse.copy(path.join(kitRoot, fileName), path.join(installDirectory, fileName))
+  await npmInstall(installLocation, variantDefinition.dependencies)
 
-  await Promise.all([
-    createStarterFiles(installDirectory),
-    fse.writeFile(path.join(installDirectory, '.gitignore'), gitignore, 'utf8'),
-    fse.writeFile(path.join(installDirectory, '.npmrc'), npmrc, 'utf8'),
-    copyFile('LICENCE.txt'),
-    updatePackageJson(path.join(installDirectory, 'package.json'))
-  ])
-    .then(initialiseGitRepo)
+  while (variantDefinition.dirsToCopy.length > 0) {
+    await fse.copy(variantDefinition.dirsToCopy.shift(), installLocation)
+  }
+
+  while (variantDefinition.commands.length > 0) {
+    await exec(variantDefinition.commands.shift(), { cwd: installLocation, env: { ...process.env }, stdio: 'inherit' })
+  }
 }
 
 async function runDev () {
@@ -361,6 +326,27 @@ async function runValidatePlugin () {
       break
     case 'version':
       console.log(kitVersion)
+      break
+    case 'debug-print-env-info':
+      console.log('Printing debug info about the environment')
+      console.log('')
+      console.log('Environment variables')
+      console.log(process.env)
+      console.log('')
+      console.log('Process argv')
+      console.log(process.argv)
+      console.log('')
+      console.log('Process features')
+      console.log(process.features)
+      console.log('')
+      console.log('Process config')
+      console.log(process.config)
+      console.log('')
+      console.log('Process mainModule')
+      console.log(process.mainModule)
+      console.log('')
+      console.log('Process title')
+      console.log(process.title)
       break
     default:
       usage()

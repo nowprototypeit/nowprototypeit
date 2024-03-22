@@ -5,6 +5,10 @@
 {% from "components/plugin-card.njk" import nowPrototypeItPluginCard %}
 
 {% block mainPanel %}
+
+    <h3>
+        {{ foundMessage }}
+    </h3>
     {% if isSearchPage %}
             <div id="search-container">
                 <form action="{{ currentUrl }}" method="get">
@@ -12,32 +16,37 @@
                         id: "search",
                         nameAndId: "search",
                         value: search,
-                        label: "Search",
-                        labelClasses: "nowprototypeit-no-top-margin"
+                        label: "Filter",
+                        labelClasses: "nowprototypeit-no-top-margin nowprototypeit-form-item-wrapper-tiny-gap-bottom",
+                        classes: "nowprototypeit-form-item-wrapper-tiny-gap-bottom nowprototypeit-form-item-wrapper-tiny-gap-top"
                     }) }}
 
                     {{ nowPrototypeItSubmitButton({
-                        text: "Search",
-                        classes: "nowprototypeit-form-item-wrapper-small-gap"
+                        text: "Filter",
+                        classes: "nowprototypeit-form-item-wrapper-tiny-gap-top" + (" nowprototypeit-form-item-wrapper-tiny-gap-bottom" if search else "")
                     }) }}
                 </form>
 
                 {% if search %}
-                    <a href="?">Clear search</a>
+                    <a href="?" class="nowprototypeit-form-item-wrapper-tiny-gap-top">Clear filter</a>
                 {% endif %}
             </div>
     {% endif %}
-
-    <h3>
-        {{ foundMessage }}
-    </h3>
 
     {% if plugins.length === 0 %}
         {% if isInstalledPage %}
             <p>It looks like you don't have any plugins installed.</p>
         {% else %}
-            <p>We couldn't find any plugins, looks like something went wrong. Feel free to <a
-                        href="https://github.com/nowprototypeit/govuk/issues" target="_blank">raise us a ticket</a>.</p>
+            <p>We couldn't find any plugins, looks like something went wrong. Your options are:</p>
+            <ul class="nowprototypeit-bullet-list">
+                <li><a
+                            href="/manage-prototype/plugins/lookup">Lookup a specific plugin</a>.</li>
+            <ul class="nowprototypeit-bullet-list">
+                <li><a
+                            href="https://docs.nowprototype.it/plugins">Check our website for information about plugins</a>.</li>
+                <li><a
+                            href="https://docs.nowprototype.it/build-a-plugin">Learn about building your own plugin</a>.</li>
+            </ul>
         {% endif %}
     {% else %}
         <ul class="nowprototypeit-manage-prototype-plugin-list"

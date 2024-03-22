@@ -3,8 +3,17 @@ const { expect } = require('./utils')
 const { By } = require('selenium-webdriver')
 
 Then('I should see an error page', async function () {
-  const bodyTag = (await this.browser.queryTag('body'))[0]
-  const classArray = (await bodyTag.getAttribute('class'))?.split(' ')
+  let classArray
+  const startTime = Date.now()
+  while (classArray === undefined) {
+    if (Date.now() - startTime > 2000) {
+      throw new Error('Timed out waiting for the error page to load')
+    }
+    try {
+      const bodyTag = (await this.browser.queryTag('body'))[0]
+      classArray = (await bodyTag.getAttribute('class'))?.split(' ')
+    } catch (e) {}
+  }
   ;(await expect(classArray)).to.include('nowprototypeit-error-page')
 })
 
@@ -21,15 +30,13 @@ async function getErrorDetailElements (browser, tryCount = 0) {
       }
     }))
   } catch (e) {
-    if (e.type === 'StaleElementReferenceError') {
+    if (e.type === 'StaleElementReferenceError' || e.message?.startsWith('stale element reference:')) {
       if (tryCount > 5) {
-        console.log('caught StaleElementReferenceError, not retrying as retry max reached. Throwing it again.')
         throw e
       }
-      console.log('caught StaleElementReferenceError, retrying')
-      await getErrorDetailElements(browser, tryCount + 1)
+      return await getErrorDetailElements(browser, tryCount + 1)
     } else {
-      console.log('caught error other than StaleElementReferenceError, throwing it again')
+      console.log(e)
       throw e
     }
   }

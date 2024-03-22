@@ -1,8 +1,9 @@
 @errors
 Feature: Error handling
-  
+
+  @no-variant
   @nunjucks
-  Scenario: Template error
+  Scenario: Template error, broken nunjucks
     Given I create a file "app/views/broken-example.njk" based on the fixture file "nunjucks/broken/no-brace-on-block.njk"
     When I visit "/broken-example"
     Then the main heading should be updated to "There was an error while loading your page"
@@ -17,8 +18,9 @@ Feature: Error handling
     And the source code should end at line 102
     And only line 87 should be highlighted
 
+  @no-variant
   @nunjucks
-  Scenario: Template error
+  Scenario: Template error, missing layout
     Given I create a file "app/views/abc/def/ghi/missing-layout.njk" based on the fixture file "nunjucks/broken/nonexistent-layout.njk"
     When I visit "/abc/def/ghi/missing-layout"
     Then the main heading should be updated to "There was an error while loading your page"

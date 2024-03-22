@@ -22,7 +22,7 @@
       {{ nowPrototypeItSubmitButton({
         nameAndId: 'action-install',
         text: installLinkText | default('Install'),
-        classes: 'govuk-prototype-kit-plugin-install-button',
+        classes: '',
         href: installLink
       }) }}
     {% endif %}
@@ -45,9 +45,9 @@
   </form>
 
   {% if plugin.releaseDateTime or preparedPluginLinks.releaseNotes or preparedPluginLinks.versionHistory %}
-    <div class="govuk-prototype-kit-manage-prototype-plugin-details-links">
+    <div>
       {% if plugin.releaseDateTime %}
-        <p class="govuk-body">Released
+        <p>Released
           <time title="{{ plugin.releaseDateTime }}"
                 datetime="{{ plugin.releaseDateTime }}">{{ releaseTimeSummary }}</time>
         </p>
@@ -64,9 +64,9 @@
 {% endblock %}
             
 {% block mainPanel %}
-  <h2 class="govuk-heading-l">About this plugin</h2>
+  <h2>About this plugin</h2>
 
-  <p class="govuk-body">{{ pluginDescription | default('No description has been provided.') }}</p>
+  <p>{{ pluginDescription | default('No description has been provided.') }}</p>
 
   {% if preparedPluginLinks.documentation %}
     <p class="feature-link__container"><a href="{{ preparedPluginLinks.documentation }}">How to use this plugin</a></p>

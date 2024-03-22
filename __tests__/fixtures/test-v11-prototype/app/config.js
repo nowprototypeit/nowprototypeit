@@ -1,6 +1,6 @@
 module.exports = {
   serviceName: 'Migrate test prototype',
-  baseExtensions: ['@nowprototypeit/govuk', 'govuk-prototype-kit'],
+  baseExtensions: ['govuk-prototype-kit', '@nowprototypeit/govuk'],
   port: '3010',
   useAuth: 'true',
   useAutoStoreData: 'true',

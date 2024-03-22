@@ -4,8 +4,8 @@
 {% block content %}
 
   {% include "plugins/includes/plugin-details-header.njk" %}
-  <div class="govuk-grid-row nowprototypeit-manage-prototype-plugin-processing">
-    <div class="govuk-grid-column-two-thirds">
+  <div class="nowprototypeit-manage-prototype-plugin-processing">
+    <div class="">
 
       {% set pluginHeaderPrefix = verb.progressiveTitle + " " %}
 
@@ -21,13 +21,13 @@
       {% if dependencyHeading %}
         <div id="dependency-heading">
 
-          <p class="govuk-notification-banner__heading">
+          <p class="notification-banner">
             {{ dependencyHeading }}
           </p>
 
           {% if relatedPlugins|length %}
             <div>
-              <ul class="govuk-list govuk-list--bullet">
+              <ul class="nowprototypeit-bullet-list">
                 {% for plugin in relatedPlugins %}
                   <li class="affected-plugin">{{ plugin.name }}{% if plugin.scope %} from {{ plugin.scope }} {% endif %}</li>
                 {% endfor %}
@@ -58,11 +58,11 @@
                 nameAndId: "plugin-action-button"
               }) }}
 
-              <a class="govuk-link" href="{{ cancelLink }}">Cancel {{ verb.para }}</a>
+              <a href="{{ cancelLink }}">Cancel {{ verb.para }}</a>
           </div>
         {% elseif not isSameOrigin %}
           <div id="plugin-action-confirmation">
-            <p class="govuk-body">
+            <p>
               Are you sure you want to {{ verb.para }} this plugin?
             </p>
             {{ nowPrototypeItSubmitButton({
@@ -72,7 +72,7 @@
           </div>
         {% endif %}
 
-        <div hidden class="panel-error govuk-panel govuk-panel--confirmation" id="panel-error">
+        <div hidden class="panel-error" id="panel-error">
           <p>
             There was a problem {{ verb.progressive }}
           </p>
@@ -85,10 +85,10 @@
 
         <div hidden class="" id="instructions-complete">
           <h3>Successfully {{ verb.status }} {{ plugin.name }}</h3>
-          <p class="govuk-body">
+          <p>
             If you are using Git you can commit this change.
           </p>
-          <p class="govuk-body">
+          <p>
             <a href="{{ returnLink.href }}">
               {{ returnLink.text }}
             </a>

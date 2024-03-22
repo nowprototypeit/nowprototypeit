@@ -2,4 +2,4 @@
 
 mkdir -p ~/projects/prototype-kits/now-prototype-it-govuk-companion &&
 rm -Rf ~/projects/prototype-kits/now-prototype-it-govuk-companion/* &&
-./bin/cli create --version=local ~/projects/prototype-kits/now-prototype-it-govuk-companion --use-njk-extensions
+./bin/cli create --version=local ~/projects/prototype-kits/now-prototype-it-govuk-companion

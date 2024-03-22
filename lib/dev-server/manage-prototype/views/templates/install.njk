@@ -4,19 +4,17 @@
 
 {% block beforeContent %}
   {{ super() }}
-  <a class="govuk-back-link" href="/manage-prototype/templates">Back</a>
+  <a href="/manage-prototype/templates">Back</a>
 {% endblock %}
 
 {% block content %}
 
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
       {% if error %}
         <p>There is a problem</p>
         {{ error }}
       {% endif %}
 
-      <h1 class="govuk-heading-l">{{ pageName }}</h1>
+      <h1>{{ pageName }}</h1>
 
       <form action="{{ currentUrl }}" method="post">
 
@@ -35,6 +33,4 @@
           nameAndId: 'create-page-from-template'
         }) }}
       </form>
-    </div>
-  </div>
 {% endblock %}

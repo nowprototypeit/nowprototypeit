@@ -1,9 +1,9 @@
 const fsp = require('fs').promises
 const { When, Then } = require('@cucumber/cucumber')
-const { expect, makeGetRequest } = require('./utils')
+const { expect, makeGetRequest, mediumActionTimeout } = require('./utils')
 const { By } = require('selenium-webdriver')
-const mediumActionTimeout = require('./utils')
 const path = require('path')
+const { sleep } = require('../../lib/utils')
 
 async function getTemplateList (browser) {
   await browser.openUrl('/manage-prototype/templates')
@@ -34,29 +34,39 @@ async function getTemplateList (browser) {
   }))
 }
 
-async function getTemplateInformation (browser, fromPluginName, createTemplateName) {
+async function getTemplateInformation (browser, fromPluginName, templateName, maxRetries = 0, delayBetweenRetries = 300) {
+  await sleep(2000)
   const templatesByPlugin = await getTemplateList(browser)
   const requestedPluginTemplates = templatesByPlugin.find(({ pluginName }) => pluginName === fromPluginName)
   if (!requestedPluginTemplates) {
+    if (maxRetries > 0) {
+      console.log('failed to get template [%s] from plugin [%s] because the plugin isn\'t installed.  Retrying up to [%s] more times.', templateName, fromPluginName, maxRetries)
+      await sleep(delayBetweenRetries)
+      return await getTemplateInformation(browser, fromPluginName, templateName, maxRetries - 1, delayBetweenRetries)
+    }
     const templatePluginNames = templatesByPlugin.map(({ pluginName }) => pluginName).join(', ')
     throw new Error(`Couldn't find templates from plugin [${fromPluginName}], available options are [${templatePluginNames}]`)
   }
-  const requestedTemplateRow = requestedPluginTemplates.templates.find(({ name }) => name === createTemplateName)
-  if (!requestedPluginTemplates) {
-    const templateNames = requestedPluginTemplates.map(({ pluginName }) => pluginName).join(', ')
-    throw new Error(`Couldn't find the template [${createTemplateName}] from plugin [${fromPluginName}], available options are [${templateNames}]`)
+  const requestedTemplateRow = requestedPluginTemplates.templates.find(({ name }) => name === templateName)
+  if (!requestedTemplateRow) {
+    if (maxRetries > 0) {
+      console.log('failed to get template [%s] from plugin [%s] because the template can\'t be found.  Retrying up to [%s] more times.', templateName, fromPluginName, maxRetries)
+      await sleep(delayBetweenRetries)
+      return await getTemplateInformation(browser, fromPluginName, templateName, maxRetries - 1, delayBetweenRetries)
+    }
+    throw new Error(`Couldn't find the template [${templateName}] from plugin [${fromPluginName}], available options are [${requestedPluginTemplates.templates.map(({ name }) => name)}]`)
   }
   return requestedTemplateRow
 }
 
 When('I preview the {string} template from the {string} plugin', mediumActionTimeout, async function (createTemplateName, fromPluginName) {
-  const x = await getTemplateInformation(this.browser, fromPluginName, createTemplateName)
+  const x = await getTemplateInformation(this.browser, fromPluginName, createTemplateName, 3)
   await x.viewButton.click()
 })
 
 When('I create a page at {string} using the {string} template from the {string} plugin', mediumActionTimeout, async function (newPageUrl, createTemplateName, fromPluginName) {
   const browser = this.browser
-  const requestedTemplateRow = await getTemplateInformation(browser, fromPluginName, createTemplateName)
+  const requestedTemplateRow = await getTemplateInformation(browser, fromPluginName, createTemplateName, 3)
   await requestedTemplateRow.createButton.click()
   const [formInput, submitButton, h1] = await Promise.all([
     browser.queryId('chosen-url'),
@@ -69,7 +79,18 @@ When('I create a page at {string} using the {string} template from the {string} 
 })
 
 async function expectH1ToBe (browser, headerText) {
-  const h1Text = await (await browser.queryTag('h1'))[0].getText()
+  const startDate = new Date()
+  let h1
+  while (!h1) {
+    h1 = await browser.queryTag('h1')
+    if (h1.length === 0) {
+      if (new Date() - startDate > 2000) {
+        throw new Error('Timed out waiting for h1 element to appear')
+      }
+      await sleep(100)
+    }
+  }
+  const h1Text = await h1[0].getText()
   ;(await expect(h1Text)).to.contain(headerText)
 }
 

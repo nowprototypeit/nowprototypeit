@@ -6,6 +6,7 @@
 
 {% block mainPanel %}
 
+
 {% set npm %}
     {{ nowPrototypeItTextInput({
         nameAndId: "npmPackage",
@@ -89,6 +90,6 @@
         ]
     }) }}
     {{ nowPrototypeItSubmitButton({text: "Lookup"}) }}
-    <input type="hidden" name="notFoundErrorUrl" value="/manage-prototype/plugins?error=plugin-lookup-no-results"/>
+    <input type="hidden" name="notFoundErrorUrl" value="/manage-prototype/plugins/lookup?error=plugin-lookup-no-results"/>
 </form>
 {% endblock %}

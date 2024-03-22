@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+### New Features
+
+ - Created a "variant" system alongside the plugin system, this allows authors to define how a new kit should be created
+ - Removed the remaining govuk-frontend specific code and added a new plugin to allow for the use of the `govuk-frontend` library (@nowprototypeit/govuk-frontend-adaptor)
+ - Improved watching when the user installs, updates or uninstalls a plugin using the command line while the kit is running
+ - Allowed plugins to specify related plugins which will shown the plugin discovery page
+ - Allowed plugins to specify "proxy config" for modules which can't manage their own plugin configuration
+ - Allowed plugins to specify "settings" which can be used as variables in SASS and Nunjucks 
+ - Always using `.njk` file extensions for nunjucks templates
+ - Always allowing GOV.UK Frontend to be uninstalled
+ - Always showing the plugin lookup
+ - Service Name is removed from the settings page as it's GOV.UK Frontend specific, in future this will be able to be added back in using plugin configuration
+ - Moved the file watchers onto their own thread to prevent blocking the main thread (this should make the kit feel more responsive)
+
 ## 0.1.0
 
 ### New Features

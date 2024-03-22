@@ -1,5 +1,5 @@
 const { Given, When, Then } = require('@cucumber/cucumber')
-const { kitStartTimeout, expect, pluginActionPageTimeout, pluginActionTimeout, timeoutMultiplier } = require('./utils')
+const { kitStartTimeout, expect, pluginActionPageTimeout, pluginActionTimeout, mediumActionTimeout, timeoutMultiplier } = require('./utils')
 const { By } = require('selenium-webdriver')
 const { exec } = require('../../lib/exec')
 const path = require('path')
@@ -23,13 +23,18 @@ When('I visit the installed plugins page', kitStartTimeout, async function () {
   await this.browser.openUrl('/manage-prototype/plugins/installed')
 })
 
-When('I visit the available plugins page', async function () {
+When('I visit the available plugins page', mediumActionTimeout, async function () {
   await this.browser.openUrl('/manage-prototype/plugins/discover')
 })
 
-Then('I should see the plugin {string} in the list', async function (pluginName) {
+Then('I should see the plugin {string} in the list', mediumActionTimeout, async function (pluginName) {
   const pluginDetails = await this.browser.getPluginDetails()
   ;(await expect(pluginDetails.map(({ name }) => name))).to.contain(pluginName)
+})
+
+Then('I should have no plugins installed', async function () {
+  const pluginDetails = await this.browser.getPluginDetails()
+  ;(await expect(pluginDetails.length)).to.equal(0)
 })
 
 Then('I should not see the plugin {string} in the list', async function (pluginName) {
@@ -108,7 +113,7 @@ When('I uninstall the {string} plugin using the console', pluginActionPageTimeou
 })
 
 When('I should be informed that {string} will also be installed', async function (pluginName) {
-  const $bannerHeading = (await this.browser.queryClass('govuk-notification-banner__heading'))[0]
+  const $bannerHeading = (await this.browser.queryClass('notification-banner'))[0]
   if ($bannerHeading) {
     ;(await expect((await $bannerHeading.getText()).trim())).to.eq('To update this plugin, you also need to install another plugin')
   }

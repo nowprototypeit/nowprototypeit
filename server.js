@@ -15,7 +15,7 @@ const { expressNunjucks, getNunjucksAppEnv, stopWatchingNunjucks } = require('./
 dotenv.config()
 
 // Local dependencies
-const { projectDir, appViewsDir, finalBackupNunjucksDir } = require('./lib/utils/paths')
+const { projectDir, appViewsDir } = require('./lib/utils/paths')
 const config = require('./lib/config.js').getConfig()
 const packageJson = require('./package.json')
 const utils = require('./lib/utils')
@@ -39,6 +39,7 @@ if (isSecure) {
 
 // Add variables that are available in all views
 app.locals.asset_path = '/public/'
+app.locals.managePrototypeUrl = '/manage-prototype'
 app.locals.useAutoStoreData = config.useAutoStoreData
 app.locals.releaseVersion = 'v' + releaseVersion
 app.locals.isRunningInPrototypeKit = true
@@ -48,10 +49,12 @@ app.locals.pluginConfig = plugins.getAppConfig({
   scripts: utils.prototypeAppScripts
 })
 
-utils.addGovukFrontendSpecificValuesToAppLocalSync(app.locals)
-
 plugins.getNunjucksVariables().forEach(({ key, value }) => {
   app.locals[key] = value
+})
+
+plugins.getAppLocalModifiers().forEach(item => {
+  console.log('modifier', item)
 })
 
 // Support session data storage
@@ -59,10 +62,6 @@ app.use(sessionUtils.getSessionMiddleware())
 
 // use cookie middleware for reading authentication cookie
 app.use(cookieParser())
-
-// Authentication middleware must be loaded before other middleware such as
-// static assets to prevent unauthorised access
-app.use(require('./lib/authentication.js')())
 
 const nunjucksConfig = {
   autoescape: true,
@@ -78,7 +77,7 @@ nunjucksConfig.express = app
 
 // but uses the internal package as a backup if uninstalled
 const nunjucksAppEnv = getNunjucksAppEnv(
-  plugins.getAppViews([appViewsDir, finalBackupNunjucksDir])
+  plugins.getAppViews([appViewsDir])
 )
 
 expressNunjucks(nunjucksAppEnv, app)

@@ -1,6 +1,6 @@
 <p>You can use the <a href="/manage-prototype" class="nowprototypeit-focus-link">management pages</a> to:</p>
 
-<ul class="nowprototypeit-bullet-list">
+<ul class="nowprototypeit-bullet-list {{ nowPrototypeItListAdditionalClasses }}">
   <li>
     Install, uninstall, and update plugins in <a href="/manage-prototype/plugins" class="nowprototypeit-focus-link">the plugin pages</a>
   </li>
@@ -12,9 +12,12 @@
   </li>
 </ul>
 
+{% if isRunningFromManagePrototype %}
 <p>You can replace this page with your own by adding an "<strong>index.{{ defaultViewExtension }}</strong>" file in "<strong>app/views</strong>", you can also do this
   <a href="/manage-prototype/templates" class="nowprototypeit-focus-link">by using a template</a> and using the path "<strong>/index</strong>".</p>
-
+{% else %}
+  <p>You can update this page, it's in your prototype kit at <strong>app/views/index.njk</strong> or <strong>app/views/index.html</strong>.</p>
+{% endif %}
 {% macro showPage(page) %}
   <li class="nowprototypeit-page-item"><a href="{{ page.url }}" class="nowprototypeit-page-link"
     >{{ page.name }}</a>{% if page.children %}{{ showPages(page.children) }}{% endif %}</li>

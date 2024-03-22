@@ -1,63 +1,55 @@
 {% extends "layouts/manage-prototype.njk" %}
 
 {% block content %}
-
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds-from-desktop">
-      <div class="govuk-!-margin-bottom-8">
-        <h1 class="govuk-heading-l">
-          Manage your prototype
-        </h1>
-        <p class="nowprototypeit-manage-prototype-version">
-          Now Prototype It - GOV.UK Kit {{ releaseVersion }}
-        </p>
-        {% if kitUpdateAvailable %}
-          <p>
-            <a href="{{ latestKitUrl }}">
-              New version available: v{{ latestAvailableKit }}
-            </a>
-          </p>
-        {% endif %}
-      </div>
-
-      {% if messages.length > 0 %}
-        <h2 class="govuk-heading-m">
-          Messages from the Now Prototype It Team:
-        </h2>
-        <ul class="nowprototypeit-manage-prototype-messages nowprototypeit-bullet-list">
-          {% for message in messages %}
-          <li class="nowprototypeit-manage-prototype-messages__item">
-            {% if message.html %}
-              {{ message.html | safe }}
-            {% elseif message.url %}
-              <a href="{{ message.url }}">{{ message.text }}</a>
-            {% else %}
-              {{ message.text }}
-            {% endif %}
-          </li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-
-      {% if tasks.length > 0 %}
-        <h2 class="govuk-heading-m">
-          Start a new prototype
-        </h2>
-        <ul class="nowprototypeit-manage-prototype-task-list__items nowprototypeit-manage-prototype-task-list__items">
-          {% for task in tasks %}
-          <li class="nowprototypeit-manage-prototype-task-list__item">
-          <span class="nowprototypeit-manage-prototype-task-list__task-name">
-            {{ task.html | safe }}
-          </span>
-            <strong class="govuk-tag nowprototypeit-manage-prototype-govuk-tag nowprototypeit-manage-prototype-task-list__tag">
-              {% if task.done %}Done{% else %}To do{% endif %}
-            </strong>
-          </li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-
-    </div>
+  <h1>
+    Manage your prototype
+  </h1>
+  <p class="nowprototypeit-manage-prototype-version">
+    Now Prototype It - GOV.UK Kit {{ releaseVersion }}
+  </p>
+  {% if kitUpdateAvailable %}
+    <p>
+      <a href="{{ latestKitUrl }}">
+        New version available: v{{ latestAvailableKit }}
+      </a>
+    </p>
+  {% endif %}
   </div>
+
+  {% if messages.length > 0 %}
+    <h2>
+      Messages from the Now Prototype It Team:
+    </h2>
+    <ul class="nowprototypeit-manage-prototype-messages nowprototypeit-bullet-list">
+      {% for message in messages %}
+        <li class="nowprototypeit-manage-prototype-messages__item">
+          {% if message.html %}
+            {{ message.html | safe }}
+          {% elseif message.url %}
+            <a href="{{ message.url }}">{{ message.text }}</a>
+          {% else %}
+            {{ message.text }}
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  {% macro showPage(page) %}
+    <li class="nowprototypeit-page-item"><a href="{{ page.url }}" class="nowprototypeit-page-link"
+      >{{ page.name }}</a>{% if page.children %}{{ showPages(page.children) }}{% endif %}</li>
+  {% endmacro %}
+  {% macro showPages(pages) %}
+    {% if pages.length > 0 %}
+      <ul class="nowprototypeit-bullet-list">
+        {% for page in pages %}
+          {{ showPage(page) }}
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endmacro %}
+  {% if foundPages | length > 0 %}
+    <h2>You have the following pages in your prototype:</h2>
+    {{ showPages(foundPages) }}
+  {% endif %}
 
 {% endblock %}

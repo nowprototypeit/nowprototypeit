@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{% block pageTitle %}{% endblock %}</title>
+  {% include "prototype-core/includes/stylesheets.njk" %}
+</head>
+<body>
+{% block content %}{% endblock %}
+{% include "prototype-core/includes/scripts.njk" %}
+</body>
+</html>

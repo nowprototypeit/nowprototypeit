@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 const os = require('node:os')
-const path = require("node:path");
+const path = require('node:path')
 const fsp = require('node:fs').promises
 
-const execTools = require("../lib/exec");
+const execTools = require('../lib/exec')
 
 const branchName = process.argv[2] && process.argv[2] !== '--dry-run' ? process.argv[2] : 'main'
 
@@ -13,10 +13,9 @@ const isDryRun = process.argv.includes('--dry-run')
 const wait = time => new Promise((resolve) => setTimeout(resolve, time))
 
 ;(async () => {
-
   const tmpDir = await mkTmpDir()
   console.log('tmpDir:', tmpDir)
-  const kitDir = path.join(tmpDir, 'govuk');
+  const kitDir = path.join(tmpDir, 'govuk')
   await exec('git clone git@github.com:nowprototypeit/govuk.git', {
     cwd: tmpDir
   })
@@ -28,6 +27,9 @@ const wait = time => new Promise((resolve) => setTimeout(resolve, time))
     cwd: kitDir
   })
   await exec('npm install', {
+    cwd: kitDir
+  })
+  await exec('npm run lint', {
     cwd: kitDir
   })
   await exec('npm run build:destructive', {
@@ -45,13 +47,13 @@ const wait = time => new Promise((resolve) => setTimeout(resolve, time))
   await updateChangelogAndPublish(kitDir)
 })()
 
-async function mkTmpDir() {
+async function mkTmpDir () {
   const tmpDir = path.join(os.tmpdir(), 'now-prototype-it', 'release', '' + Date.now())
-  await fsp.mkdir(tmpDir, {recursive: true})
+  await fsp.mkdir(tmpDir, { recursive: true })
   return tmpDir
 }
 
-async function execAndCaptureStdout(command, options) {
+async function execAndCaptureStdout (command, options) {
   let stdout = ''
   await exec(command, {
     ...options,
@@ -64,14 +66,14 @@ async function execAndCaptureStdout(command, options) {
   return stdout.trim()
 }
 
-async function execWithStdio(command, options) {
+async function execWithStdio (command, options) {
   await exec(command, {
     ...options,
     stdio: 'inherit'
   })
 }
 
-async function execAndPrintStdout(command, options) {
+async function execAndPrintStdout (command, options) {
   await exec(command, options, (data) => {
     process.stdout.write(data.toString())
   }, (data) => {
@@ -79,7 +81,7 @@ async function execAndPrintStdout(command, options) {
   })
 }
 
-async function exec(command, options) {
+async function exec (command, options) {
   console.log('running command:', command)
   const result = execTools.execv2(command, {
     passThroughEnv: true,
@@ -88,8 +90,8 @@ async function exec(command, options) {
   await result.finishedPromise
 }
 
-async function runBrowserTests(dependency) {
-  await exec('npm run test:browser:all', {
+async function runBrowserTests (dependency) {
+  await exec('npm run test:browser:all -- --retry=2', {
     env: {
       ...process.env,
       TEST_KIT_DEPENDENCY: dependency,
@@ -99,16 +101,16 @@ async function runBrowserTests(dependency) {
   })
 }
 
-function findIndexOfFirstMatchingLine(changelogLines, regExp) {
+function findIndexOfFirstMatchingLine (changelogLines, regExp) {
   return changelogLines
     .map((x, index) => x.match(regExp) ? index : undefined)
     .filter(x => x !== undefined)
     .at(0)
 }
 
-async function updateChangelogAndPublish(kitDir) {
+async function updateChangelogAndPublish (kitDir) {
   const changelogPath = path.join(kitDir, 'CHANGELOG.md')
-  const standardExecOptions = {cwd: kitDir}
+  const standardExecOptions = { cwd: kitDir }
   try {
     await fsp.access(changelogPath)
   } catch (e) {
@@ -165,7 +167,7 @@ async function updateChangelogAndPublish(kitDir) {
 
   await execAndPrintStdout(`git checkout -b ${branchName}`, standardExecOptions)
 
-  await execAndPrintStdout('git commit -am "Updated changelog automatically."', standardExecOptions)
+  await execAndPrintStdout(`git commit -am "Preparing for release ${newVersion}."`, standardExecOptions)
 
   if (isDryRun) {
     console.log('Dry run, skipping push and release.')
@@ -182,7 +184,7 @@ async function updateChangelogAndPublish(kitDir) {
 
   do {
     await wait(2000)
-    const output = await execAndCaptureStdout('npm whoami', {allowStderr: true, allowErrorCode: true, hideStd: true})
+    const output = await execAndCaptureStdout('npm whoami', { allowStderr: true, allowErrorCode: true, hideStd: true })
     if ((output || '').trim() === correctNpmUser) {
       loggedInAsCorrectNpmUser = true
     } else if (output) {
@@ -198,6 +200,15 @@ async function updateChangelogAndPublish(kitDir) {
     command: 'gh',
     args: ['release', 'create', `v${newVersion}`, '--notes-file', prBodyFile, '--target', branchName, '--title', `v${newVersion}`, '--latest']
   }, standardExecOptions)
+
+  await exec(`git checkout main && git checkout -b post-${branchName}`, standardExecOptions)
+  await exec(`git cherry-pick post-${branchName}`, standardExecOptions)
+  await exec(`git push -u origin post-${branchName}`, standardExecOptions)
+
+  await execAndPrintStdout({
+    command: 'gh',
+    args: ['pr', 'create', '--base', 'main', '--head', `post-${branchName}`, '--title', `Post release ${newVersion}.`, '--body', 'Post release PR.']
+  })
 }
 
 async function checkForUnpublishedDependencies (kitDir) {

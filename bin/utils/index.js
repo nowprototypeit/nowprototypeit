@@ -5,12 +5,17 @@ const fse = require('fs-extra')
 const packageJsonFormat = { encoding: 'utf8', spaces: 2 }
 
 async function npmInstall (cwd, dependencies) {
+  if (dependencies.length === 0) {
+    return
+  }
   dependencies.push('--save-exact')
+  const args = [
+    'install',
+    ...dependencies
+  ]
+
   return spawn(
-    'npm', [
-      'install',
-      ...dependencies
-    ], {
+    'npm', args, {
       cwd,
       stderr: 'inherit'
     })
