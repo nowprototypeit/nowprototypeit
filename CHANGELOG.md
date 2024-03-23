@@ -4,8 +4,10 @@
 
 ## New Features
 
- - The project is now called "nowprototypeit" rather than "@nowprototypeit/govuk" as all references to GOV.UK have been removed, the same behaviour can be achieved by using the `@nowprototypeit/govuk-frontend-adaptor` variant
- - Variant inheritance is now (theoretically) infinitely deep, any variant you inherit from is installed and then used as the base for your variant  
+- The project is now called "nowprototypeit" rather than "@nowprototypeit/govuk" as all references to GOV.UK have been removed, the same behaviour can be achieved by using the `@nowprototypeit/govuk-frontend-adaptor` variant
+- Variant inheritance is now (theoretically) infinitely deep, any variant you inherit from is installed and then used as the base for your variant
+
+## 0.3.0
 
 ## Fixes
 
