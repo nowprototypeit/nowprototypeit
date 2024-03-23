@@ -15,6 +15,20 @@ Then('the body background color should become {string}', styleBuildTimeout, asyn
   })
 })
 
+Then('the first paragraph margin top should become {string}', styleBuildTimeout, async function (expectedMarginTop) {
+  let marginTop
+  await waitForConditionToBeMet(styleBuildTimeout, async () => {
+    const firstParagraph = (await this.browser.queryTag('p'))[0]
+    if (!firstParagraph) {
+      throw new Error('Could not find first paragraph')
+    }
+    marginTop = await firstParagraph.getCssValue('margin-top')
+    return marginTop === expectedMarginTop
+  }, (reject) => {
+    return reject(new Error(`Gave up waiting for margin-top [${marginTop}] to become equal to [${expectedMarginTop}]`))
+  })
+})
+
 Then('I should see the crown icon in the footer', mediumActionTimeout, async function () {
   await makeSureBackgroundImageCanBeLoaded(this.browser, (await this.browser.queryClass('govuk-footer__copyright-logo'))[0], this.kit.dir, mediumActionTimeout.timeout)
 })

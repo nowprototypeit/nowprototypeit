@@ -1,4 +1,4 @@
-## Changelog
+# Changelog
 
 ## Unreleased
 
@@ -12,6 +12,11 @@
  - The work done on variants now works on Windows
  - Now that we have a new Github repository that's not a fork we can run the CI tests, they've highlighted a few issues which have been resolved, and they'll continue to run to make sure similar issues don't creep in
  - Removed unused dependencies and redefined test dependencies as such
+
+### New Features
+ - Allowing plugins to provide settings which can be updated by the user in the Management Pages
+ - Allowing hierarchical nunjucks variables from plugin settings
+ - Allowing more styling classes for homepage content
 
 ## 0.2.0
 

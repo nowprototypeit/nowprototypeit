@@ -240,6 +240,9 @@ async function getBrowser (config = {}) {
     queryTag: async (tag) => {
       return await driver.findElements(By.tagName(tag))
     },
+    queryAttribute: async (attrName, attrValue) => {
+      return await driver.findElements(By.xpath(`//*[@${attrName}="${attrValue}"]`))
+    },
     setWindowSizeToPageSize: async () => {
       try {
         const height = await driver.executeScript('return document.body.parentNode.scrollHeight')

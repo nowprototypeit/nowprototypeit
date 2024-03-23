@@ -76,6 +76,14 @@ When('I visit {string}', standardTimeout, async function (url) {
   await this.browser.openUrl(url)
 })
 
+When('I wait for the prototype to reload', mediumActionTimeout, async function () {
+  await new Promise((resolve) => {
+    this.kit.addNextKitRestartListener(() => {
+      resolve()
+    })
+  })
+})
+
 When('I delete the file {string}', standardTimeout, async function (relativeFilePath) {
   const filePath = path.join(this.kit.dir, relativeFilePath)
   await fsp.rm(filePath)
