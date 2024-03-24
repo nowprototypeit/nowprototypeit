@@ -21,6 +21,7 @@ if (process.argv.indexOf('--suppress-node-version-warning') === -1 || (process.a
 
 const path = require('path')
 
+const fs = require('fs')
 const fse = require('fs-extra')
 const { spawn, fork } = require('../lib/exec')
 const { parse } = require('./utils/argv-parser')
@@ -28,6 +29,7 @@ const { verboseLogger, progressLogger } = require('./utils/loggers')
 const { npmInstall } = require('./utils')
 const { projectDir } = require('../lib/utils/paths')
 const { validatePlugin } = require('../lib/plugins/plugin-validator')
+const { flattenArray } = require('../lib/utils/arrayTools')
 
 // Avoid requiring any kit server code at the top-level as we might want to
 // change environment variables below.
@@ -224,8 +226,63 @@ function getModelFromTree (inheritanceTree, key) {
   return output
 }
 
-function getVariantNameFromInheritsFrom (variantFile) {
-  return (variantFile.inheritFrom || []).map(name => name === '@nowprototypeit/govuk' ? 'nowprototypeit' : name)
+function getVariantNameFromInheritsFrom (variantFileObj) {
+  return (variantFileObj?.inheritFrom || []).map(name => name === '@nowprototypeit/govuk' ? 'nowprototypeit' : name)
+}
+
+async function ensureVariantInheritancePackagesAreInstalled () {
+  const previousModulePaths = []
+  const queue = []
+
+  function getModulePath (moduleName) {
+    return path.join(projectDir, 'node_modules', moduleName)
+  }
+
+  function addToQueue (config) {
+    if (!config.name) {
+      throw new Error('No name provided for variant lookup, this is probably deeper inside the inheritance tree.')
+    }
+    if (queue.some(({ queuedName }) => queuedName === config.name)) {
+      return
+    }
+    if (previousModulePaths.some(previousPath => previousPath === config.modulePath)) {
+      return
+    }
+    queue.push(config)
+  }
+
+  addToQueue({
+    name: getVariantName(),
+    modulePath: getModulePath(getVariantName())
+  })
+  while (queue.length > 0) {
+    const nextVariant = queue.shift()
+    previousModulePaths.push(nextVariant.modulePath)
+    if (!fs.existsSync(nextVariant.modulePath)) {
+      await npmInstall(projectDir, [nextVariant.name])
+    }
+    const filePath = path.join(nextVariant.modulePath, 'now-prototype-it.variant.json')
+    if (!fs.existsSync(filePath)) {
+      const errorMessage = `The variant ${nextVariant.name} does not contain a now-prototype-it.variant.json file`
+      console.error('')
+      console.error(errorMessage)
+      console.error('')
+      throw new Error(errorMessage)
+    }
+    const variantFileObj = await fse.readJson(filePath).catch(() => undefined)
+    if (!variantFileObj) {
+      const errorMessage = `The variant ${nextVariant.name} does not contain a valid now-prototype-it.variant.json file`
+      console.error('')
+      console.error(errorMessage)
+      console.error('')
+      throw new Error(errorMessage)
+    }
+    const inheritsFrom = getVariantNameFromInheritsFrom(variantFileObj['version-2024-03'])
+    inheritsFrom.forEach(name => addToQueue({
+      name,
+      modulePath: getModulePath(name)
+    }))
+  }
 }
 
 async function buildVariantDefinition () {
@@ -237,16 +294,18 @@ async function buildVariantDefinition () {
     throw new Error('Variant file does not contain an appropriate version key.  The only acceptable version at this time is "version-2024-03"')
   }
 
-  const variantFile = await readVariantFile(getVariantName())
+  async function getInheritanceTreeRecursive (variantName) {
+    const variantFile = await readVariantFile(variantName)
 
-  const inheritanceTree = await Promise.all(getVariantNameFromInheritsFrom(variantFile).map(async name => ({
-    name,
-    variantFile: await readVariantFile(name)
-  })))
-  inheritanceTree.unshift({
-    name: getVariantName(),
-    variantFile
-  })
+    const inheritanceTree = flattenArray(await Promise.all(getVariantNameFromInheritsFrom(variantFile).map(async name => getInheritanceTreeRecursive(name))))
+    inheritanceTree.unshift({
+      name: variantName,
+      variantFile
+    })
+    return inheritanceTree
+  }
+
+  const inheritanceTree = await getInheritanceTreeRecursive(getVariantName())
 
   const variantDefinition = {}
 
@@ -265,8 +324,6 @@ async function buildVariantDefinition () {
     argv: getArgumentsToPassThrough()
   }))
 
-  console.log('variant definition', variantDefinition)
-
   return variantDefinition
 }
 
@@ -281,6 +338,9 @@ async function runInit () {
   }
 
   const installLocation = getInstallLocation()
+
+  await ensureVariantInheritancePackagesAreInstalled(installLocation)
+
   const variantDefinition = await buildVariantDefinition()
 
   await npmInstall(installLocation, variantDefinition.dependencies)
@@ -291,7 +351,11 @@ async function runInit () {
 
   while (variantDefinition.jsScripts.length > 0) {
     const command = variantDefinition.jsScripts.shift()
-    const scriptProcess = fork(command.script, command.argv, { cwd: installLocation, env: { ...process.env }, stdio: 'inherit' })
+    const scriptProcess = fork(command.script, command.argv, {
+      cwd: installLocation,
+      env: { ...process.env },
+      stdio: 'inherit'
+    })
     await scriptProcess.finishedPromise
   }
 }
