@@ -21,13 +21,15 @@ if (process.argv.indexOf('--suppress-node-version-warning') === -1 || (process.a
 
 const path = require('path')
 
+const fs = require('fs')
 const fse = require('fs-extra')
-const { spawn, fork } = require('../lib/exec')
+const { spawn, fork, execv2 } = require('../lib/exec')
 const { parse } = require('./utils/argv-parser')
 const { verboseLogger, progressLogger } = require('./utils/loggers')
 const { npmInstall } = require('./utils')
 const { projectDir } = require('../lib/utils/paths')
 const { validatePlugin } = require('../lib/plugins/plugin-validator')
+const { flattenArray } = require('../lib/utils/arrayTools')
 
 // Avoid requiring any kit server code at the top-level as we might want to
 // change environment variables below.
@@ -224,8 +226,83 @@ function getModelFromTree (inheritanceTree, key) {
   return output
 }
 
-function getVariantNameFromInheritsFrom (variantFile) {
-  return (variantFile.inheritFrom || []).map(name => name === '@nowprototypeit/govuk' ? 'nowprototypeit' : name)
+function getVariantNameFromInheritsFrom (variantFileObj) {
+  return (variantFileObj?.inheritFrom || []).map(name => name === '@nowprototypeit/govuk' ? 'nowprototypeit' : name)
+}
+
+async function ensureVariantInheritancePackagesAreInstalled () {
+  const previousModulePaths = []
+  const queue = []
+
+  function getModulePath (moduleName) {
+    return path.join(projectDir, 'node_modules', moduleName)
+  }
+
+  function addToQueue (config) {
+    if (!config.name) {
+      console.log('skipping because name is empty')
+      return
+    }
+    if (queue.some(({ queuedName }) => queuedName === config.name)) {
+      console.log('returning early because item is already queued')
+      return
+    }
+    if (previousModulePaths.some(previousPath => previousPath === config.modulePath)) {
+      console.log('returning early because item is already looked up')
+      return
+    }
+    console.log('queuing', config)
+    queue.push(config)
+  }
+
+  addToQueue({
+    name: getVariantName(),
+    modulePath: getModulePath(getVariantName())
+  })
+  while (queue.length > 0) {
+    const nextVariant = queue.shift()
+    console.log('nextVariant', nextVariant)
+    previousModulePaths.push(nextVariant.modulePath)
+    console.log('checking', nextVariant.modulePath)
+    if (!fs.existsSync(nextVariant.modulePath)) {
+      console.log('not installed, installing')
+      await execv2({
+        command: 'npm',
+        args: [
+          'install',
+          nextVariant.name
+        ]
+      }).finishedPromise
+    }
+    console.log('installed already')
+    const filePath = path.join(nextVariant.modulePath, 'now-prototype-it.variant.json')
+    console.log('checking variant file', filePath)
+    if (!fs.existsSync(filePath)) {
+      console.log('no variant file')
+      const errorMessage = `The variant ${nextVariant.name} does not contain a now-prototype-it.variant.json file`
+      console.error('')
+      console.error(errorMessage)
+      console.error('')
+      throw new Error(errorMessage)
+    }
+    console.log('File exists')
+    const variantFileObj = await fse.readJson(filePath).catch(() => undefined)
+    console.log('variantFileObj', variantFileObj)
+    if (!variantFileObj) {
+      const errorMessage = `The variant ${nextVariant.name} does not contain a valid now-prototype-it.variant.json file`
+      console.error('')
+      console.error(errorMessage)
+      console.error('')
+      throw new Error(errorMessage)
+    }
+    const inheritsFrom = getVariantNameFromInheritsFrom(variantFileObj['version-2024-03'])
+    console.log('inheritsFrom', inheritsFrom)
+    inheritsFrom.forEach(name => addToQueue({
+      name,
+      modulePath: getModulePath(name)
+    }))
+  }
+  console.log('finished, all inheritFroms are installed')
 }
 
 async function buildVariantDefinition () {
@@ -237,20 +314,24 @@ async function buildVariantDefinition () {
     throw new Error('Variant file does not contain an appropriate version key.  The only acceptable version at this time is "version-2024-03"')
   }
 
-  const variantFile = await readVariantFile(getVariantName())
+  async function getInheritanceTreeRecursive (variantName) {
+    const variantFile = await readVariantFile(variantName)
 
-  const inheritanceTree = await Promise.all(getVariantNameFromInheritsFrom(variantFile).map(async name => ({
-    name,
-    variantFile: await readVariantFile(name)
-  })))
-  inheritanceTree.unshift({
-    name: getVariantName(),
-    variantFile
-  })
+    const inheritanceTree = flattenArray(await Promise.all(getVariantNameFromInheritsFrom(variantFile).map(async name => getInheritanceTreeRecursive(name))))
+    inheritanceTree.unshift({
+      name: variantName,
+      variantFile
+    })
+    return inheritanceTree
+  }
+
+  const inheritanceTree = await getInheritanceTreeRecursive(getVariantName())
 
   const variantDefinition = {}
 
   const nodeModulesDir = path.join(projectDir, 'node_modules')
+
+  console.log('inheritance tree', inheritanceTree)
 
   variantDefinition.dependencies = getModelFromTree(inheritanceTree, 'installedPackages').map(({ value }) => value)
   variantDefinition.dirsToCopy = getModelFromTree(inheritanceTree, 'starterFileDirectories').map(({
@@ -281,6 +362,9 @@ async function runInit () {
   }
 
   const installLocation = getInstallLocation()
+
+  await ensureVariantInheritancePackagesAreInstalled(installLocation)
+
   const variantDefinition = await buildVariantDefinition()
 
   await npmInstall(installLocation, variantDefinition.dependencies)
@@ -291,7 +375,11 @@ async function runInit () {
 
   while (variantDefinition.jsScripts.length > 0) {
     const command = variantDefinition.jsScripts.shift()
-    const scriptProcess = fork(command.script, command.argv, { cwd: installLocation, env: { ...process.env }, stdio: 'inherit' })
+    const scriptProcess = fork(command.script, command.argv, {
+      cwd: installLocation,
+      env: { ...process.env },
+      stdio: 'inherit'
+    })
     await scriptProcess.finishedPromise
   }
 }
