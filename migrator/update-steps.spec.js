@@ -314,10 +314,10 @@ ${mainFileContents}`
   return filters
 }
 `
-    const starterFileContents = `const govukPrototypeKit = require('@nowprototypeit/govuk')
+    const starterFileContents = `const govukPrototypeKit = require('nowprototypeit')
 const addFilter = govukPrototypeKit.views.addFilter
 `
-    const expectedFileContents = `const govukPrototypeKit = require('@nowprototypeit/govuk')
+    const expectedFileContents = `const govukPrototypeKit = require('nowprototypeit')
 const addFilter = govukPrototypeKit.views.addFilter
 
   var filters = {}

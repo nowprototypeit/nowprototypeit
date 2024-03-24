@@ -3,7 +3,7 @@
 // https://docs.nowprototype.it/__VERSION__/nunjucks/filters
 //
 
-const prototypeCore = require('@nowprototypeit/govuk')
+const prototypeCore = require('nowprototypeit')
 const addFilter = prototypeCore.views.addFilter
 
 // Add your filters here

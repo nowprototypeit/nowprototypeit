@@ -112,7 +112,7 @@ async function startKit (config = {}) {
   })
 
   const kitPort = await findAvailablePort()
-  const pathToCli = path.join(dir, 'node_modules', '@nowprototypeit', 'govuk', 'bin', 'cli')
+  const pathToCli = path.join(dir, 'node_modules', 'nowprototypeit', 'bin', 'cli')
   if (!fs.existsSync(pathToCli)) {
     throw new Error('Could not find the CLI at ' + pathToCli)
   }

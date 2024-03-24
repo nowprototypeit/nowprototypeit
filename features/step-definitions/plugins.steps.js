@@ -3,6 +3,7 @@ const { kitStartTimeout, expect, pluginActionPageTimeout, pluginActionTimeout, m
 const { By } = require('selenium-webdriver')
 const { exec } = require('../../lib/exec')
 const path = require('path')
+const { sleep } = require('../../lib/utils')
 
 Given('I have the {string} \\({string}\\) plugin installed', pluginActionPageTimeout, async function (pluginName, pluginRef) {
   await this.browser.openUrl('/manage-prototype/plugins')
@@ -71,14 +72,26 @@ async function waitForPluginInstallUpdateOrUninstall (browser) {
   }, pluginActionPageTimeout.timeout)
 }
 
-const visitPluginPageAndRunAction = async (browser, pluginRef, buttonId, expectToWaitForAction) => {
-  await browser.openUrl(`/manage-prototype/plugin/${encodeURIComponent(pluginRef)}`)
+async function getActionButton (browser, pluginRef, buttonId, timeout) {
+  const start = Date.now()
   let uninstallButton
-  try {
-    uninstallButton = await browser.queryId(buttonId)
-  } catch (e) {
+
+  while (uninstallButton === undefined && (start + timeout) > Date.now()) {
+    await sleep(100)
+    await browser.openUrl(`/manage-prototype/plugin/${encodeURIComponent(pluginRef)}`)
+    try {
+      uninstallButton = await browser.queryId(buttonId)
+    } catch (e) {
+    }
+  }
+  if (!uninstallButton) {
     throw new Error(`There is no [${buttonId}] button for plugin [${pluginRef}]`)
   }
+  return uninstallButton
+}
+
+const visitPluginPageAndRunAction = async (browser, pluginRef, buttonId, expectToWaitForAction) => {
+  const uninstallButton = await getActionButton(browser, pluginRef, buttonId, pluginActionTimeout.timeout / 3)
   await uninstallButton.click()
   if (expectToWaitForAction) {
     await waitForPluginInstallUpdateOrUninstall(browser)

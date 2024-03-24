@@ -29,15 +29,14 @@ audit=false
 
 const packageJson = {
   scripts: {
-    dev: 'now-prototype-it-govuk dev || npx -y @nowprototypeit/govuk@latest failed-to-launch dev $?',
-    serve: 'now-prototype-it-govuk serve || npx -y @nowprototypeit/govuk@latest failed-to-launch serve $?',
-    start: 'now-prototype-it-govuk start || npx -y @nowprototypeit/govuk@latest failed-to-launch start $?'
+    dev: 'nowprototypeit dev || npx -y nowprototypeit@latest failed-to-launch dev $?',
+    serve: 'nowprototypeit serve || npx -y nowprototypeit@latest failed-to-launch serve $?',
+    start: 'nowprototypeit start || npx -y nowprototypeit@latest failed-to-launch start $?'
 
   }
 }
 
 const installDirectory = process.cwd()
-const appViewsDir = path.join(installDirectory, 'app', 'views')
 
 ;(async () => {
   async function updatePackageJson (packageJsonPath) {

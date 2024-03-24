@@ -22,7 +22,7 @@ if (process.argv.indexOf('--suppress-node-version-warning') === -1 || (process.a
 const path = require('path')
 
 const fse = require('fs-extra')
-const { spawn, exec } = require('../lib/exec')
+const { spawn, fork } = require('../lib/exec')
 const { parse } = require('./utils/argv-parser')
 const { verboseLogger, progressLogger } = require('./utils/loggers')
 const { npmInstall } = require('./utils')
@@ -56,7 +56,7 @@ function displaySuccessMessage () {
 }
 
 function usage () {
-  const prog = 'npx @nowprototypeit/govuk'
+  const prog = 'nowprototypeit'
   console.log(`
 ${prog} <command>
 
@@ -86,7 +86,7 @@ function getInstallLocation () {
 }
 
 function getChosenKitDependency () {
-  const defaultValue = '@nowprototypeit/govuk'
+  const defaultValue = 'nowprototypeit'
   const versionRequested = argv.options.version || argv.options.v
 
   if (!versionRequested) {
@@ -171,7 +171,7 @@ async function runCreate () {
 
   progressLogger('Setting up your prototype')
 
-  await spawn('npx', ['-y', 'now-prototype-it-govuk', 'init', '--running-within-create-script', installDirectory, `--created-from-version=${kitVersion}`, ...(getArgumentsToPassThrough()), '--suppress-node-version-warning'], {
+  await spawn('npx', ['-y', 'nowprototypeit', 'init', '--running-within-create-script', installDirectory, `--created-from-version=${kitVersion}`, ...(getArgumentsToPassThrough()), '--suppress-node-version-warning'], {
     cwd: installDirectory,
     stdio: 'inherit'
   })
@@ -188,7 +188,7 @@ function getVariantName (fallback = true) {
     return argv.options.variant
   }
   if (fallback) {
-    return '@nowprototypeit/govuk'
+    return 'nowprototypeit'
   }
   return undefined
 }
@@ -224,6 +224,10 @@ function getModelFromTree (inheritanceTree, key) {
   return output
 }
 
+function getVariantNameFromInheritsFrom (variantFile) {
+  return (variantFile.inheritFrom || []).map(name => name === '@nowprototypeit/govuk' ? 'nowprototypeit' : name)
+}
+
 async function buildVariantDefinition () {
   async function readVariantFile (variantName) {
     const variantFileObj = await fse.readJson(path.join(projectDir, 'node_modules', variantName, 'now-prototype-it.variant.json'))
@@ -234,7 +238,10 @@ async function buildVariantDefinition () {
   }
 
   const variantFile = await readVariantFile(getVariantName())
-  const inheritanceTree = await Promise.all((variantFile.inheritFrom || []).map(async name => ({
+
+  console.log('variant file', variantFile)
+
+  const inheritanceTree = await Promise.all(getVariantNameFromInheritsFrom(variantFile).map(async name => ({
     name,
     variantFile: await readVariantFile(name)
   })))
@@ -252,10 +259,15 @@ async function buildVariantDefinition () {
     packageName,
     value
   }) => path.join(nodeModulesDir, packageName, value))
-  variantDefinition.commands = getModelFromTree(inheritanceTree, 'postCreateScripts').map(({
+  variantDefinition.jsScripts = getModelFromTree(inheritanceTree, 'postCreateJSScripts').map(({
     packageName,
     value
-  }) => [path.join(nodeModulesDir, packageName, value), ...(getArgumentsToPassThrough())].join(' '))
+  }) => ({
+    script: path.join(nodeModulesDir, packageName, value),
+    argv: getArgumentsToPassThrough()
+  }))
+
+  console.log('variant definition', variantDefinition)
 
   return variantDefinition
 }
@@ -279,8 +291,10 @@ async function runInit () {
     await fse.copy(variantDefinition.dirsToCopy.shift(), installLocation)
   }
 
-  while (variantDefinition.commands.length > 0) {
-    await exec(variantDefinition.commands.shift(), { cwd: installLocation, env: { ...process.env }, stdio: 'inherit' })
+  while (variantDefinition.jsScripts.length > 0) {
+    const command = variantDefinition.jsScripts.shift()
+    const scriptProcess = fork(command.script, command.argv, { cwd: installLocation, env: { ...process.env }, stdio: 'inherit' })
+    await scriptProcess.finishedPromise
   }
 }
 
