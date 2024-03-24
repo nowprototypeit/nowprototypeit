@@ -1,10 +1,10 @@
 const { Given, When, Then } = require('@cucumber/cucumber')
 const { By } = require('selenium-webdriver')
-const { expect } = require('./utils')
+const { expect, standardTimeout } = require('./utils')
 const { mediumActionTimeout } = require('./utils')
 const { sleep } = require('../../lib/utils')
 
-Given('I am on the plugin settings page for the {string} plugin', async function (pluginName) {
+Given('I am on the plugin settings page for the {string} plugin', standardTimeout, async function (pluginName) {
   await this.browser.openUrl('/manage-prototype/settings')
   const subNavItems = await this.browser.queryClass('nowprototypeit-sub-nav-item')
   const links = await Promise.all(subNavItems.map(async (item) => {
@@ -28,7 +28,7 @@ Given('I am on the plugin settings page for the {string} plugin', async function
   await link.linkElement.click()
 })
 
-When('I fill in {string} with {string}', async function (fieldId, value) {
+When('I fill in {string} with {string}', standardTimeout, async function (fieldId, value) {
   const field = await this.browser.queryId(fieldId)
   await field.sendKeys(value)
 })
@@ -58,7 +58,7 @@ When('I turn off the {string} setting', mediumActionTimeout, async function (fie
   await chosenField.field.click()
 })
 
-When('I press {string}', async function (buttonText) {
+When('I press {string}', standardTimeout, async function (buttonText) {
   const buttons = await Promise.all((await this.browser.queryTag('button')).map(async (button) => {
     return {
       text: await button.getText(),
@@ -72,7 +72,7 @@ When('I press {string}', async function (buttonText) {
   await button.element.click()
 })
 
-Then('I should see the settings saved message', async function () {
+Then('I should see the settings saved message', standardTimeout, async function () {
   const toast = (await this.browser.queryClass('nowprototypeit-toast'))[0]
   if (!toast) {
     throw new Error('Could not find toast')
@@ -81,11 +81,11 @@ Then('I should see the settings saved message', async function () {
   ;(await expect(toastText)).to.contain('Settings saved')
 })
 
-When('I visit the homepage', async function () {
+When('I visit the homepage', standardTimeout, async function () {
   await this.browser.openUrl('/')
 })
 
-Then('I should see {string} as the service name in the GOV.UK header', async function (serviceName) {
+Then('I should see {string} as the service name in the GOV.UK header', standardTimeout, async function (serviceName) {
   const serviceNameElement = (await this.browser.queryClass('govuk-header__service-name'))[0]
   if (!serviceNameElement) {
     throw new Error('Could not find service name element')
