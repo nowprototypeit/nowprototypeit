@@ -16,6 +16,10 @@ const variantConfigs = {
   '@mpj-variant': {
     variantPluginName: 'marsha-p-johnson',
     variantPluginDependency: path.join(__dirname, '..', 'fixtures', 'plugins', 'marsha-p-johnson')
+  },
+  '@lma-variant': {
+    variantPluginName: 'louisa-may-alcott',
+    variantPluginDependency: path.join(__dirname, '..', 'fixtures', 'plugins', 'louisa-may-alcott')
   }
 }
 
@@ -29,6 +33,7 @@ Before(kitStartTimeout, async function (scenario) {
     return
   }
   const variantConfig = variantConfigs[variantTag]
+
   if (!variantConfig) {
     throw new Error('Unknown variant tag: ' + variantTag)
   }

@@ -109,6 +109,14 @@ Then('I should see the GOV.UK Header', standardTimeout, async function () {
   }
 })
 
+Then('I should not see the GOV.UK Header', standardTimeout, async function () {
+  const classToLookFor = 'govuk-header__logo'
+  const elems = await this.browser.queryClass(classToLookFor)
+  if (elems.length > 0) {
+    throw new Error(`Expected no GOV.UK Header but there is an element with class [${classToLookFor}]`)
+  }
+})
+
 Then('I should see the page header {string}', standardTimeout, async function (expectedHeader) {
   await expectH1ToBe(this.browser, expectedHeader)
 })

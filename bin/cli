@@ -261,11 +261,8 @@ async function ensureVariantInheritancePackagesAreInstalled () {
   })
   while (queue.length > 0) {
     const nextVariant = queue.shift()
-    console.log('nextVariant', nextVariant)
     previousModulePaths.push(nextVariant.modulePath)
-    console.log('checking', nextVariant.modulePath)
     if (!fs.existsSync(nextVariant.modulePath)) {
-      console.log('not installed, installing')
       await execv2({
         command: 'npm',
         args: [
@@ -274,20 +271,15 @@ async function ensureVariantInheritancePackagesAreInstalled () {
         ]
       }).finishedPromise
     }
-    console.log('installed already')
     const filePath = path.join(nextVariant.modulePath, 'now-prototype-it.variant.json')
-    console.log('checking variant file', filePath)
     if (!fs.existsSync(filePath)) {
-      console.log('no variant file')
       const errorMessage = `The variant ${nextVariant.name} does not contain a now-prototype-it.variant.json file`
       console.error('')
       console.error(errorMessage)
       console.error('')
       throw new Error(errorMessage)
     }
-    console.log('File exists')
     const variantFileObj = await fse.readJson(filePath).catch(() => undefined)
-    console.log('variantFileObj', variantFileObj)
     if (!variantFileObj) {
       const errorMessage = `The variant ${nextVariant.name} does not contain a valid now-prototype-it.variant.json file`
       console.error('')
@@ -296,13 +288,11 @@ async function ensureVariantInheritancePackagesAreInstalled () {
       throw new Error(errorMessage)
     }
     const inheritsFrom = getVariantNameFromInheritsFrom(variantFileObj['version-2024-03'])
-    console.log('inheritsFrom', inheritsFrom)
     inheritsFrom.forEach(name => addToQueue({
       name,
       modulePath: getModulePath(name)
     }))
   }
-  console.log('finished, all inheritFroms are installed')
 }
 
 async function buildVariantDefinition () {
@@ -331,8 +321,6 @@ async function buildVariantDefinition () {
 
   const nodeModulesDir = path.join(projectDir, 'node_modules')
 
-  console.log('inheritance tree', inheritanceTree)
-
   variantDefinition.dependencies = getModelFromTree(inheritanceTree, 'installedPackages').map(({ value }) => value)
   variantDefinition.dirsToCopy = getModelFromTree(inheritanceTree, 'starterFileDirectories').map(({
     packageName,
@@ -345,8 +333,6 @@ async function buildVariantDefinition () {
     script: path.join(nodeModulesDir, packageName, value),
     argv: getArgumentsToPassThrough()
   }))
-
-  console.log('variant definition', variantDefinition)
 
   return variantDefinition
 }

@@ -1,0 +1,9 @@
+{
+  "version-2024-03": {
+    "inheritFrom": ["@nowprototypeit/govuk-frontend-adaptor"],
+    "starterFileDirectories": [
+      "__INHERIT__",
+      "/files-to-add-to-kit"
+    ]
+  }
+}
