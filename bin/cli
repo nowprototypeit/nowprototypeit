@@ -239,8 +239,6 @@ async function buildVariantDefinition () {
 
   const variantFile = await readVariantFile(getVariantName())
 
-  console.log('variant file', variantFile)
-
   const inheritanceTree = await Promise.all(getVariantNameFromInheritsFrom(variantFile).map(async name => ({
     name,
     variantFile: await readVariantFile(name)

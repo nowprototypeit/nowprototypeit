@@ -40,6 +40,4 @@ jobs:
 
     - run: npm run test:unit && npm run test:browser:${{ matrix.type }} -- --retry 1
       env:
-        TIMEOUT_MULTIPLIER: 5
-        DELAY_BETWEEN_TESTS: 1000
-        DELAY_BETWEEN_STEPS: 500
+        ADDITIONAL_TIMEOUT_MULTIPLIER: 2

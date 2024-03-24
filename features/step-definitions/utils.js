@@ -423,7 +423,9 @@ async function resetKit (kit) {
   }
 }
 
-const timeoutMultiplier = Number(process.env.TIMEOUT_MULTIPLIER || path.sep === '/' ? 1 : 3)
+const initialTimeoutMultiplier = process.env.TIMEOUT_MULTIPLIER || path.sep === '/' ? 1 : 3
+const additionalTimeoutMultiplier = Number(process.env.ADDITIONAL_TIMEOUT_MULTIPLIER ? process.env.ADDITIONAL_TIMEOUT_MULTIPLIER : 1)
+const timeoutMultiplier = initialTimeoutMultiplier * additionalTimeoutMultiplier
 
 module.exports = {
   cleanupEverything,
