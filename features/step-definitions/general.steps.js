@@ -4,11 +4,11 @@ const { sleep } = require('../../lib/utils')
 const { intentionalDelayTimeout, pageRefreshTimeout, waitForConditionToBeMet, makeGetRequest } = require('./utils')
 const path = require('node:path')
 const fs = require('node:fs')
-const { mediumActionTimeout } = require('./utils')
+const { mediumActionTimeout, standardTimeout } = require('./utils')
 const { promises: fsp } = fs
 const kitVersion = require('../../package.json').version
 
-Given('I do nothing', function () {
+Given('I do nothing', standardTimeout, function () {
 })
 
 Given('I wait for {int} seconds', intentionalDelayTimeout, async function (seconds) {
@@ -21,11 +21,11 @@ Given('I wait for {int} seconds', intentionalDelayTimeout, async function (secon
   await sleep(ms)
 })
 
-Given('I refresh the browser', async function () {
+Given('I refresh the browser', standardTimeout, async function () {
   await this.browser.refresh()
 })
 
-Then('the main heading should read {string}', async function (expectedHeading) {
+Then('the main heading should read {string}', standardTimeout, async function (expectedHeading) {
   const actualH1 = await (await this.browser.queryTag('h1'))[0]?.getText()
   ;(await expect(actualH1)).to.equal(expectedHeading)
 })
@@ -48,7 +48,7 @@ Then('the main heading should be updated to {string}', pageRefreshTimeout, async
   return waitForConditionToBeMet(pageRefreshTimeout, isCorrect, errorCallback)
 })
 
-Then('the page title should read {string}', async function (expectedTitle) {
+Then('the page title should read {string}', standardTimeout, async function (expectedTitle) {
   const actualH1 = await (await this.browser.getTitle())
   ;(await expect(actualH1)).to.equal(expectedTitle)
 })
@@ -64,7 +64,7 @@ Then('the page title should become {string}', mediumActionTimeout, async functio
     actualTitleText = await this.browser.getTitle()
   }
 })
-Given('I am viewing a {int} page at {string}', async function (statusCode, url) {
+Given('I am viewing a {int} page at {string}', standardTimeout, async function (statusCode, url) {
   const [response] = await Promise.all([
     makeGetRequest(this.browser.getFullUrl(url)),
     this.browser.openUrl(url)
@@ -72,38 +72,38 @@ Given('I am viewing a {int} page at {string}', async function (statusCode, url) 
   ;(await expect(response.statusCode)).to.equal(statusCode)
 })
 
-When('I visit {string}', async function (url) {
+When('I visit {string}', standardTimeout, async function (url) {
   await this.browser.openUrl(url)
 })
 
-When('I delete the file {string}', async function (relativeFilePath) {
+When('I delete the file {string}', standardTimeout, async function (relativeFilePath) {
   const filePath = path.join(this.kit.dir, relativeFilePath)
   await fsp.rm(filePath)
 })
 
-When('I create a file {string} based on the fixture file {string}', async function (relativeFilePath, fixtureFilePath) {
+When('I create a file {string} based on the fixture file {string}', standardTimeout, async function (relativeFilePath, fixtureFilePath) {
   await writePrototypeFile(this.kit, relativeFilePath, await readFixtureFile(fixtureFilePath))
 })
 
-When('I append the file {string} with contents {string}', async function (relativeFilePath, appendContent) {
+When('I append the file {string} with contents {string}', standardTimeout, async function (relativeFilePath, appendContent) {
   await fsp.appendFile(path.join(this.kit.dir, relativeFilePath), '\n' + appendContent + '\n')
 })
 
-When('I create a file {string} with contents {string}', async function (relativeFilePath, fileContents) {
+When('I create a file {string} with contents {string}', standardTimeout, async function (relativeFilePath, fileContents) {
   await writePrototypeFile(this.kit, relativeFilePath, fileContents)
 })
 
-When('I update the file {string} with contents {string}', async function (relativeFilePath, fileContents) {
+When('I update the file {string} with contents {string}', standardTimeout, async function (relativeFilePath, fileContents) {
   await writePrototypeFile(this.kit, relativeFilePath, fileContents)
 })
 
-When('I replace {string} with {string} in the file {string}', async function (find, replace, file) {
+When('I replace {string} with {string} in the file {string}', standardTimeout, async function (find, replace, file) {
   const filePath = path.join(this.kit.dir, file)
   const fileContents = await fsp.readFile(filePath, 'utf8')
   await fsp.writeFile(filePath, fileContents.replace(find, replace), 'utf8')
 })
 
-Then('there should be an {string} element with the text {string}', async function (selector, expectedText) {
+Then('there should be an {string} element with the text {string}', standardTimeout, async function (selector, expectedText) {
   const allElemsWithRequestedTag = await this.browser.queryTag(selector)
   const allElemsText = await Promise.all(allElemsWithRequestedTag.map(async (elem) => await elem.getText()))
   try {
@@ -114,13 +114,13 @@ Then('there should be an {string} element with the text {string}', async functio
   }
 })
 
-Then('the file {string} should contain {string}', async function (relativeFilePath, expectedString) {
+Then('the file {string} should contain {string}', standardTimeout, async function (relativeFilePath, expectedString) {
   const fileContents = await fsp.readFile(path.join(this.kit.dir, relativeFilePath), 'utf8')
   const expectedStringAfterReplacement = expectedString.replaceAll('(kit_version)', kitVersion)
   ;(await expect(fileContents)).to.include(expectedStringAfterReplacement)
 })
 
-Then('I should have the {string} plugin installed properly', async function (pluginName) {
+Then('I should have the {string} plugin installed properly', standardTimeout, async function (pluginName) {
   const packageJson = JSON.parse(await fsp.readFile(path.join(this.kit.dir, 'package.json'), 'utf8'))
   ;(await expect(Object.keys(packageJson.dependencies))).to.contain(pluginName)
   const modulePath = path.join(this.kit.dir, 'node_modules', pluginName)

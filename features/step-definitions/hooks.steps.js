@@ -1,10 +1,12 @@
-const { Before, AfterStep, AfterAll, After } = require('@cucumber/cucumber')
+const { Before, AfterStep, AfterAll, After, setDefaultTimeout } = require('@cucumber/cucumber')
 const { kitStartTimeout, cleanupEverything, setupKitAndBrowserForTestScope } = require('./utils')
 const colors = require('ansi-colors')
 const { sleep } = require('../../lib/utils')
 const path = require('path')
 const os = require('os')
 const fsp = require('fs').promises
+
+setDefaultTimeout(1)
 
 const variantConfigs = {
   '@no-variant': {},

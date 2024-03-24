@@ -1,5 +1,5 @@
 const { When, Then } = require('@cucumber/cucumber')
-const { expect, mediumActionTimeout } = require('./utils')
+const { expect, mediumActionTimeout, standardTimeout } = require('./utils')
 const { By } = require('selenium-webdriver')
 const { sleep } = require('../../lib/utils')
 
@@ -92,16 +92,16 @@ async function expectH1ToBe (browser, headerText) {
   ;(await expect(h1Text)).to.contain(headerText)
 }
 
-Then('I should see a template creation success page', async function () {
+Then('I should see a template creation success page', standardTimeout, async function () {
   await expectH1ToBe(this.browser, 'Page created')
 })
 
-When('I click through to the page I created from a template', async function () {
+When('I click through to the page I created from a template', standardTimeout, async function () {
   const link = await this.browser.queryId('view-page-link')
   await link.click()
 })
 
-Then('I should see the GOV.UK Header', async function () {
+Then('I should see the GOV.UK Header', standardTimeout, async function () {
   const classToLookFor = 'govuk-header__logo'
   const elems = await this.browser.queryClass(classToLookFor)
   if (elems.length === 0) {
@@ -109,6 +109,6 @@ Then('I should see the GOV.UK Header', async function () {
   }
 })
 
-Then('I should see the page header {string}', async function (expectedHeader) {
+Then('I should see the page header {string}', standardTimeout, async function (expectedHeader) {
   await expectH1ToBe(this.browser, expectedHeader)
 })
