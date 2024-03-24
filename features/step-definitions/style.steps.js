@@ -30,15 +30,18 @@ Then('the first paragraph margin top should become {string}', styleBuildTimeout,
 })
 
 Then('I should see the crown icon in the footer', mediumActionTimeout, async function () {
-  await makeSureBackgroundImageCanBeLoaded(this.browser, (await this.browser.queryClass('govuk-footer__copyright-logo'))[0], this.kit.dir, mediumActionTimeout.timeout)
+  await makeSureBackgroundImageCanBeLoaded(this.browser, this.kit.dir, mediumActionTimeout.timeout)
 })
 
-async function makeSureBackgroundImageCanBeLoaded (browser, element, prototypeDir, timeout) {
+async function makeSureBackgroundImageCanBeLoaded (browser, prototypeDir, timeout) {
   const start = Date.now()
   let output = 'none'
   while (output === 'none' && (start + timeout) > Date.now()) {
     await sleep(100)
-    output = await browser.driver.executeScript('const style = window.getComputedStyle(arguments[0]); return {backgroundImage: style.backgroundImage};', element)
+    const element = (await browser.queryClass('govuk-footer__copyright-logo'))[0]
+    if (element) {
+      output = await browser.driver.executeScript('const style = window.getComputedStyle(arguments[0]); return {backgroundImage: style.backgroundImage};', element)
+    }
   }
 
   const [before, url, after] = output.backgroundImage.split('"')

@@ -76,24 +76,24 @@ When('I create a page at {string} using the {string} template from the {string} 
   await submitButton.click()
 })
 
-async function expectH1ToBe (browser, headerText) {
+async function expectH1ToBe (browser, headerText, timeout) {
   const startDate = new Date()
   let h1
   while (!h1) {
-    h1 = await browser.queryTag('h1')
-    if (h1.length === 0) {
-      if (new Date() - startDate > 2000) {
+    h1 = (await browser.queryTag('h1'))[0]
+    if (!h1) {
+      if (new Date() - startDate > (timeout - 500)) {
         throw new Error('Timed out waiting for h1 element to appear')
       }
       await sleep(100)
     }
   }
-  const h1Text = await h1[0].getText()
+  const h1Text = await h1.getText()
   ;(await expect(h1Text)).to.contain(headerText)
 }
 
 Then('I should see a template creation success page', standardTimeout, async function () {
-  await expectH1ToBe(this.browser, 'Page created')
+  await expectH1ToBe(this.browser, 'Page created', standardTimeout.timeout)
 })
 
 When('I click through to the page I created from a template', standardTimeout, async function () {
@@ -118,5 +118,5 @@ Then('I should not see the GOV.UK Header', standardTimeout, async function () {
 })
 
 Then('I should see the page header {string}', standardTimeout, async function (expectedHeader) {
-  await expectH1ToBe(this.browser, expectedHeader)
+  await expectH1ToBe(this.browser, expectedHeader, standardTimeout.timeout)
 })
