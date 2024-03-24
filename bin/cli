@@ -23,7 +23,7 @@ const path = require('path')
 
 const fs = require('fs')
 const fse = require('fs-extra')
-const { spawn, fork, execv2 } = require('../lib/exec')
+const { spawn, fork } = require('../lib/exec')
 const { parse } = require('./utils/argv-parser')
 const { verboseLogger, progressLogger } = require('./utils/loggers')
 const { npmInstall } = require('./utils')
@@ -240,18 +240,14 @@ async function ensureVariantInheritancePackagesAreInstalled () {
 
   function addToQueue (config) {
     if (!config.name) {
-      console.log('skipping because name is empty')
-      return
+      throw new Error('No name provided for variant lookup, this is probably deeper inside the inheritance tree.')
     }
     if (queue.some(({ queuedName }) => queuedName === config.name)) {
-      console.log('returning early because item is already queued')
       return
     }
     if (previousModulePaths.some(previousPath => previousPath === config.modulePath)) {
-      console.log('returning early because item is already looked up')
       return
     }
-    console.log('queuing', config)
     queue.push(config)
   }
 
@@ -263,13 +259,7 @@ async function ensureVariantInheritancePackagesAreInstalled () {
     const nextVariant = queue.shift()
     previousModulePaths.push(nextVariant.modulePath)
     if (!fs.existsSync(nextVariant.modulePath)) {
-      await execv2({
-        command: 'npm',
-        args: [
-          'install',
-          nextVariant.name
-        ]
-      }).finishedPromise
+      await npmInstall(projectDir, [nextVariant.name])
     }
     const filePath = path.join(nextVariant.modulePath, 'now-prototype-it.variant.json')
     if (!fs.existsSync(filePath)) {
