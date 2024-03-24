@@ -1,6 +1,16 @@
-# Changelog
+## Changelog
 
 ## Unreleased
+
+## New Features
+
+ - The project is now called "nowprototypeit" rather than "@nowprototypeit/govuk" as all references to GOV.UK have been removed, the same behaviour can be achieved by using the `@nowprototypeit/govuk-frontend-adaptor` variant
+
+## Fixes
+
+ - The work done on variants now works on Windows
+ - Now that we have a new Github repository that's not a fork we can run the CI tests, they've highlighted a few issues which have been resolved, and they'll continue to run to make sure similar issues don't creep in
+ - Removed unused dependencies and redefined test dependencies as such
 
 ## 0.2.0
 
@@ -9,7 +19,7 @@
  - Created a "variant" system alongside the plugin system, this allows authors to define how a new kit should be created
  - Removed the remaining govuk-frontend specific code and added a new plugin to allow for the use of the `govuk-frontend` library (@nowprototypeit/govuk-frontend-adaptor)
  - Improved watching when the user installs, updates or uninstalls a plugin using the command line while the kit is running
- - Allowed plugins to specify related plugins which will shown the plugin discovery page
+ - Allowed plugins to specify related plugins which will show the plugin discovery page
  - Allowed plugins to specify "proxy config" for modules which can't manage their own plugin configuration
  - Allowed plugins to specify "settings" which can be used as variables in SASS and Nunjucks 
  - Always using `.njk` file extensions for nunjucks templates

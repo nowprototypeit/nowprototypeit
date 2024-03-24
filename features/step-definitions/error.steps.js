@@ -1,8 +1,8 @@
 const { Then } = require('@cucumber/cucumber')
-const { expect } = require('./utils')
+const { expect, standardTimeout } = require('./utils')
 const { By } = require('selenium-webdriver')
 
-Then('I should see an error page', async function () {
+Then('I should see an error page', standardTimeout, async function () {
   let classArray
   const startTime = Date.now()
   while (classArray === undefined) {
@@ -42,7 +42,7 @@ async function getErrorDetailElements (browser, tryCount = 0) {
   }
 }
 
-Then('the error details should contain additional information starting with {string}', async function (startOfAdditionalInfo) {
+Then('the error details should contain additional information starting with {string}', standardTimeout, async function (startOfAdditionalInfo) {
   const info = await getErrorDetailElements(this.browser)
 
   const additionalDetailsIndex = info.findIndex(({
@@ -59,7 +59,7 @@ Then('the error details should contain additional information starting with {str
   ;(await expect(additionalDetails.split('\n')[0].trim())).to.eq(startOfAdditionalInfo)
 })
 
-Then('the error details should contain {string} {string}', async function (name, value) {
+Then('the error details should contain {string} {string}', standardTimeout, async function (name, value) {
   const info = await getErrorDetailElements(this.browser)
 
   const separator = '____'
@@ -94,11 +94,11 @@ async function assertLineNumber (browser, elemNumber, expectedFirstLineNumber) {
   ;(await expect(await allLineNumberElems.at(elemNumber).getText())).to.eq(expectedFirstLineNumber + '.')
 }
 
-Then('the source code should start at line {int}', async function (expectedFirstLineNumber) {
+Then('the source code should start at line {int}', standardTimeout, async function (expectedFirstLineNumber) {
   await assertLineNumber(this.browser, 0, expectedFirstLineNumber)
 })
 
-Then('the source code should end at line {int}', async function (expectedLastLineNumber) {
+Then('the source code should end at line {int}', standardTimeout, async function (expectedLastLineNumber) {
   await assertLineNumber(this.browser, -1, expectedLastLineNumber)
 })
 
@@ -115,11 +115,10 @@ async function getHighlightedNumbers (browser) {
     }
   }))
 
-  const highlightedNumbers = lineNumberInfo.filter(({ isHighlighted }) => isHighlighted).map(({ lineNumber }) => lineNumber)
-  return highlightedNumbers
+  return lineNumberInfo.filter(({ isHighlighted }) => isHighlighted).map(({ lineNumber }) => lineNumber)
 }
 
-Then('only lines {int}-{int} should be highlighted', async function (expectedStartOfHighlight, expectedEndOfHighlight) {
+Then('only lines {int}-{int} should be highlighted', standardTimeout, async function (expectedStartOfHighlight, expectedEndOfHighlight) {
   const highlightedNumbers = await getHighlightedNumbers(this.browser)
 
   const expected = []
@@ -131,6 +130,6 @@ Then('only lines {int}-{int} should be highlighted', async function (expectedSta
   ;(await expect(highlightedNumbers)).to.have.all.members(expected)
 })
 
-Then('only line {int} should be highlighted', async function (expectedLineNumber) {
+Then('only line {int} should be highlighted', standardTimeout, async function (expectedLineNumber) {
   (await expect(await getHighlightedNumbers(this.browser))).to.eql([expectedLineNumber.toString()])
 })

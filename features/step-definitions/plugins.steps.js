@@ -1,8 +1,9 @@
 const { Given, When, Then } = require('@cucumber/cucumber')
-const { kitStartTimeout, expect, pluginActionPageTimeout, pluginActionTimeout, mediumActionTimeout, timeoutMultiplier } = require('./utils')
+const { kitStartTimeout, expect, pluginActionPageTimeout, pluginActionTimeout, mediumActionTimeout, standardTimeout } = require('./utils')
 const { By } = require('selenium-webdriver')
 const { exec } = require('../../lib/exec')
 const path = require('path')
+const { sleep } = require('../../lib/utils')
 
 Given('I have the {string} \\({string}\\) plugin installed', pluginActionPageTimeout, async function (pluginName, pluginRef) {
   await this.browser.openUrl('/manage-prototype/plugins')
@@ -13,7 +14,7 @@ Given('I have the {string} \\({string}\\) plugin installed', pluginActionPageTim
   }
 })
 
-Given('I have the demo plugin {string} installed', { timeout: 40 * 1000 * timeoutMultiplier }, async function (demoPluginName) {
+Given('I have the demo plugin {string} installed', pluginActionTimeout, async function (demoPluginName) {
   const fsPath = path.resolve(__dirname, '..', 'fixtures', 'plugins', demoPluginName)
   const pluginRef = 'fs:' + fsPath
   await visitPluginPageAndRunAction(this.browser, pluginRef, 'action-install', true)
@@ -32,17 +33,17 @@ Then('I should see the plugin {string} in the list', mediumActionTimeout, async 
   ;(await expect(pluginDetails.map(({ name }) => name))).to.contain(pluginName)
 })
 
-Then('I should have no plugins installed', async function () {
+Then('I should have no plugins installed', standardTimeout, async function () {
   const pluginDetails = await this.browser.getPluginDetails()
   ;(await expect(pluginDetails.length)).to.equal(0)
 })
 
-Then('I should not see the plugin {string} in the list', async function (pluginName) {
+Then('I should not see the plugin {string} in the list', standardTimeout, async function (pluginName) {
   const pluginDetails = await this.browser.getPluginDetails()
   ;(await expect(pluginDetails.map(({ name }) => name))).not.to.contain(pluginName)
 })
 
-Then('The {string} plugin should be tagged as {string}', async function (pluginName, tag) {
+Then('The {string} plugin should be tagged as {string}', standardTimeout, async function (pluginName, tag) {
   if (tag !== 'Installed') {
     throw new Error(`Don't know how to handle tag [${tag}]`)
   }
@@ -50,7 +51,7 @@ Then('The {string} plugin should be tagged as {string}', async function (pluginN
   ;(await expect(pluginDetails.filter(x => x.hasInstalledFlag).map(({ name }) => name))).to.contain(pluginName)
 })
 
-Then('The {string} plugin should not be tagged as {string}', async function (pluginName, tag) {
+Then('The {string} plugin should not be tagged as {string}', standardTimeout, async function (pluginName, tag) {
   if (tag !== 'Installed') {
     throw new Error(`Don't know how to handle tag [${tag}]`)
   }
@@ -71,14 +72,26 @@ async function waitForPluginInstallUpdateOrUninstall (browser) {
   }, pluginActionPageTimeout.timeout)
 }
 
-const visitPluginPageAndRunAction = async (browser, pluginRef, buttonId, expectToWaitForAction) => {
-  await browser.openUrl(`/manage-prototype/plugin/${encodeURIComponent(pluginRef)}`)
+async function getActionButton (browser, pluginRef, buttonId, timeout) {
+  const start = Date.now()
   let uninstallButton
-  try {
-    uninstallButton = await browser.queryId(buttonId)
-  } catch (e) {
+
+  while (uninstallButton === undefined && (start + timeout) > Date.now()) {
+    await sleep(100)
+    await browser.openUrl(`/manage-prototype/plugin/${encodeURIComponent(pluginRef)}`)
+    try {
+      uninstallButton = await browser.queryId(buttonId)
+    } catch (e) {
+    }
+  }
+  if (!uninstallButton) {
     throw new Error(`There is no [${buttonId}] button for plugin [${pluginRef}]`)
   }
+  return uninstallButton
+}
+
+const visitPluginPageAndRunAction = async (browser, pluginRef, buttonId, expectToWaitForAction) => {
+  const uninstallButton = await getActionButton(browser, pluginRef, buttonId, pluginActionTimeout.timeout / 3)
   await uninstallButton.click()
   if (expectToWaitForAction) {
     await waitForPluginInstallUpdateOrUninstall(browser)
@@ -112,7 +125,7 @@ When('I uninstall the {string} plugin using the console', pluginActionPageTimeou
   ])
 })
 
-When('I should be informed that {string} will also be installed', async function (pluginName) {
+When('I should be informed that {string} will also be installed', standardTimeout, async function (pluginName) {
   const $bannerHeading = (await this.browser.queryClass('notification-banner'))[0]
   if ($bannerHeading) {
     ;(await expect((await $bannerHeading.getText()).trim())).to.eq('To update this plugin, you also need to install another plugin')

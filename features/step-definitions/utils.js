@@ -12,6 +12,7 @@ const chaiPromise = import('chai')
 const { Builder, By } = require('selenium-webdriver')
 const chrome = require('selenium-webdriver/chrome')
 const firefox = require('selenium-webdriver/firefox')
+const { sleep } = require('../../lib/utils')
 const { fork, execv2 } = require('../../lib/exec')
 const execv1 = require('../../lib/exec').exec
 const exec = execv2
@@ -23,7 +24,9 @@ const kitAndBrowserStore = (() => {
 
   return {
     get: (options) => store[getKeyFromOptions(options)],
-    set: (kitAndBrowser, options) => { store[getKeyFromOptions(options)] = kitAndBrowser },
+    set: (kitAndBrowser, options) => {
+      store[getKeyFromOptions(options)] = kitAndBrowser
+    },
     remove: (options) => delete store[getKeyFromOptions(options)],
     getAllKits: () => flattenArray(Object.values(store).map(({ kit }) => kit)),
     getAllBrowsers: () => flattenArray(Object.values(store).map(({ browser }) => browser))
@@ -112,7 +115,7 @@ async function startKit (config = {}) {
   })
 
   const kitPort = await findAvailablePort()
-  const pathToCli = path.join(dir, 'node_modules', '@nowprototypeit', 'govuk', 'bin', 'cli')
+  const pathToCli = path.join(dir, 'node_modules', 'nowprototypeit', 'bin', 'cli')
   if (!fs.existsSync(pathToCli)) {
     throw new Error('Could not find the CLI at ' + pathToCli)
   }
@@ -205,11 +208,25 @@ async function getBrowser (config = {}) {
     },
     getFullUrl,
     openUrl: async (url) => {
+      const start = Date.now()
       const fullUrl = getFullUrl(url)
       if (process.env.SHOW_URL_OPENINGS === 'true') {
         console.log('Opening URL', fullUrl)
       }
-      return await driver.get(fullUrl)
+      let succeeded = false
+      let lastKnownError
+      while (!succeeded && Date.now() - start < standardTimeout.timeout - 500) {
+        try {
+          await driver.get(fullUrl)
+          succeeded = true
+        } catch (e) {
+          lastKnownError = e
+          await sleep(200)
+        }
+      }
+      if (!succeeded && lastKnownError) {
+        throw lastKnownError
+      }
     },
     refresh: async () => {
       await driver.navigate().refresh()
@@ -390,7 +407,9 @@ async function resetKit (kit) {
   }
 
   let resetPromiseResolve
-  kit.resetPromise = new Promise((resolve) => { resetPromiseResolve = resolve })
+  kit.resetPromise = new Promise((resolve) => {
+    resetPromiseResolve = resolve
+  })
 
   const status = await runCommand('git status')
 
@@ -423,8 +442,11 @@ async function resetKit (kit) {
   }
 }
 
-const timeoutMultiplier = Number(process.env.TIMEOUT_MULTIPLIER || path.sep === '/' ? 1 : 3)
+const initialTimeoutMultiplier = process.env.TIMEOUT_MULTIPLIER || path.sep === '/' ? 1 : 3
+const additionalTimeoutMultiplier = Number(process.env.ADDITIONAL_TIMEOUT_MULTIPLIER ? process.env.ADDITIONAL_TIMEOUT_MULTIPLIER : 1)
+const timeoutMultiplier = initialTimeoutMultiplier * additionalTimeoutMultiplier
 
+const standardTimeout = { timeout: 5 * 1000 * timeoutMultiplier }
 module.exports = {
   cleanupEverything,
   expect: async function () {
@@ -436,6 +458,7 @@ module.exports = {
   setupKitAndBrowserForTestScope,
   timeoutMultiplier,
   kitStartTimeout: { timeout: (process.env.TEST_KIT_DEPENDENCY ? 90 : 40) * 1000 * timeoutMultiplier },
+  standardTimeout,
   pluginActionTimeout: { timeout: 60 * 1000 * timeoutMultiplier },
   pluginActionPageTimeout: { timeout: 20 * 1000 * timeoutMultiplier },
   mediumActionTimeout: { timeout: 10 * 1000 * timeoutMultiplier },

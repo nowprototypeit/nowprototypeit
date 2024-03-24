@@ -5,7 +5,7 @@ const path = require('node:path')
 const fsp = require('node:fs').promises
 
 const execTools = require('../lib/exec')
-const {sleep} = require("../lib/utils");
+const { sleep } = require('../lib/utils')
 
 const branchName = process.argv[2] && process.argv[2] !== '--dry-run' ? process.argv[2] : 'main'
 
@@ -17,7 +17,7 @@ const wait = time => new Promise((resolve) => setTimeout(resolve, time))
   const tmpDir = await mkTmpDir()
   console.log('tmpDir:', tmpDir)
   const kitDir = path.join(tmpDir, 'govuk')
-  await exec('git clone git@github.com:nowprototypeit/govuk.git', {
+  await exec('git clone git@github.com:nowprototypeit/nowprototypeit.git', {
     cwd: tmpDir
   })
   await exec(`git checkout ${branchName}`, {
@@ -207,7 +207,7 @@ async function updateChangelogAndPublish (kitDir) {
 
   await sleep(2000)
 
-  await exec(`git checkout main`, standardExecOptions)
+  await exec('git checkout main', standardExecOptions)
   await exec(`git checkout -b post-${branchName}`, standardExecOptions)
   await exec(`git cherry-pick ${branchName}`, standardExecOptions)
   await exec(`git push -u origin post-${branchName}`, standardExecOptions)

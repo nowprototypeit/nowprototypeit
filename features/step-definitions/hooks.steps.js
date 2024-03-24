@@ -1,10 +1,12 @@
-const { Before, AfterAll, After } = require('@cucumber/cucumber')
+const { Before, AfterStep, AfterAll, After, setDefaultTimeout } = require('@cucumber/cucumber')
 const { kitStartTimeout, cleanupEverything, setupKitAndBrowserForTestScope } = require('./utils')
 const colors = require('ansi-colors')
 const { sleep } = require('../../lib/utils')
 const path = require('path')
 const os = require('os')
 const fsp = require('fs').promises
+
+setDefaultTimeout(1)
 
 const variantConfigs = {
   '@no-variant': {},
@@ -34,6 +36,13 @@ Before(kitStartTimeout, async function (scenario) {
   await setupKitAndBrowserForTestScope(this, variantConfig)
 })
 
+if (process.env.DELAY_BETWEEN_TESTS) {
+  const ms = parseInt(process.env.DELAY_BETWEEN_TESTS, 10)
+  AfterStep({ timeout: ms + 1000 }, async function () {
+    await sleep(ms)
+  })
+}
+
 After(kitStartTimeout, async function (scenario) {
   const isFailure = scenario.result.status === 'FAILED'
   const scenarioName = scenario.pickle.name
@@ -58,6 +67,9 @@ After(kitStartTimeout, async function (scenario) {
     process.exitCode = 10
   }
   this.browser?.openUrl('about:blank')
+  if (process.env.DELAY_BETWEEN_TESTS) {
+    await sleep(parseInt(process.env.DELAY_BETWEEN_TESTS, 10))
+  }
 })
 
 AfterAll(kitStartTimeout, async function () {
