@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.4.0
+
 ## New Features
 
 - The project is now called "nowprototypeit" rather than "@nowprototypeit/govuk" as all references to GOV.UK have been removed, the same behaviour can be achieved by using the `@nowprototypeit/govuk-frontend-adaptor` variant
