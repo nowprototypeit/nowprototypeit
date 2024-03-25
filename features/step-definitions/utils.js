@@ -88,7 +88,7 @@ async function startKit (config = {}) {
   if (config.kitDependency) {
     const dep = config.kitDependency
     const command = 'npx'
-    const args = ['-y', `-package=${dep}`, 'now-prototype-it-govuk', 'create', ...additionalCliArgs, `--version=${dep}`, dir]
+    const args = ['-y', `-package=${dep}`, 'nowprototypeit', 'create', ...additionalCliArgs, `--version=${dep}`, dir]
     const execResult = exec({
       command,
       args
