@@ -1,5 +1,5 @@
 const { When, Then } = require('@cucumber/cucumber')
-const { expect, mediumActionTimeout, standardTimeout } = require('./utils')
+const { expect, mediumActionTimeout, standardTimeout, waitForConditionToBeMet } = require('./utils')
 const { By } = require('selenium-webdriver')
 const { sleep } = require('../../lib/utils')
 
@@ -66,12 +66,16 @@ When('I create a page at {string} using the {string} template from the {string} 
   const browser = this.browser
   const requestedTemplateRow = await getTemplateInformation(browser, fromPluginName, createTemplateName, 3)
   await requestedTemplateRow.createButton.click()
-  const [formInput, submitButton, h1] = await Promise.all([
-    browser.queryId('chosen-url'),
-    browser.queryId('create-page-from-template'),
-    browser.queryTag('h1')
-  ])
-  ;(await expect(await h1[0].getText())).to.equal('Create new ' + createTemplateName)
+  let formInput, submitButton, h1
+  await waitForConditionToBeMet(mediumActionTimeout, async () => {
+    [formInput, submitButton, h1] = await Promise.all([
+      browser.queryId('chosen-url'),
+      browser.queryId('create-page-from-template'),
+      browser.queryTag('h1').then(tags => tags[0])
+    ])
+    return formInput && submitButton && h1
+  })
+  ;(await expect(await h1.getText())).to.equal('Create new ' + createTemplateName)
   await formInput.sendKeys(newPageUrl)
   await submitButton.click()
 })

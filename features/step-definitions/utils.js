@@ -358,7 +358,10 @@ function waitForConditionToBeMet (timeoutDeclaration, isCorrect, errorCallback) 
         return resolve()
       }
       if (Date.now() + delayBetweenRetries > timeoutTimestamp) {
-        return errorCallback(reject)
+        if (errorCallback) {
+          return errorCallback(reject)
+        }
+        reject(new Error('Timeout waiting for condition to be met'))
       }
       setupTimeout()
     }

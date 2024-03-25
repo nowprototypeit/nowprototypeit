@@ -22,8 +22,12 @@ Then('the first paragraph margin top should become {string}', styleBuildTimeout,
     if (!firstParagraph) {
       throw new Error('Could not find first paragraph')
     }
-    marginTop = await firstParagraph.getCssValue('margin-top')
-    return marginTop === expectedMarginTop
+    try {
+      marginTop = await firstParagraph.getCssValue('margin-top')
+      return marginTop === expectedMarginTop
+    } catch (e) {
+      return false
+    }
   }, (reject) => {
     return reject(new Error(`Gave up waiting for margin-top [${marginTop}] to become equal to [${expectedMarginTop}]`))
   })
