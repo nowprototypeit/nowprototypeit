@@ -1,17 +1,24 @@
-## Changelog
+# Changelog
 
 ## Unreleased
 
 ## New Features
 
- - The project is now called "nowprototypeit" rather than "@nowprototypeit/govuk" as all references to GOV.UK have been removed, the same behaviour can be achieved by using the `@nowprototypeit/govuk-frontend-adaptor` variant
- - Variant inheritance is now (theoretically) infinitely deep, any variant you inherit from is installed and then used as the base for your variant  
+- The project is now called "nowprototypeit" rather than "@nowprototypeit/govuk" as all references to GOV.UK have been removed, the same behaviour can be achieved by using the `@nowprototypeit/govuk-frontend-adaptor` variant
+- Variant inheritance is now (theoretically) infinitely deep, any variant you inherit from is installed and then used as the base for your variant
+
+## 0.3.0
 
 ## Fixes
 
  - The work done on variants now works on Windows
  - Now that we have a new Github repository that's not a fork we can run the CI tests, they've highlighted a few issues which have been resolved, and they'll continue to run to make sure similar issues don't creep in
  - Removed unused dependencies and redefined test dependencies as such
+
+### New Features
+ - Allowing plugins to provide settings which can be updated by the user in the Management Pages
+ - Allowing hierarchical nunjucks variables from plugin settings
+ - Allowing more styling classes for homepage content
 
 ## 0.2.0
 

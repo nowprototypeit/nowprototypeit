@@ -50,7 +50,16 @@ app.locals.pluginConfig = plugins.getAppConfig({
 })
 
 plugins.getNunjucksVariables().forEach(({ key, value }) => {
-  app.locals[key] = value
+  let context = app.locals
+  const keyParts = key.split('.')
+  while (keyParts.length > 1) {
+    const currentKey = keyParts.shift()
+    if (!context[currentKey]) {
+      context[currentKey] = {}
+    }
+    context = context[currentKey]
+  }
+  context[keyParts.shift()] = value
 })
 
 plugins.getAppLocalModifiers().forEach(item => {

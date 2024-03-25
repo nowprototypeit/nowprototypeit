@@ -240,6 +240,9 @@ async function getBrowser (config = {}) {
     queryTag: async (tag) => {
       return await driver.findElements(By.tagName(tag))
     },
+    queryAttribute: async (attrName, attrValue) => {
+      return await driver.findElements(By.xpath(`//*[@${attrName}="${attrValue}"]`))
+    },
     setWindowSizeToPageSize: async () => {
       try {
         const height = await driver.executeScript('return document.body.parentNode.scrollHeight')
@@ -355,7 +358,10 @@ function waitForConditionToBeMet (timeoutDeclaration, isCorrect, errorCallback) 
         return resolve()
       }
       if (Date.now() + delayBetweenRetries > timeoutTimestamp) {
-        return errorCallback(reject)
+        if (errorCallback) {
+          return errorCallback(reject)
+        }
+        reject(new Error('Timeout waiting for condition to be met'))
       }
       setupTimeout()
     }

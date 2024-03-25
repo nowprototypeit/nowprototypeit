@@ -1,25 +1,25 @@
-<p>You can use the <a href="/manage-prototype" class="nowprototypeit-focus-link">management pages</a> to:</p>
+<p class="{{ nowPrototypeItParagraphAdditionalClasses }}">You can use the <a href="/manage-prototype" class="nowprototypeit-focus-link {{ nowPrototypeItLinkAdditionalClasses }}">management pages</a> to:</p>
 
 <ul class="nowprototypeit-bullet-list {{ nowPrototypeItListAdditionalClasses }}">
   <li>
-    Install, uninstall, and update plugins in <a href="/manage-prototype/plugins" class="nowprototypeit-focus-link">the plugin pages</a>
+    Install, uninstall, and update plugins in <a href="/manage-prototype/plugins" class="nowprototypeit-focus-link {{ nowPrototypeItLinkAdditionalClasses }}">the plugin pages</a>
   </li>
   <li>
-    Create a new page <a href="/manage-prototype/templates" class="nowprototypeit-focus-link">by using a template</a>
+    Create a new page <a href="/manage-prototype/templates" class="nowprototypeit-focus-link {{ nowPrototypeItLinkAdditionalClasses }}">by using a template</a>
   </li>
   <li>
-    Change your service name in <a href="/manage-prototype/settings" class="nowprototypeit-focus-link">basic settings</a>
+    <a href="/manage-prototype/settings" class="nowprototypeit-focus-link {{ nowPrototypeItLinkAdditionalClasses }}">Update settings</a> and more
   </li>
 </ul>
 
 {% if isRunningFromManagePrototype %}
-<p>You can replace this page with your own by adding an "<strong>index.{{ defaultViewExtension }}</strong>" file in "<strong>app/views</strong>", you can also do this
-  <a href="/manage-prototype/templates" class="nowprototypeit-focus-link">by using a template</a> and using the path "<strong>/index</strong>".</p>
+<p class="{{ nowPrototypeItParagraphAdditionalClasses }}">You can replace this page with your own by adding an "<strong>index.{{ defaultViewExtension }}</strong>" file in "<strong>app/views</strong>", you can also do this
+  <a href="/manage-prototype/templates" class="nowprototypeit-focus-link" {{ nowPrototypeItLinkAdditionalClasses }}>by using a template</a> and using the path "<strong>/index</strong>".</p>
 {% else %}
-  <p>You can update this page, it's in your prototype kit at <strong>app/views/index.njk</strong> or <strong>app/views/index.html</strong>.</p>
+  <p class="{{ nowPrototypeItParagraphAdditionalClasses }}">You can update this page, it's in your prototype kit at <strong>app/views/index.njk</strong> or <strong>app/views/index.html</strong>.</p>
 {% endif %}
 {% macro showPage(page) %}
-  <li class="nowprototypeit-page-item"><a href="{{ page.url }}" class="nowprototypeit-page-link"
+  <li class="nowprototypeit-page-item"><a href="{{ page.url }}" class="nowprototypeit-page-link {{ nowPrototypeItLinkAdditionalClasses }}"
     >{{ page.name }}</a>{% if page.children %}{{ showPages(page.children) }}{% endif %}</li>
 {% endmacro %}
 
@@ -33,6 +33,6 @@
   {% endif %}
 {% endmacro %}
 {% if foundPages | length > 0 %}
-  <h2>You have the following pages in your prototype:</h2>
+  <h2 class="{{ nowPrototypeItSubheadingAdditionalClasses }}">You have the following pages in your prototype:</h2>
   {{ showPages(foundPages) }}
 {% endif %}
