@@ -16,7 +16,7 @@ const wait = time => new Promise((resolve) => setTimeout(resolve, time))
 ;(async () => {
   const tmpDir = await mkTmpDir()
   console.log('tmpDir:', tmpDir)
-  const kitDir = path.join(tmpDir, 'govuk')
+  const kitDir = path.join(tmpDir, 'nowprototypeit')
   await exec('git clone git@github.com:nowprototypeit/nowprototypeit.git', {
     cwd: tmpDir
   })

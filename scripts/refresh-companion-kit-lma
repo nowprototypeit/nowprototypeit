@@ -1,0 +1,5 @@
+#!/bin/sh
+
+mkdir -p ~/projects/prototype-kits/now-prototype-it-companion &&
+rm -Rf ~/projects/prototype-kits/now-prototype-it-companion/* &&
+./bin/cli create --version=local --variant="louisa-may-alcott" --variant-dependency="$(pwd)/features/fixtures/plugins/louisa-may-alcott" ~/projects/prototype-kits/now-prototype-it-companion
