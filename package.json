@@ -66,7 +66,6 @@
   },
   "devDependencies": {
     "@cucumber/cucumber": "^10.3.1",
-    "@nowprototypeit/design-system": "^1.0.6",
     "assert": "^2.1.0",
     "chai": "^5.1.0",
     "cheerio": "^1.0.0-rc.12",
