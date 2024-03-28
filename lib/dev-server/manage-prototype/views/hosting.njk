@@ -9,6 +9,9 @@
   {% if splash %}
     <h1>{{ splash }}</h1>
   {% endif %}
+  {% if splash == 'success' and url %}
+    <p>Your prototype is now hosted at <a href="{{ url }}" target="_blank">{{ url }}</a>.</p>
+  {% endif %}
 
   <form action="{{ uploadPrototypeUrl }}" method="post">
     <h1>Upload your prototype to nowuserresearch.it</h1>
