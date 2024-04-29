@@ -30,6 +30,16 @@ Then('the main heading should read {string}', standardTimeout, async function (e
   ;(await expect(actualH1)).to.equal(expectedHeading)
 })
 
+Then('the page should include a paragraph that reads {string}', standardTimeout, async function (expectedHeading) {
+  const allPText = await Promise.all((await this.browser.queryTag('p')).map(elem => elem.getText()))
+  ;(await expect(allPText)).to.include(expectedHeading)
+})
+
+Then('the first paragraph should read {string}', standardTimeout, async function (expectedHeading) {
+  const actualH1 = await (await this.browser.queryTag('p'))[0]?.getText()
+  ;(await expect(actualH1)).to.equal(expectedHeading)
+})
+
 Then('the main heading should be updated to {string}', pageRefreshTimeout, async function (expectedHeading) {
   let actualH1
   const isCorrect = async () => {
