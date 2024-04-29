@@ -72,13 +72,17 @@ async function waitForPluginInstallUpdateOrUninstall (browser) {
   }, pluginActionPageTimeout.timeout)
 }
 
+function loadPluginDetailsForPluginRef (browser, pluginRef) {
+  return browser.openUrl(`/manage-prototype/plugin/${pluginRef.split(':').map(encodeURIComponent).join(':')}`)
+}
+
 async function getActionButton (browser, pluginRef, buttonId, timeout) {
   const start = Date.now()
   let uninstallButton
 
   while (uninstallButton === undefined && (start + timeout) > Date.now()) {
     await sleep(100)
-    await browser.openUrl(`/manage-prototype/plugin/${encodeURIComponent(pluginRef)}`)
+    await loadPluginDetailsForPluginRef(browser, pluginRef)
     try {
       uninstallButton = await browser.queryId(buttonId)
     } catch (e) {
@@ -142,3 +146,7 @@ const continueWithUpdateInstallOrUninstall = async function () {
 When('I continue with the update', pluginActionPageTimeout, continueWithUpdateInstallOrUninstall)
 When('I continue with the uninstall', pluginActionPageTimeout, continueWithUpdateInstallOrUninstall)
 When('I continue with the install', pluginActionPageTimeout, continueWithUpdateInstallOrUninstall)
+
+Given('I view the plugin details for the {string} plugin', pluginActionPageTimeout, async function (pluginRef) {
+  await loadPluginDetailsForPluginRef(this.browser, pluginRef)
+})

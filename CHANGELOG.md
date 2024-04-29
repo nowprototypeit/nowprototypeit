@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Removed ZLib dependency, using built in node implementation - this solves an installation issue
+
 ## 0.4.0
 
 ## New Features
@@ -11,7 +15,7 @@
 
 ## 0.3.0
 
-## Fixes
+### Fixes
 
  - The work done on variants now works on Windows
  - Now that we have a new Github repository that's not a fork we can run the CI tests, they've highlighted a few issues which have been resolved, and they'll continue to run to make sure similar issues don't creep in
