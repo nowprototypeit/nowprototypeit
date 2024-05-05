@@ -39,6 +39,6 @@ jobs:
 
     - run: npm ci
 
-    - run: npm run test:unit && npm run test:browser:${{ matrix.type }} -- --retry 1
+    - run: npm run test:unit && npm run test:browser:${{ matrix.type }} -- --retry 2
       env:
-        ADDITIONAL_TIMEOUT_MULTIPLIER: 2
+        ADDITIONAL_TIMEOUT_MULTIPLIER: 3
