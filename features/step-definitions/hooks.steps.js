@@ -51,7 +51,6 @@ if (process.env.DELAY_BETWEEN_TESTS) {
 After(kitStartTimeout, async function (scenario) {
   const isFailure = scenario.result.status === 'FAILED'
   const scenarioName = scenario.pickle.name
-  this.kit?.reset()
   process.stdout.write(colors.bold(' ' + (isFailure ? colors.red('✘ ' + scenarioName) : colors.green('✓ ' + scenarioName))))
   console.log('')
   if (isFailure) {
@@ -71,6 +70,7 @@ After(kitStartTimeout, async function (scenario) {
     }
     process.exitCode = 10
   }
+  await this.kit?.reset()
   this.browser?.openUrl('about:blank')
   if (process.env.DELAY_BETWEEN_TESTS) {
     await sleep(parseInt(process.env.DELAY_BETWEEN_TESTS, 10))

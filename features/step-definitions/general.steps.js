@@ -1,10 +1,12 @@
 const { Given, Then, When } = require('@cucumber/cucumber')
 const { expect } = require('./utils')
 const { sleep } = require('../../lib/utils')
-const { intentionalDelayTimeout, pageRefreshTimeout, waitForConditionToBeMet, makeGetRequest } = require('./utils')
+const { intentionalDelayTimeout, waitForConditionToBeMet, makeGetRequest, tinyTimeout } = require('./utils')
 const path = require('node:path')
 const fs = require('node:fs')
 const { mediumActionTimeout, standardTimeout } = require('./utils')
+const { By } = require('selenium-webdriver')
+
 const { promises: fsp } = fs
 const kitVersion = require('../../package.json').version
 
@@ -40,7 +42,7 @@ Then('the first paragraph should read {string}', standardTimeout, async function
   ;(await expect(actualH1)).to.equal(expectedHeading)
 })
 
-Then('the main heading should be updated to {string}', pageRefreshTimeout, async function (expectedHeading) {
+Then('the main heading should be updated to {string}', mediumActionTimeout, async function (expectedHeading) {
   let actualH1
   const isCorrect = async () => {
     try {
@@ -55,7 +57,7 @@ Then('the main heading should be updated to {string}', pageRefreshTimeout, async
     return reject(new Error(`Gave up waiting for heading [${actualH1}] to become equal to [${expectedHeading}]`))
   }
 
-  return waitForConditionToBeMet(pageRefreshTimeout, isCorrect, errorCallback)
+  return waitForConditionToBeMet(mediumActionTimeout, isCorrect, errorCallback)
 })
 
 Then('the page title should read {string}', standardTimeout, async function (expectedTitle) {
@@ -146,6 +148,27 @@ Then('I should have the {string} plugin installed properly', standardTimeout, as
   if (!exists) {
     throw new Error(`Plugin not installed properly - ${modulePath} does not exist`)
   }
+})
+
+When('I enter {string} into the {string} field', tinyTimeout, async function (value, fieldName) {
+  const input = (await this.browser.queryCss(`input[name="${fieldName}"]`))[0]
+  if (!input) {
+    throw new Error(`Could not find input with name [${fieldName}]`)
+  }
+  await input.clear()
+  await input.sendKeys(value)
+})
+
+When('I submit the form', standardTimeout, async function () {
+  const forms = await this.browser.queryTag('form')
+  if (forms.length !== 1) {
+    throw new Error(`Expected exactly one form on the page, found [${forms.length}]`)
+  }
+  const submitButtons = await forms[0].findElements(By.css('button[type="submit"], input[type="submit"]'))
+  if (submitButtons.length !== 1) {
+    throw new Error(`Expected exactly one submit button in the form, found [${submitButtons.length}]`)
+  }
+  await submitButtons[0].click()
 })
 
 async function readFixtureFile (relativeFilePath, fileContents) {
