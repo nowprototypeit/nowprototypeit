@@ -6,6 +6,8 @@
 
 - Removed ZLib dependency, using built in node implementation - this solves an installation issue
 - POST requests are now being proxied correctly - this allows `<form method="post">` and calls to `.post()` routes which weren't previously working in development mode unless the request body was empty
+- Silenced npm logs to clean up the output when you run commands
+- Renamed 'failed-to-launch' to 'validate-kit' as it's less scary wording for the same feature (this runs if a command like npm run dev fails and will, in future, be used to offer solutions like running `npm install` if packages are missing)
 
 ## 0.4.0
 
