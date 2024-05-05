@@ -1,7 +1,7 @@
 const { Given, When, Then } = require('@cucumber/cucumber')
 const { By } = require('selenium-webdriver')
 const { expect, standardTimeout } = require('./utils')
-const { mediumActionTimeout } = require('./utils')
+const { mediumActionTimeout, waitForConditionToBeMet } = require('./utils')
 const { sleep } = require('../../lib/utils')
 
 Given('I am on the plugin settings page for the {string} plugin', standardTimeout, async function (pluginName) {
@@ -91,4 +91,18 @@ Then('I should see {string} as the service name in the GOV.UK header', standardT
     throw new Error('Could not find service name element')
   }
   (await expect(await serviceNameElement.getText())).to.eq(serviceName)
+})
+
+Then('the service name in the GOV.UK header should become {string}', standardTimeout, async function (string) {
+  let actual = null
+  await waitForConditionToBeMet(standardTimeout, async () => {
+    const serviceNameElement = (await this.browser.queryClass('govuk-header__service-name'))[0]
+    if (!serviceNameElement) {
+      return null
+    }
+    actual = await serviceNameElement.getText()
+    return actual === string
+  }, () => {
+    throw new Error(`Expected service name to be ${string}, but was ${actual}`)
+  })
 })

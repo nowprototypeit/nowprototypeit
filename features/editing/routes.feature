@@ -12,8 +12,9 @@ Feature: Routes
     Then the main heading should be updated to "hello example 2 - part 2"
 
   @no-variant
-  Scenario: Custom get route
+  Scenario: Custom get route - auto reload from page not found
     Given I append the file "app/routes.js" with contents "router.get('/hello/:name', function (req, res) {res.send('<h1>hello ' + req.params.name + '</h1>')})"
+    And I wait for the prototype to reload
     When I visit "/hello/world"
     Then the main heading should be updated to "hello world"
     When I visit "/hello/you"

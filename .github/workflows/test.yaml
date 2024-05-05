@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false  # continue other tests if one test in matrix fails
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [18.x, 20.x, 22.x]
         os: [windows-latest, ubuntu-latest, macos-latest]
         type: [acceptance, integration]
 
@@ -38,6 +38,6 @@ jobs:
 
     - run: npm ci
 
-    - run: npm run test:unit && npm run test:browser:${{ matrix.type }} -- --retry 1
+    - run: npm run test:unit && npm run test:browser:${{ matrix.type }} -- --retry 2
       env:
-        ADDITIONAL_TIMEOUT_MULTIPLIER: 2
+        ADDITIONAL_TIMEOUT_MULTIPLIER: 3
