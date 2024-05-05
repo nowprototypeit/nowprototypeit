@@ -25,13 +25,14 @@ usage-data-config.json
 
 const npmrc = `
 audit=false
+loglevel=error
 `.trimStart()
 
 const packageJson = {
   scripts: {
-    dev: 'nowprototypeit dev || npx -y nowprototypeit@latest failed-to-launch dev $?',
-    serve: 'nowprototypeit serve || npx -y nowprototypeit@latest failed-to-launch serve $?',
-    start: 'nowprototypeit start || npx -y nowprototypeit@latest failed-to-launch start $?'
+    dev: 'nowprototypeit dev || npx -y nowprototypeit@latest validate-kit dev $?',
+    serve: 'nowprototypeit serve || npx -y nowprototypeit@latest validate-kit serve $?',
+    start: 'nowprototypeit start || npx -y nowprototypeit@latest validate-kit start $?'
 
   }
 }

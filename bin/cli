@@ -396,6 +396,7 @@ async function runValidatePlugin () {
     case 'validate-plugin':
       return runValidatePlugin()
     case 'failed-to-launch':
+    case 'validate-kit':
       console.log()
       console.log('Your prototype kit failed to launch.  You might want to try running `npm install` to ensure all dependencies are installed.')
       console.log()
