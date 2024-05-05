@@ -81,23 +81,24 @@ When('I create a page at {string} using the {string} template from the {string} 
 })
 
 async function expectH1ToBe (browser, headerText, timeout) {
-  const startDate = new Date()
-  let h1
-  while (!h1) {
-    h1 = (await browser.queryTag('h1'))[0]
-    if (!h1) {
-      if (new Date() - startDate > (timeout - 500)) {
-        throw new Error('Timed out waiting for h1 element to appear')
-      }
-      await sleep(100)
+  let h1Text = null
+  await waitForConditionToBeMet(timeout, async () => {
+    const h1 = (await browser.queryTag('h1'))[0]
+    if (h1) {
+      h1Text = await h1.getText()
+      return h1Text.includes(headerText)
     }
-  }
-  const h1Text = await h1.getText()
-  ;(await expect(h1Text)).to.contain(headerText)
+    return false
+  }, () => {
+    if (!h1Text) {
+      throw new Error('h1 never appeared on the page')
+    }
+    throw new Error(`Expected h1 to contain [${headerText}] but found [${h1Text}]`)
+  })
 }
 
 Then('I should see a template creation success page', standardTimeout, async function () {
-  await expectH1ToBe(this.browser, 'Page created', standardTimeout.timeout)
+  await expectH1ToBe(this.browser, 'Page created', standardTimeout)
 })
 
 When('I click through to the page I created from a template', standardTimeout, async function () {
@@ -122,5 +123,5 @@ Then('I should not see the GOV.UK Header', standardTimeout, async function () {
 })
 
 Then('I should see the page header {string}', standardTimeout, async function (expectedHeader) {
-  await expectH1ToBe(this.browser, expectedHeader, standardTimeout.timeout)
+  await expectH1ToBe(this.browser, expectedHeader, standardTimeout)
 })
