@@ -5,6 +5,7 @@
 ### Fixes
 
 - Removed ZLib dependency, using built in node implementation - this solves an installation issue
+- POST requests are now being proxied correctly - this allows `<form method="post">` and calls to `.post()` routes which weren't previously working in development mode unless the request body was empty
 
 ## 0.4.0
 

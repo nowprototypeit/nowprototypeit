@@ -177,6 +177,7 @@ async function startKit (config = {}) {
       kitThread.stdio.stdin.write(str + '\n')
     },
     reset: async () => {
+      await resetKitSessions(returnValue)
       await resetKit(returnValue)
     },
     startupConfig: JSON.stringify(config, null, 2),
@@ -207,7 +208,8 @@ async function getBrowser (config = {}) {
       baseUrl = newBaseUrl
     },
     getFullUrl,
-    openUrl: async (url) => {
+    openUrl: async (url, maxTimeout = standardTimeout.timeout - 500) => {
+      let attemptCount = 0
       const start = Date.now()
       const fullUrl = getFullUrl(url)
       if (process.env.SHOW_URL_OPENINGS === 'true') {
@@ -215,16 +217,20 @@ async function getBrowser (config = {}) {
       }
       let succeeded = false
       let lastKnownError
-      while (!succeeded && Date.now() - start < standardTimeout.timeout - 500) {
-        try {
-          await driver.get(fullUrl)
-          succeeded = true
-        } catch (e) {
-          lastKnownError = e
-          await sleep(200)
-        }
+      while (!succeeded && Date.now() - start < maxTimeout) {
+        attemptCount++
+        await driver.get(fullUrl)
+          .then(() => {
+            succeeded = true
+          })
+          .catch(e => {
+            console.log(`Caught error [${e.type || e}] after [${attemptCount}] attempts`)
+            lastKnownError = e
+            return sleep(200)
+          })
       }
       if (!succeeded && lastKnownError) {
+        console.log(`failed to load [${url}] after [${attemptCount}] attempts with timeout [${maxTimeout}]`)
         throw lastKnownError
       }
     },
@@ -233,6 +239,9 @@ async function getBrowser (config = {}) {
     },
     queryClass: async (className) => {
       return await driver.findElements(By.className(className))
+    },
+    queryCss: async (cssSelector) => {
+      return await driver.findElements(By.css(cssSelector))
     },
     queryId: async (id) => {
       return await driver.findElement(By.id(id))
@@ -254,7 +263,13 @@ async function getBrowser (config = {}) {
       }
     },
     close: async () => {
-      await driver.quit()
+      try {
+        await driver.quit()
+      } catch (e) {
+        if (e.type !== 'NoSuchSessionError') {
+          throw e
+        }
+      }
       if (config.afterCleanup) {
         config.afterCleanup()
       }
@@ -394,6 +409,13 @@ async function setupKitAndBrowserForTestScope (that, options) {
   }
 }
 
+async function resetKitSessions (kit) {
+  const sessionsDir = path.join(kit.dir, '.tmp', 'sessions')
+  if (fs.existsSync(sessionsDir)) {
+    await fsp.rm(sessionsDir, { recursive: true })
+  }
+}
+
 async function resetKit (kit) {
   const runCommand = async (command) => {
     let result = ''
@@ -465,6 +487,7 @@ module.exports = {
   timeoutMultiplier,
   kitStartTimeout: { timeout: (process.env.TEST_KIT_DEPENDENCY ? 90 : 40) * 1000 * timeoutMultiplier },
   standardTimeout,
+  tinyTimeout: { timeout: 0.5 * 1000 * timeoutMultiplier },
   pluginActionTimeout: { timeout: 60 * 1000 * timeoutMultiplier },
   pluginActionPageTimeout: { timeout: 20 * 1000 * timeoutMultiplier },
   mediumActionTimeout: { timeout: 10 * 1000 * timeoutMultiplier },
