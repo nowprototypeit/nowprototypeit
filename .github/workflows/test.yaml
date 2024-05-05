@@ -20,7 +20,6 @@ jobs:
     name: Test ${{ matrix.type }} on Node v${{ matrix.node-version }} (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 25
-    runs-using: ${{ matrix.node-version }}
 
     steps:
     - run: |
