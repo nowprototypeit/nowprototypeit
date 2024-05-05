@@ -13,13 +13,14 @@ jobs:
     strategy:
       fail-fast: false  # continue other tests if one test in matrix fails
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [18.x, 20.x, 22.x]
         os: [windows-latest, ubuntu-latest, macos-latest]
         type: [acceptance, integration]
 
     name: Test ${{ matrix.type }} on Node v${{ matrix.node-version }} (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 25
+    runs-using: ${{ matrix.node-version }}
 
     steps:
     - run: |
