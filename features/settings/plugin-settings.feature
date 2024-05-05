@@ -8,7 +8,7 @@ Feature: Plugin settings
     And I wait for the prototype to reload
     Then I should see the settings saved message
     When I visit the homepage
-    Then I should see "An example service" as the service name in the GOV.UK header
+    Then the service name in the GOV.UK header should become "An example service"
 
   @govuk-variant
   Scenario: GOV.UK Global styles
