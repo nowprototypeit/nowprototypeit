@@ -311,6 +311,7 @@ async function getPrototypeKitAndBrowser (options = {}) {
     variantPluginName: options.variantPluginName,
     variantPluginDependency: options.variantPluginDependency
   }
+
   const [kit, browser] = await Promise.all([
     startKit(kitStartConfig),
     getBrowser({

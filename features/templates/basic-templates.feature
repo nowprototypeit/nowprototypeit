@@ -17,7 +17,6 @@ Feature: Templates
     Given I have the "GOV.UK Frontend" ("npm:govuk-frontend") plugin installed
     And I have the "Common Templates" ("npm:@govuk-prototype-kit/common-templates") plugin installed
     And I have the "GOV.UK Frontend Adaptor" ("npm:@nowprototypeit/govuk-frontend-adaptor") plugin installed
-    And I create a file "app/config.json" with contents '{"basePlugins": ["nowprototypeit", "govuk-frontend"]}'
     When I create a page at "/hello/world/this/is/a/test" using the "Question page" template from the "Common Templates From GOV.UK Prototype Kit" plugin
     Then I should see a template creation success page
     When I click through to the page I created from a template
@@ -44,4 +43,3 @@ Feature: Templates
     Then I should see the GOV.UK Header
     And I should see the page header "Heading or question goes here"
     And I should see the crown icon in the footer
-

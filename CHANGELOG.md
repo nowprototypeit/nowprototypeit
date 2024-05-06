@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### New Features
+
+- Replaced `basePlugins`, it was created a long time ago to allow a plugin like `govuk-frontend` to be built upon by a plugin like `hmrc-frontend` but now we have `pluginDependencies` which puts the decision into the hands of the plugin developer rather than the person building the prototype.  In the above example `hmrc-frontend` already depends on `govuk-frontend` so the order can be calculated without `basePlugins` being set. 
+
 ## 0.4.1
 
 ### Fixes
