@@ -1,4 +1,4 @@
-name: Tests
+name: Unit Tests
 
 on:
   push:
@@ -13,13 +13,11 @@ jobs:
     strategy:
       fail-fast: false  # continue other tests if one test in matrix fails
       matrix:
-        node-version: [18.x, 20.x, 22.x]
         os: [windows-latest, ubuntu-latest, macos-latest]
-        type: [acceptance, integration]
 
-    name: Test ${{ matrix.type }} on Node v${{ matrix.node-version }} (${{ matrix.os }})
+    name: Unit test (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 25
+    timeout-minutes: 5
 
     steps:
     - run: |
@@ -30,14 +28,12 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Use Node v${{ matrix.node-version }}
+    - name: Use Node v22
       uses: actions/setup-node@v4
       with:
         cache: 'npm'
-        node-version: ${{ matrix.node-version }}
+        node-version: 22
 
     - run: npm ci
 
-    - run: npm run test:unit && npm run test:browser:${{ matrix.type }} -- --retry 2
-      env:
-        ADDITIONAL_TIMEOUT_MULTIPLIER: 3
+    - run: npm run test:unit && npm run test:unit
