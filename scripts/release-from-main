@@ -188,7 +188,10 @@ async function updateChangelogAndPublish (kitDir) {
 
   do {
     await wait(2000)
-    const output = await execAndCaptureStdout('npm whoami', { allowStderr: true, allowErrorCode: true, hideStd: true })
+    let output = ''
+    try {
+      output = await execAndCaptureStdout('npm whoami', { allowStderr: true, allowErrorCode: true, hideStd: true })
+    } catch (e) {}
     if ((output || '').trim() === correctNpmUser) {
       loggedInAsCorrectNpmUser = true
     } else if (output) {
