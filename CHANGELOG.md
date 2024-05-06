@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.4.1
+
 ### Fixes
 
 - Removed ZLib dependency, using built in node implementation - this solves an installation issue
