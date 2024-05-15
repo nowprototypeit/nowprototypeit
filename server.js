@@ -84,18 +84,17 @@ if (config.isDevelopment) {
 
 nunjucksConfig.express = app
 
-// but uses the internal package as a backup if uninstalled
 const nunjucksAppEnv = getNunjucksAppEnv(
   plugins.getAppViews([appViewsDir])
 )
 
 expressNunjucks(nunjucksAppEnv, app)
 
-// Add Nunjucks filters
 utils.addNunjucksFilters(nunjucksAppEnv)
 
-// Add Nunjucks functions
 utils.addNunjucksFunctions(nunjucksAppEnv)
+
+utils.addMarkdownRenderers(nunjucksAppEnv)
 
 function prepareError (err) {
   return {
@@ -223,7 +222,8 @@ app.post('/manage-prototype/clear-data', function (req, res) {
 })
 
 // Strip .html, .htm and .njk if provided
-app.get(/\.(html|htm|njk)$/i, (req, res) => {
+const regExp = config.respectFileExtensions ? /\.(html|htm|njk|md)$/i : /\.(html|htm|njk)$/i
+app.get(regExp, (req, res) => {
   let path = req.path
   const parts = path.split('.')
   parts.pop()
@@ -291,11 +291,14 @@ app.use((err, req, res, next) => {
       if (config.showJsonErrors) {
         res.send({
           errorToBeDisplayedNicely: true,
-          isNunjucksError: true,
+          isNunjucksError: err.type === 'TEMPLATE_NOT_FOUND',
           message: err.message,
           type: err.type,
           stack: err.stack,
-          name: err.name
+          name: err.name,
+          reportedFilename: err.filename,
+          reportedLineNumber: err.lineNumber,
+          reportedColumn: err.column
         })
       } else {
         res.render('prototype-core/views/error.njk', {

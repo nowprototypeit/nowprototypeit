@@ -7,6 +7,16 @@
   {% if fields.length %}
     <form action="{{ currentUrl }}" method="post">
       {% for field in fields %}
+        {% if field.stage %}
+          <h3>Experiment stage: {{ field.stage }}</h3>
+          <p>
+            {% if field.stage == 1 %}
+              At this stage features may be added and removed, integrations with plugins may change.  It's not recommended that you use this stage in your prototypes, it's intended for early testing.
+            {% else %}
+              (no description found for stage {{ field.stage }})
+            {% endif %}
+          </p>
+        {% endif %}
         {% if field.type == 'text' or field.type == 'int' %}
           {{ nowPrototypeItTextInput({
             label: field.name,

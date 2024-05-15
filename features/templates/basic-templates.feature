@@ -12,7 +12,6 @@ Feature: Templates
 
   @no-variant
   @integration
-  @current
   Scenario: Create a GOV.UK Page
     Given I have the "GOV.UK Frontend" ("npm:govuk-frontend") plugin installed
     And I have the "Common Templates" ("npm:@govuk-prototype-kit/common-templates") plugin installed
