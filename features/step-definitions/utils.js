@@ -114,6 +114,25 @@ async function startKit (config = {}) {
     finishedRes = resolve
   })
 
+  if (config.appConfigAdditions) {
+    const configFilePath = path.join(dir, 'app', 'config.json')
+    const configFileObj = JSON.parse(await fsp.readFile(configFilePath, 'utf8'))
+    const newConfigObj = {
+      ...configFileObj,
+      ...config.appConfigAdditions
+    }
+    await fsp.writeFile(configFilePath, JSON.stringify(newConfigObj, null, 2), 'utf8')
+    let output = ''
+    await execv1('git status', {
+      cwd: dir
+    }, x => { output += x.toString() })
+    if (!output.includes('nothing to commit, working tree clean')) {
+      await execv1('git -c "user.email=no-reply@nowprototype.it" -c "user.name=NPI Automation" commit -am "Add app config additions" --no-verify', {
+        cwd: dir
+      })
+    }
+  }
+
   const kitPort = await findAvailablePort()
   const pathToCli = path.join(dir, 'node_modules', 'nowprototypeit', 'bin', 'cli')
   if (!fs.existsSync(pathToCli)) {
@@ -309,7 +328,8 @@ async function getPrototypeKitAndBrowser (options = {}) {
     afterCleanup: cleanup,
     kitDependency: options.kitDependency || process.env.TEST_KIT_DEPENDENCY,
     variantPluginName: options.variantPluginName,
-    variantPluginDependency: options.variantPluginDependency
+    variantPluginDependency: options.variantPluginDependency,
+    appConfigAdditions: options.appConfigAdditions
   }
 
   const [kit, browser] = await Promise.all([
@@ -407,6 +427,10 @@ async function setupKitAndBrowserForTestScope (that, options) {
 
   if (!that.kit) {
     throw new Error('No kit set up, something is wrong')
+  }
+
+  if (process.env.LOG_KIT_DIR === 'true') {
+    console.log('Kit running in dir', that.kit.dir)
   }
 }
 

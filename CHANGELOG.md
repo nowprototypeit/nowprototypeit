@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Experimental Features
+
+- Respecting file extensions - using `.njk` for Nunjucks templates and treating `.html` files as just HTML (when using the respect file extensions experiment)
+- Allowing markdown views and includes (when using the respect file extensions experiment)
+- Allowing plugins to provide Markdown Renderers (when using the respect file extensions experiment)
+- Experimentally allowing plugins to provide Markdown Templates for the user to use when creating new pages, this integration may change based on feedback - please provide feedback if you're using this feature support@nowprototype.it (when using the respect file extensions experiment)
+
+### New Features
+
+- Plugin lookup is no longer experimental, it's now a core feature
+
 ## 0.5.0
 
 ### New Features
