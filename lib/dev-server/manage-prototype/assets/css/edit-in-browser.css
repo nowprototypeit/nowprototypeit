@@ -1,0 +1,54 @@
+.nowprototypeit-in-browser-editor-is-open {
+  padding-bottom: 40vh;
+}
+
+.nowprototypeit-in-browser-editor {
+  position: fixed;
+  height: 40vh;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid #333;
+}
+
+.nowprototypeit-in-browser-bar {
+  position: relative;
+  border-bottom: 1px solid #333;
+}
+
+.nowprototypeit-in-browser-bar__logo {
+  max-width: 15rem;
+  margin: 0.3rem;
+}
+
+.nowprototypeit-in-browser-bar__burger-menu-contents--closed {
+  display: none;
+}
+
+.nowprototypeit-in-browser-bar__burger-menu {
+  position: absolute;
+  right: 0.75rem;
+  top: 0.75rem;
+  margin: 0.2rem;
+  cursor: pointer;
+}
+
+.nowprototypeit-in-browser-bar__burger-menu-contents {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  width: 15rem;
+  height: 6rem;
+  background: white;
+  border: 3px solid #333;
+  z-index: 9999;
+}
+
+.nowprototypeit-in-browser-editor__editor {
+  display: block;
+  height: 30vh;
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
