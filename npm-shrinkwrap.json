@@ -8,6 +8,7 @@
       "name": "nowprototypeit",
       "version": "0.6.0",
       "dependencies": {
+        "@nowprototypeit/design-system": "^1.0.6",
         "ansi-colors": "^4.1.3",
         "body-parser": "^1.20.2",
         "chokidar": "^3.6.0",
@@ -23,6 +24,7 @@
         "inquirer": "^8.2.6",
         "lodash": "^4.17.21",
         "marked": "^4.3.0",
+        "monaco-editor": "^0.48.0",
         "nodemon": "^3.0.1",
         "nunjucks": "^3.2.4",
         "portscanner": "^2.2.0",
@@ -36,7 +38,6 @@
       },
       "devDependencies": {
         "@cucumber/cucumber": "^10.3.1",
-        "@nowprototypeit/design-system": "^1.0.6",
         "assert": "^2.1.0",
         "chai": "^5.1.0",
         "cheerio": "^1.0.0-rc.12",
@@ -1782,8 +1783,7 @@
     "node_modules/@nowprototypeit/design-system": {
       "version": "1.0.6",
       "resolved": "https://registry.npmjs.org/@nowprototypeit/design-system/-/design-system-1.0.6.tgz",
-      "integrity": "sha512-OqUF1N9cKzDW/7nG3hgUfMmvptoSzYMTwysX25Ax1GH2uc+XiKZRAN0C8+HMbQ0y3xd4P2qLXd5moTxwXM9dPw==",
-      "dev": true
+      "integrity": "sha512-OqUF1N9cKzDW/7nG3hgUfMmvptoSzYMTwysX25Ax1GH2uc+XiKZRAN0C8+HMbQ0y3xd4P2qLXd5moTxwXM9dPw=="
     },
     "node_modules/@pkgjs/parseargs": {
       "version": "0.11.0",
@@ -8110,6 +8110,11 @@
         "url": "https://github.com/sponsors/isaacs"
       }
     },
+    "node_modules/monaco-editor": {
+      "version": "0.48.0",
+      "resolved": "https://registry.npmjs.org/monaco-editor/-/monaco-editor-0.48.0.tgz",
+      "integrity": "sha512-goSDElNqFfw7iDHMg8WDATkfcyeLTNpBHQpO8incK6p5qZt5G/1j41X0xdGzpIkGojGXM+QiRQyLjnfDVvrpwA=="
+    },
     "node_modules/ms": {
       "version": "2.0.0",
       "resolved": "https://registry.npmjs.org/ms/-/ms-2.0.0.tgz",
@@ -12596,8 +12601,7 @@
     "@nowprototypeit/design-system": {
       "version": "1.0.6",
       "resolved": "https://registry.npmjs.org/@nowprototypeit/design-system/-/design-system-1.0.6.tgz",
-      "integrity": "sha512-OqUF1N9cKzDW/7nG3hgUfMmvptoSzYMTwysX25Ax1GH2uc+XiKZRAN0C8+HMbQ0y3xd4P2qLXd5moTxwXM9dPw==",
-      "dev": true
+      "integrity": "sha512-OqUF1N9cKzDW/7nG3hgUfMmvptoSzYMTwysX25Ax1GH2uc+XiKZRAN0C8+HMbQ0y3xd4P2qLXd5moTxwXM9dPw=="
     },
     "@pkgjs/parseargs": {
       "version": "0.11.0",
@@ -17244,6 +17248,11 @@
       "resolved": "https://registry.npmjs.org/mkdirp/-/mkdirp-2.1.6.tgz",
       "integrity": "sha512-+hEnITedc8LAtIP9u3HJDFIdcLV2vXP33sqLLIzkv1Db1zO/1OxbvYf0Y1OC/S/Qo5dxHXepofhmxL02PsKe+A==",
       "dev": true
+    },
+    "monaco-editor": {
+      "version": "0.48.0",
+      "resolved": "https://registry.npmjs.org/monaco-editor/-/monaco-editor-0.48.0.tgz",
+      "integrity": "sha512-goSDElNqFfw7iDHMg8WDATkfcyeLTNpBHQpO8incK6p5qZt5G/1j41X0xdGzpIkGojGXM+QiRQyLjnfDVvrpwA=="
     },
     "ms": {
       "version": "2.0.0",
