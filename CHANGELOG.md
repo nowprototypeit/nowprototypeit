@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.6.1
+
 ### Fixes
 
 - Fixed an issue causing repeated reloads.
