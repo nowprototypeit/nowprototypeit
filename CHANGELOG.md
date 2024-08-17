@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-### New Features
+### Fixes
 
 - Fixed an issue causing repeated reloads.
 
