@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### New Features
+
+- Fixed an issue causing repeated reloads.
+
 ## 0.6.0
 
 ### Experimental Features
