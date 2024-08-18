@@ -1,5 +1,5 @@
 const { When, Then } = require('@cucumber/cucumber')
-const { standardTimeout, waitForConditionToBeMet, readFixtureFile, readPrototypeFile  } = require('./utils')
+const { standardTimeout, waitForConditionToBeMet, readFixtureFile, readPrototypeFile } = require('./utils')
 const waitForEditorElem = getEditorElem
 
 When('I open the in-browser editor', standardTimeout, async function () {
@@ -58,10 +58,10 @@ Then('the file {string} should contain the same content as the fixture file {str
   })
 })
 
-async function getEditorContents(browser) {
+async function getEditorContents (browser) {
   return await browser.executeScript('return window.NOW_PROTOTYPE_IT.__for_automation_only_currentEditor.getValue()')
 }
 
-async function setEditorContents(browser, val) {
+async function setEditorContents (browser, val) {
   return await browser.executeScript('window.NOW_PROTOTYPE_IT.__for_automation_only_currentEditor.setValue(`' + val.replaceAll('`', '\\`') + '`)')
 }
