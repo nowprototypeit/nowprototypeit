@@ -4,7 +4,7 @@ const { sleep } = require('../../lib/utils')
 const { intentionalDelayTimeout, waitForConditionToBeMet, makeGetRequest, tinyTimeout } = require('./utils')
 const path = require('node:path')
 const fs = require('node:fs')
-const { mediumActionTimeout, standardTimeout } = require('./utils')
+const { mediumActionTimeout, standardTimeout, readFixtureFile, writePrototypeFile } = require('./utils')
 const { By } = require('selenium-webdriver')
 
 const { promises: fsp } = fs
@@ -170,14 +170,3 @@ When('I submit the form', standardTimeout, async function () {
   }
   await submitButtons[0].click()
 })
-
-async function readFixtureFile (relativeFilePath, fileContents) {
-  const filePath = path.join(__dirname, '..', 'fixtures', relativeFilePath)
-  return await fsp.readFile(filePath, 'utf8')
-}
-
-async function writePrototypeFile (kit, relativeFilePath, fileContents) {
-  const filePath = path.join(kit.dir, relativeFilePath)
-  await fsp.mkdir(path.dirname(filePath), { recursive: true })
-  await fsp.writeFile(filePath, fileContents, 'utf8')
-}

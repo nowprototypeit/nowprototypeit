@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Experimental Features
+
+- Added an in-browser editor, it's at a very early stage.  It currently only supports the view file when using standard file naming.  We would love your feedback on this feature, please raise Github Issues with any feedback
+
 ## 0.6.1
 
 ### Fixes
