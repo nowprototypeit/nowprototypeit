@@ -293,6 +293,9 @@ async function getBrowser (config = {}) {
         config.afterCleanup()
       }
     },
+    executeScript: async (script) => {
+      return await driver.executeScript(script)
+    },
     kitStartConfig: config.kitStartConfig
   }
   self.getPluginDetails = async () => {
@@ -495,6 +498,22 @@ async function resetKit (kit) {
   }
 }
 
+async function readFixtureFile (relativeFilePath, fileContents) {
+  const filePath = path.join(__dirname, '..', 'fixtures', relativeFilePath)
+  return await fsp.readFile(filePath, 'utf8')
+}
+
+async function readPrototypeFile (kit, relativeFilePath) {
+  const filePath = path.join(kit.dir, relativeFilePath)
+  return await fsp.readFile(filePath, 'utf8')
+}
+
+async function writePrototypeFile (kit, relativeFilePath, fileContents) {
+  const filePath = path.join(kit.dir, relativeFilePath)
+  await fsp.mkdir(path.dirname(filePath), { recursive: true })
+  await fsp.writeFile(filePath, fileContents, 'utf8')
+}
+
 const initialTimeoutMultiplier = process.env.TIMEOUT_MULTIPLIER || path.sep === '/' ? 1 : 3
 const additionalTimeoutMultiplier = Number(process.env.ADDITIONAL_TIMEOUT_MULTIPLIER ? process.env.ADDITIONAL_TIMEOUT_MULTIPLIER : 1)
 const timeoutMultiplier = initialTimeoutMultiplier * additionalTimeoutMultiplier
@@ -509,6 +528,9 @@ module.exports = {
   makeGetRequest,
   waitForConditionToBeMet,
   setupKitAndBrowserForTestScope,
+  readFixtureFile,
+  readPrototypeFile,
+  writePrototypeFile,
   timeoutMultiplier,
   kitStartTimeout: { timeout: (process.env.TEST_KIT_DEPENDENCY ? 90 : 40) * 1000 * timeoutMultiplier },
   standardTimeout,

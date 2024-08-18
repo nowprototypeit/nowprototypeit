@@ -13,6 +13,9 @@ setDefaultTimeout(1)
 const experimentTagSettings = {
   '@respect-file-extensions-experiment-on': {
     respectFileExtensions: true
+  },
+  '@edit-in-browser-experiment-on': {
+    editInBrowser: true
   }
 }
 
