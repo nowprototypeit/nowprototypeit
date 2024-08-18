@@ -6,6 +6,11 @@
 
 - Added an in-browser editor, it's at a very early stage.  It currently only supports the view file when using standard file naming.  We would love your feedback on this feature, please raise Github Issues with any feedback
 
+### New Features
+
+- Introduced password protection for prototypes hosted outside our dedicated hosting platform
+- Added an explanation when a user doesn't set up a password or intentionally opt-out of password protection
+
 ## 0.6.1
 
 ### Fixes
