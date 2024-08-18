@@ -23,6 +23,8 @@ async function getEditorElem (browser) {
 }
 
 Then('I should see the contents of {string} in the in-browser editor', standardTimeout, async function (fileRelativePath) {
+  await waitForEditorElem(this.browser)
+
   let actual
   const expected = (await readPrototypeFile(this.kit, fileRelativePath))
   await waitForConditionToBeMet(standardTimeout, async () => {
