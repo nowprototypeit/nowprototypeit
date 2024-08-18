@@ -8,6 +8,7 @@ const cookieParser = require('cookie-parser')
 const dotenv = require('dotenv')
 const express = require('express')
 const { expressNunjucks, getNunjucksAppEnv, stopWatchingNunjucks } = require('./lib/nunjucks/nunjucksConfiguration')
+const { setupDesignSystemRoutes } = require('./lib/dev-server/manage-prototype/routes/management-pages/design-system-routes')
 
 // We want users to be able to keep api keys, config variables and other
 // envvars in a `.env` file, run dotenv before other code to make sure those
@@ -163,20 +164,15 @@ app.use((req, res, next) => {
   next()
 })
 
-require('./lib/plugins/plugins-routes.js')
 const { encryptPassword } = require('./lib/utils')
-
-utils.addRouters(app)
-
-// Clear all data in session
-// Render password page with a returnURL to redirect people to where they came from
-// Check authentication password
 app.get('/manage-prototype/password', function (req, res) {
   const error = req.query.error
   res.render('prototype-core/views/password.njk', {
     ...req.app.locals,
     error,
-    currentUrl: req.originalUrl
+    currentUrl: req.originalUrl,
+    nowPrototypeItAssetsPath: '/manage-prototype/assets',
+    nowPrototypeItDesignSystemAssetsPath: '/manage-prototype/now-prototype-it-design-system/assets'
   })
 })
 
@@ -185,7 +181,7 @@ app.post('/manage-prototype/password', function (req, res) {
   const submittedPassword = req.body.password
   const providedUrl = req.query.returnURL
 
-  const processedRedirectUrl = (!providedUrl || providedUrl.startsWith('/manage-prototype/password')) ? '/' : providedUrl
+  const processedRedirectUrl = (!providedUrl || providedUrl.startsWith('/manage-prototype')) ? '/' : providedUrl
   if (passwords.some(password => submittedPassword === password)) {
     // see lib/middleware/authentication.js for explanation
     res.cookie('authentication', encryptPassword(submittedPassword), {
@@ -199,6 +195,37 @@ app.post('/manage-prototype/password', function (req, res) {
     res.redirect('/manage-prototype/password?error=wrong-password&returnURL=' + encodeURIComponent(processedRedirectUrl))
   }
 })
+
+if ((config.useAuth && config.isProduction) || config.passwordMissing) {
+  const npiDesignSystemRouter = express.Router()
+  setupDesignSystemRoutes(npiDesignSystemRouter)
+  app.use('/manage-prototype', npiDesignSystemRouter)
+
+  if (config.passwordMissing) {
+    app.use((req, res, next) => {
+      res.render('prototype-core/views/password-missing.njk', {
+        currentUrl: req.originalUrl,
+        nowPrototypeItAssetsPath: '/manage-prototype/assets',
+        nowPrototypeItDesignSystemAssetsPath: '/manage-prototype/now-prototype-it-design-system/assets'
+      })
+    })
+  }
+  app.use((req, res, next) => {
+    if (req.originalUrl.startsWith('/manage-prototype/assets')) {
+      return next()
+    }
+    if (req.cookies.authentication) {
+      if (config.passwords.some(password => req.cookies.authentication === encryptPassword(password))) {
+        return next()
+      }
+    }
+    res.redirect('/manage-prototype/password?returnURL=' + encodeURIComponent(req.originalUrl))
+  })
+}
+
+require('./lib/plugins/plugins-routes.js')
+
+utils.addRouters(app)
 
 app.get('/manage-prototype/clear-data', function (req, res) {
   if (!req.query.returnUrl && req.headers.referer) {
@@ -301,6 +328,7 @@ app.use((err, req, res, next) => {
           reportedColumn: err.column
         })
       } else {
+        console.log(err)
         res.render('prototype-core/views/error.njk', {
           heading: 'An error occurred',
           text: err.message
@@ -310,7 +338,6 @@ app.use((err, req, res, next) => {
     }
   }
 })
-
 app.close = stopWatchingNunjucks
 
 module.exports = app
