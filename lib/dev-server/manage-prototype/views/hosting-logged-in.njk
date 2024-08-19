@@ -1,0 +1,30 @@
+{% extends "layouts/manage-prototype.njk" %}
+{% from "components/text-input.njk" import nowPrototypeItTextInput %}
+{% from "components/radio-buttons.njk" import nowPrototypeItRadioButtons %}
+{% from "components/submit-button.njk" import nowPrototypeItSubmitButton %}
+{% from "components/error.njk" import nowPrototypeItError %}
+
+{% block content %}
+
+  {% if splash %}
+    <h1>{{ splash }}</h1>
+  {% endif %}
+  {% if splash == 'success' and url %}
+    <p>Your prototype is now hosted at <a href="{{ url }}" target="_blank">{{ url }}</a>.</p>
+  {% endif %}
+
+  <form action="{{ uploadPrototypeUrl }}" method="post">
+    <h1>Upload your prototype to nowuserresearch.it</h1>
+
+    {{ nowPrototypeItTextInput({
+      label: "Name of prototype",
+      nameAndId: "prototype-name"
+    }) }}
+
+    {{ nowPrototypeItSubmitButton({
+      text: "Upload prototype"
+    }) }}
+
+  </form>
+
+{% endblock %}

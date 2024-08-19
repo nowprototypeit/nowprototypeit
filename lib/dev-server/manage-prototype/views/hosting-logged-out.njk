@@ -1,0 +1,20 @@
+{% extends "layouts/manage-prototype.njk" %}
+{% from "components/text-input.njk" import nowPrototypeItTextInput %}
+{% from "components/radio-buttons.njk" import nowPrototypeItRadioButtons %}
+{% from "components/submit-button.njk" import nowPrototypeItSubmitButton %}
+{% from "components/error.njk" import nowPrototypeItError %}
+
+{% block content %}
+
+  <h1>Prototype Hosting from Now Prototye It</h1>
+
+  <p>To start hosing you'll need to log in to your nowprototype.it account.</p>
+
+  <form action="/manage-prototype/hosting/begin-login" method="post">
+    {{ nowPrototypeItSubmitButton({
+      text: 'Log in'
+    }) }}
+  </form>
+
+
+{% endblock %}
