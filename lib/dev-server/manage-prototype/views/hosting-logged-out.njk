@@ -6,9 +6,17 @@
 
 {% block content %}
 
-  <h1>Prototype Hosting from Now Prototye It</h1>
+  <h1>Prototype Hosting from Now Prototype It</h1>
 
   <p>To start hosing you'll need to log in to your nowprototype.it account.</p>
+
+  {% if genericError %}
+    {{ nowPrototypeItError({
+      titleText: "Something went wrong while trying to log you in",
+      errorList: [
+        {text: "Something went wrong when trying to log you in, please check your internet connection and try again."}
+      ]}) }}
+  {% endif %}
 
   <form action="/manage-prototype/hosting/begin-login" method="post">
     {{ nowPrototypeItSubmitButton({

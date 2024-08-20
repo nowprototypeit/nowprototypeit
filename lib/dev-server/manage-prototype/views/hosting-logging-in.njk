@@ -24,7 +24,7 @@
 
   <script>
     {% if shouldAutoOpen and loginUrl %}
-    window.open('{{ loginUrl }}', '_blank').focus()
+    window.open('{{ loginUrl }}', 'NPILoginWindow', 'width=600,height=400,top=50,left=50,').focus()
     {% endif %}
     setTimeout(function() {
       window.location.reload()
