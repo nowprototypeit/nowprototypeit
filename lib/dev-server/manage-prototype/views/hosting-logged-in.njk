@@ -6,8 +6,20 @@
 
 {% block content %}
 
-  {% if splash %}
-    <h1>{{ splash }}</h1>
+  <div class="nowprototypeit-profile-banner">
+    <div class="nowprototypeit-user-area-wrapper">
+      <div class="nowprototypeit-profile-picture-wrapper"><img src="/manage-prototype/hosting/profile-picture" alt="User profile picture"/></div>
+      <div class="nowprototypeit-user-name">{{ name }}</div>
+    </div>
+    <div class="nowprototypeit-sign-out-wrapper"><form method="post" action="/manage-prototype/hosting/logout">{{ nowPrototypeItSubmitButton({text: 'Sign out'}) }}</form></div>
+  </div>
+
+  {% if errorSplash %}
+    {{ nowPrototypeItError({
+      titleText: errorSplash.title,
+      errorList: [
+        {text: errorSplash.message}
+      ]}) }}
   {% endif %}
   {% if splash == 'success' and url %}
     <p>Your prototype is now hosted at <a href="{{ url }}" target="_blank">{{ url }}</a>.</p>

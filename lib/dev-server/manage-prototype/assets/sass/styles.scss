@@ -6,3 +6,52 @@
   //transition: top .2s ease-in-out;
 }
 
+.nowprototypeit-profile-banner {
+  position: relative;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 10px 0;
+  text-align: center;
+
+  .nowprototypeit-user-area-wrapper {
+    display: inline-block;
+    position: relative;
+    vertical-align: top;
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 20px;
+    text-align: left;
+
+    .nowprototypeit-profile-picture-wrapper {
+      display: inline-block;
+      vertical-align: top;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin-right: 20px;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+    .nowprototypeit-user-name {
+      font-size: 1.5em;
+      font-weight: bold;
+      margin: 0;
+      display: inline-block;
+      margin-top: 1.2rem;
+    }
+  }
+  .nowprototypeit-sign-out-wrapper {
+    display: inline-block;
+    vertical-align: top;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-top: 1rem;
+  }
+}
