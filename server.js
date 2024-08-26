@@ -9,6 +9,7 @@ const dotenv = require('dotenv')
 const express = require('express')
 const { expressNunjucks, getNunjucksAppEnv, stopWatchingNunjucks } = require('./lib/nunjucks/nunjucksConfiguration')
 const { setupDesignSystemRoutes } = require('./lib/dev-server/manage-prototype/routes/management-pages/design-system-routes')
+const {highPriorityPluginRoutes, lowPriorityPluginRoutes} = require('./lib/plugins/plugins-routes.js')
 
 // We want users to be able to keep api keys, config variables and other
 // envvars in a `.env` file, run dotenv before other code to make sure those
@@ -223,9 +224,11 @@ if ((config.useAuth && config.isProduction) || config.passwordMissing) {
   })
 }
 
-require('./lib/plugins/plugins-routes.js')
 
+
+highPriorityPluginRoutes()
 utils.addRouters(app)
+lowPriorityPluginRoutes()
 
 app.get('/manage-prototype/clear-data', function (req, res) {
   if (!req.query.returnUrl && req.headers.referer) {

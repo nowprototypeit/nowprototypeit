@@ -16,6 +16,9 @@ const experimentTagSettings = {
   },
   '@edit-in-browser-experiment-on': {
     editInBrowser: true
+  },
+  '@global-plugin-routes': {
+    globalRoutesFromPlugins: true
   }
 }
 

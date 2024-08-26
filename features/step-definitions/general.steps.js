@@ -76,13 +76,15 @@ Then('the page title should become {string}', mediumActionTimeout, async functio
     actualTitleText = await this.browser.getTitle()
   }
 })
-Given('I am viewing a {int} page at {string}', standardTimeout, async function (statusCode, url) {
+const statusCodeCheck = async function (statusCode, url) {
   const [response] = await Promise.all([
-    makeGetRequest(this.browser.getFullUrl(url)),
-    this.browser.openUrl(url)
-  ])
+      makeGetRequest(this.browser.getFullUrl(url)),
+      this.browser.openUrl(url)
+    ])
   ;(await expect(response.statusCode)).to.equal(statusCode)
-})
+}
+Given('I am viewing a {int} page at {string}', standardTimeout, statusCodeCheck)
+Then('I should receive a {int} for page at {string}', standardTimeout, statusCodeCheck)
 
 When('I visit {string}', standardTimeout, async function (url) {
   await this.browser.openUrl(url)
