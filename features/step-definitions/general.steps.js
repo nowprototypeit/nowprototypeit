@@ -170,3 +170,11 @@ When('I submit the form', standardTimeout, async function () {
   }
   await submitButtons[0].click()
 })
+
+When('I select the {string} radio button', standardTimeout, async function (radioElementId) {
+  const $elem = await this.browser.queryId(radioElementId)
+  if (!$elem) {
+    throw new Error(`no element with ID ${radioElementId}`)
+  }
+  await $elem.click()
+})
