@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### New Features
+
+- Added the ability for plugins to provide routers allowing them to provide partial user journeys.
+
 ### Experimental Features
 
 - Added an early exploration into an integrated hosting solution.  This is too early to appear in the settings pages but including it here allows us to work on the hosting platform and get ready for it to become an experiment that users can opt in to.

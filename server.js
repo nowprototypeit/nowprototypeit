@@ -9,6 +9,7 @@ const dotenv = require('dotenv')
 const express = require('express')
 const { expressNunjucks, getNunjucksAppEnv, stopWatchingNunjucks } = require('./lib/nunjucks/nunjucksConfiguration')
 const { setupDesignSystemRoutes } = require('./lib/dev-server/manage-prototype/routes/management-pages/design-system-routes')
+const { highPriorityPluginRoutes, lowPriorityPluginRoutes } = require('./lib/plugins/plugins-routes.js')
 
 // We want users to be able to keep api keys, config variables and other
 // envvars in a `.env` file, run dotenv before other code to make sure those
@@ -223,8 +224,7 @@ if ((config.useAuth && config.isProduction) || config.passwordMissing) {
   })
 }
 
-require('./lib/plugins/plugins-routes.js')
-
+highPriorityPluginRoutes()
 utils.addRouters(app)
 
 app.get('/manage-prototype/clear-data', function (req, res) {
@@ -264,6 +264,8 @@ app.get(regExp, (req, res) => {
 app.get(/^([^.]+)$/, async (req, res, next) => {
   await utils.matchRoutes(req, res, next)
 })
+
+lowPriorityPluginRoutes()
 
 // Redirect all POSTs to GETs - this allows users to use POST for autoStoreData
 app.post(/^\/([^.]+)$/, (req, res) => {

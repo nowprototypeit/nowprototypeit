@@ -76,13 +76,15 @@ Then('the page title should become {string}', mediumActionTimeout, async functio
     actualTitleText = await this.browser.getTitle()
   }
 })
-Given('I am viewing a {int} page at {string}', standardTimeout, async function (statusCode, url) {
+const statusCodeCheck = async function (statusCode, url) {
   const [response] = await Promise.all([
     makeGetRequest(this.browser.getFullUrl(url)),
     this.browser.openUrl(url)
   ])
   ;(await expect(response.statusCode)).to.equal(statusCode)
-})
+}
+Given('I am viewing a {int} page at {string}', standardTimeout, statusCodeCheck)
+Then('I should receive a {int} for page at {string}', standardTimeout, statusCodeCheck)
 
 When('I visit {string}', standardTimeout, async function (url) {
   await this.browser.openUrl(url)
@@ -169,4 +171,12 @@ When('I submit the form', standardTimeout, async function () {
     throw new Error(`Expected exactly one submit button in the form, found [${submitButtons.length}]`)
   }
   await submitButtons[0].click()
+})
+
+When('I select the {string} radio button', standardTimeout, async function (radioElementId) {
+  const $elem = await this.browser.queryId(radioElementId)
+  if (!$elem) {
+    throw new Error(`no element with ID ${radioElementId}`)
+  }
+  await $elem.click()
 })

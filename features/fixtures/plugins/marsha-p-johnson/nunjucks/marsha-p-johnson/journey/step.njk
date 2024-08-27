@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Step {{ writtenNumber }}</title>
+</head>
+<body>
+<h1>Step {{ writtenNumber }}</h1>
+<p>{{ info }}</p>
+{% if next %}
+  <form method="post" action="{{ navigatorFormHandlerUrl }}">
+    <input type="hidden" name="current-page" value="{{ pageNumber }}"/>
+    <fieldset>
+      <h3 class="fieldset__heading">
+        Do you want to know more?
+      </h3>
+      <input name="knowMore" id="know-more-yes" type="radio" value="yes"/>
+      <label for="know-more-yes">
+        Yes, I want to know more
+      </label>
+      <input name="knowMore" id="know-more-no" type="radio" value="no"/>
+      <label for="know-more-no">
+        No, I've learned enough
+      </label>
+    </fieldset>
+    <button type="submit">Submit</button>
+  </form>
+{% else %}
+  <p><a href="{{ endPageURL }}">Next page</a></p>
+{% endif %}
+</body>
+</html>

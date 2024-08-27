@@ -31,6 +31,9 @@
     ],
     "importNunjucksMacrosInto": [
       "/nunjucks/marsha-p-johnson/layouts/example-layout.njk"
+    ],
+    "expressRouters": [
+      "/mpj-routes.js"
     ]
   }
 }
