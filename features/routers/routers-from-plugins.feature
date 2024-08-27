@@ -1,3 +1,4 @@
+@plugin-routers
 Feature: Routers from plugins
 
   @no-variant

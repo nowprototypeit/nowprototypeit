@@ -60,7 +60,7 @@ function setupNamespacedRouter (router, { contextPath }) {
   })
 }
 
-function setupGlobalRouter(router) {
+function setupGlobalRouter (router) {
   router.get('/mpj-info/start', (req, res) => {
     res.send('<h1>Welcome to the MPJ plugin pages</h1><p><a href="/plugin-routes/marsha-p-johnson/info/1">Start the journey</a></p>')
   })
