@@ -6,6 +6,12 @@
 
 - Added the ability for plugins to provide routers allowing them to provide partial user journeys.
 
+### Fixes
+
+- No longer allowing in-browser editing of files from node_modules
+- Syntax highlighting html files as HTML when using the "respect file extensions" experiment
+- Syntax highlighting html files as Nunjucks when not using the "respect file extensions" experiment
+
 ### Experimental Features
 
 - Added an early exploration into an integrated hosting solution.  This is too early to appear in the settings pages but including it here allows us to work on the hosting platform and get ready for it to become an experiment that users can opt in to.

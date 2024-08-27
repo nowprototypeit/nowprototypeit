@@ -88,9 +88,12 @@ button {
   border-left: 1px solid #35529c;
 }
 
-.nowprototypeit-in-browser-bar__nav li + li {
+.nowprototypeit-in-browser-bar__nav li:last-of-type {
   border-right: 1px solid #35529c;
-  padding-left:0.6rem;
+}
+
+.nowprototypeit-in-browser-bar__nav li + li {
+  padding-left: 0.6rem;
 }
 
 .nowprototypeit-in-browser-editor__editor {
