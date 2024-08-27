@@ -228,7 +228,7 @@ if ((config.useAuth && config.isProduction) || config.passwordMissing) {
 
 highPriorityPluginRoutes()
 utils.addRouters(app)
-lowPriorityPluginRoutes()
+
 
 app.get('/manage-prototype/clear-data', function (req, res) {
   if (!req.query.returnUrl && req.headers.referer) {
@@ -267,6 +267,8 @@ app.get(regExp, (req, res) => {
 app.get(/^([^.]+)$/, async (req, res, next) => {
   await utils.matchRoutes(req, res, next)
 })
+
+lowPriorityPluginRoutes()
 
 // Redirect all POSTs to GETs - this allows users to use POST for autoStoreData
 app.post(/^\/([^.]+)$/, (req, res) => {

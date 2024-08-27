@@ -19,7 +19,6 @@ Feature: Routers from plugins
     Then the main heading should be updated to "End"
 
   @no-variant
-  @global-plugin-routes
   @auto-refresh
   Scenario: Prototype routes should override global plugin routes
     Given I have the demo plugin "marsha-p-johnson" installed
@@ -29,9 +28,15 @@ Feature: Routers from plugins
     Then the main heading should be updated to "Hello world"
 
   @no-variant
-  Scenario: Global plugin routes should be off by default
+  @auto-refresh
+  Scenario: Global plugin routes should be overridden by prototype views
     Given I have the demo plugin "marsha-p-johnson" installed
-    Then I should receive a 404 for page at "/mpj-info/start"
+    When I visit "/mpj-info/start"
+    Then the main heading should be updated to "Welcome to the MPJ plugin pages"
+    And I create a file "app/views/mpj-info/start.njk" based on the fixture file "nunjucks/really-basic-page.njk"
+    Then the main heading should be updated to "3 + 5 = 8"
+    When I delete the file "/app/views/mpj-info/start.njk"
+    Then the main heading should be updated to "Welcome to the MPJ plugin pages"
 
   @no-variant
   Scenario: Prototype routes should not override namespaced plugin routes
