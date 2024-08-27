@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.8.0
+
 ### New Features
 
 - Added the ability for plugins to provide routers allowing them to provide partial user journeys.
