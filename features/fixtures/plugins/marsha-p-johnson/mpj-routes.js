@@ -59,7 +59,6 @@ function setupNamespacedRouter (router, { contextPath }) {
     res.status(404).render('/marsha-p-johnson/journey/not-found.njk')
   })
 }
-
 function setupGlobalRouter (router) {
   router.get('/mpj-info/start', (req, res) => {
     res.send('<h1>Welcome to the MPJ plugin pages</h1><p><a href="/plugin-routes/marsha-p-johnson/info/1">Start the journey</a></p>')
