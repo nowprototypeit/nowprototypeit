@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-global.initialStartTime = Date.now()
-
 if (process.argv.indexOf('--suppress-node-version-warning') === -1 || (process.argv[2] === 'migrate' && process.argv[3] === '--')) {
   const majorNodeVersion = parseInt(process.version.split('.')[0].substring(1), 10)
   const versionIsWithinRecommendation = [16, 18, 20].includes(majorNodeVersion)

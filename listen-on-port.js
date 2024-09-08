@@ -1,15 +1,9 @@
-const timeToListenOnPort = Date.now() - global.initialStartTime
-
-// npm dependencies
 const config = require('./lib/config.js').getConfig(null, false)
-const timeToConfigLoaded = Date.now() - global.initialStartTime
 const server = require('./server.js')
-const timeToServerLoaded = Date.now() - global.initialStartTime
 
 if (config.isProduction) {
   server.listen(config.port)
-  const timeToListening = Date.now() - global.initialStartTime
-  console.log(`Your prototype is running on port ${config.port}, took ${timeToListening}ms to start (${timeToListenOnPort}ms to listen on port, ${timeToConfigLoaded}ms to load config, ${timeToServerLoaded}ms to load server)`)
+  console.log(`Your prototype is running on port ${config.port}`)
 } else {
   process.on('disconnect', () => {
     process.exit()
