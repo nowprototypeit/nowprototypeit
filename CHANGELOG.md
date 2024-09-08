@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## Fixes
+
+- Made improvements to the hosting integration.
+
 ## 0.8.0
 
 ### New Features

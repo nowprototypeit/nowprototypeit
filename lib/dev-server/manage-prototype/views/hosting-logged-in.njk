@@ -21,6 +21,12 @@
         {text: errorSplash.message}
       ]}) }}
   {% endif %}
+  {% if successSplash %}
+    <div class="nowprototypeit-success-splash">
+      <h1>{{ successSplash.title }}</h1>
+      <p>{{ successSplash.message}} <a href="{{ successSplash.url }}" target="_blank">{{ successSplash.url }}</a></p>
+    </div>
+  {% endif %}
   {% if splash == 'success' and url %}
     <p>Your prototype is now hosted at <a href="{{ url }}" target="_blank">{{ url }}</a>.</p>
   {% endif %}
