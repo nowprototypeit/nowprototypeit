@@ -1,3 +1,5 @@
+const timeToListenOnPort = Date.now() - global.initialStartTime
+
 process.on('disconnect', () => {
   process.exit()
 })
@@ -13,7 +15,8 @@ monitorEventLoop('prototype')
 
 if (config.isProduction) {
   server.listen(config.port)
-  console.log('Your prototype is running on port', config.port)
+  const timeToListening = Date.now() - global.initialStartTime
+  console.log(`Your prototype is running on port ${config.port}, took ${timeToListening}ms to start (${timeToListenOnPort}ms to listen on port)`)
 } else {
   const listener = server.listen(() => {
     events.emitExternal(eventTypes.KIT_STARTED, {
