@@ -70,9 +70,8 @@ ${prog} create relative/location/to/create/in
 
 ${prog} dev
 ${prog} serve
-${prog} start
-
-${prog} migrate`
+${prog} build
+${prog} start`
   )
 }
 
@@ -375,6 +374,15 @@ function runServe () {
   require('../listen-on-port')
 }
 
+function runBuild () {
+  require('../lib/build.js').generateAssetsSync()
+}
+
+function runServePreBuilt () {
+  process.env.NODE_ENV = process.env.NODE_ENV || 'production'
+  require('../listen-on-port')
+}
+
 async function runValidatePlugin () {
   return validatePlugin(getInstallLocation(), argv)
 }
@@ -393,6 +401,10 @@ async function runValidatePlugin () {
       return runServe()
     case 'serve':
       return runServe()
+    case 'build':
+      return runBuild()
+    case 'serve-pre-built':
+      return runServePreBuilt()
     case 'validate-plugin':
       return runValidatePlugin()
     case 'failed-to-launch':
