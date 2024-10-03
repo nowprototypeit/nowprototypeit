@@ -2,9 +2,13 @@
 
 ## Unreleased
 
+### New Features
+
+- Added a link to 404 pages to allow users to quickly create the page that should have been found.
+
 ## 0.8.1
 
-## Fixes
+### Fixes
 
 - Made improvements to the hosting integration.
 
