@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.8.1
+
 ## Fixes
 
 - Made improvements to the hosting integration.
