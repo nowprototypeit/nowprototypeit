@@ -180,3 +180,20 @@ When('I select the {string} radio button', standardTimeout, async function (radi
   }
   await $elem.click()
 })
+
+When('I click the link with text {string}', standardTimeout, async function (linkText) {
+  const $links = await this.browser.queryTag('a')
+  const $matchingLinks = (await Promise.all($links.map(async ($link) => (await $link.getText()) === linkText ? $link : undefined)))
+    .filter(x => !!x)
+  if ($matchingLinks.length === 0) {
+    throw new Error(`Could not find link with text [${linkText}]`)
+  }
+  if ($matchingLinks.length > 1) {
+    throw new Error(`Found ${$matchingLinks.length} links with text [${linkText}]`)
+  }
+  await $matchingLinks[0].click()
+})
+
+When('I log the page URL', standardTimeout, async function () {
+  console.log(await this.browser.getCurrentUrl())
+})

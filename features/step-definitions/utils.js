@@ -223,6 +223,7 @@ async function getBrowser (config = {}) {
     driver,
     id: uuid.v4(),
     getTitle: () => driver.getTitle(),
+    getCurrentUrl: () => driver.getCurrentUrl(),
     setBaseUrl: (newBaseUrl) => {
       baseUrl = newBaseUrl
     },

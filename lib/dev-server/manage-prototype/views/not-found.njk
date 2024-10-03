@@ -21,4 +21,8 @@
     <li>a form in your code is wrong</li>
     <li>you have not created the page yet</li>
   </ul>
+
+  {% if createFromTemplateUrl %}
+    <p>If this page should exist you can <strong><a href="{{ createFromTemplateUrl }}">create this page using a template</a></strong>.</p>
+  {% endif %}
 {% endblock %}

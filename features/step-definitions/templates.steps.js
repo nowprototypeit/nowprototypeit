@@ -4,7 +4,9 @@ const { By } = require('selenium-webdriver')
 const { sleep } = require('../../lib/utils')
 
 async function getTemplateList (browser) {
-  await browser.openUrl('/manage-prototype/templates')
+  if (!(await browser.getCurrentUrl()).includes('/manage-prototype/templates')) {
+    await browser.openUrl('/manage-prototype/templates')
+  }
   const pluginSections = await browser.queryClass('plugin-templates')
   return await Promise.all(pluginSections.map(async section => {
     const templateRows = await section.findElements(By.className('template-list__item'))
@@ -78,6 +80,12 @@ When('I create a page at {string} using the {string} template from the {string} 
   ;(await expect(await h1.getText())).to.equal('Create new ' + createTemplateName)
   await formInput.sendKeys(newPageUrl)
   await submitButton.click()
+})
+
+When('I choose the {string} template from the {string} plugin', mediumActionTimeout, async function (createTemplateName, fromPluginName) {
+  const browser = this.browser
+  const requestedTemplateRow = await getTemplateInformation(browser, fromPluginName, createTemplateName, 3)
+  await requestedTemplateRow.createButton.click()
 })
 
 async function expectH1ToBe (browser, headerText, timeout) {
