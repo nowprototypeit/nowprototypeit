@@ -392,8 +392,8 @@ async function runDev () {
   }
 
   events.on(eventTypes.FULL_KIT_RESTART, async (info) => {
-    if (info.logMessage) {
-      console.log(info.logMessage)
+    if (info.message) {
+      console.log(info.message)
     } else {
       console.log(`Fully restarting your prototype${info.reason ? ` ${info.reason}` : ''}.`)
     }
