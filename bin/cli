@@ -370,7 +370,7 @@ async function runDev () {
 
   let scriptProcess
 
-  function start(entryPoint = undefined) {
+  function start (entryPoint = undefined) {
     scriptProcess = fork(path.join(kitRoot, entryPoint), {
       cwd: projectDir,
       env: { ...process.env },
@@ -382,7 +382,7 @@ async function runDev () {
     })
   }
 
-  function stop() {
+  function stop () {
     return new Promise(resolve => {
       events.once(closeEvent, () => {
         resolve()
