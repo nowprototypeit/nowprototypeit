@@ -109,5 +109,6 @@
       "/tmp/"
     ],
     "testTimeout": 5000
-  }
+  },
+  "_cliDevEntryPoint": "lib/dev-server/init.js"
 }
