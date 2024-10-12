@@ -107,6 +107,10 @@ When('I create a file {string} based on the fixture file {string}', standardTime
   await writePrototypeFile(this.kit, relativeFilePath, await readFixtureFile(fixtureFilePath))
 })
 
+When('I replace the file {string} based on the fixture file {string}', standardTimeout, async function (relativeFilePath, fixtureFilePath) {
+  await writePrototypeFile(this.kit, relativeFilePath, await readFixtureFile(fixtureFilePath))
+})
+
 When('I append the file {string} with contents {string}', standardTimeout, async function (relativeFilePath, appendContent) {
   await fsp.appendFile(path.join(this.kit.dir, relativeFilePath), '\n' + appendContent + '\n')
 })
@@ -161,16 +165,28 @@ When('I enter {string} into the {string} field', tinyTimeout, async function (va
   await input.sendKeys(value)
 })
 
+async function submitForm (form) {
+  const submitButtons = await form.findElements(By.css('button[type="submit"], input[type="submit"]'))
+  if (submitButtons.length !== 1) {
+    throw new Error(`Expected exactly one submit button in the form, found [${submitButtons.length}]`)
+  }
+  await submitButtons[0].click()
+}
+
 When('I submit the form', standardTimeout, async function () {
   const forms = await this.browser.queryTag('form')
   if (forms.length !== 1) {
     throw new Error(`Expected exactly one form on the page, found [${forms.length}]`)
   }
-  const submitButtons = await forms[0].findElements(By.css('button[type="submit"], input[type="submit"]'))
-  if (submitButtons.length !== 1) {
-    throw new Error(`Expected exactly one submit button in the form, found [${submitButtons.length}]`)
+  await submitForm(forms[0])
+})
+
+When('I submit the form with ID {string}', standardTimeout, async function (formId) {
+  const form = await this.browser.queryId(formId)
+  if (!form) {
+    throw new Error(`Failed to find form with ID [${formId}]`)
   }
-  await submitButtons[0].click()
+  await submitForm(form)
 })
 
 When('I select the {string} radio button', standardTimeout, async function (radioElementId) {
@@ -196,4 +212,54 @@ When('I click the link with text {string}', standardTimeout, async function (lin
 
 When('I log the page URL', standardTimeout, async function () {
   console.log(await this.browser.getCurrentUrl())
+})
+
+Then('the list with ID {string} should contain an item which starts with text {string}', standardTimeout, async function (id, text) {
+  const $list = await this.browser.queryId(id)
+  if (!$list) {
+    throw new Error(`no element with ID ${id}`)
+  }
+  const $items = await $list.findElements(By.css('li'))
+  if ($items.length === 0) {
+    throw new Error(`no list items found in list with ID ${id}`)
+  }
+  const itemTexts = await Promise.all($items.map(async ($item) => await $item.getText()))
+  const matchingItems = itemTexts.filter(x => x.startsWith(text))
+  if (matchingItems.length === 0) {
+    throw new Error(`no list items found in list with ID ${id} starting with text ${text}, found items: ${itemTexts.join(', ')}`)
+  }
+})
+
+Then('the list with ID {string} should be empty', standardTimeout, async function (id, text) {
+  const $list = await this.browser.queryId(id)
+  if (!$list) {
+    throw new Error(`no element with ID ${id}`)
+  }
+  const $items = await $list.findElements(By.css('li'))
+  if ($items.length !== 0) {
+    const itemTexts = await Promise.all($items.map(async ($item) => await $item.getText()))
+    throw new Error(`Expected an empty list but the list contents was [${itemTexts.join(', ')}]`)
+  }
+  const itemTexts = await Promise.all($items.map(async ($item) => await $item.getText()))
+  ;(await expect(itemTexts)).to.include(text)
+})
+
+When('I restart my prototype by updating the file {string}', { timeout: 30 * 1000 }, async function (relativeFilePath) {
+  const currentUrl = await this.browser.getCurrentUrl()
+  console.log('currentUrl', currentUrl)
+  await this.browser.openUrl('about:blank')
+  console.log('opened about blank')
+  const restartedPromise = new Promise(resolve => {
+    console.log('setup promise')
+    this.kit.addNextKitRestartListener(() => {
+      console.log('kit restarted')
+      resolve()
+    })
+  })
+  await fsp.appendFile(path.join(this.kit.dir, relativeFilePath), '\n')
+  console.log('appended file')
+  await restartedPromise
+  console.log('kit restarted')
+  await this.browser.openUrl(currentUrl)
+  console.log('url opened')
 })

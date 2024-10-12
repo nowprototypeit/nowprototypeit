@@ -24,6 +24,9 @@ const variantConfigs = {
   '@govuk-variant': {
     variantPluginName: '@nowprototypeit/govuk-frontend-adaptor'
   },
+  '@npi-variant': {
+    variantPluginName: '@nowprototypeit/design-system'
+  },
   '@mpj-variant': {
     variantPluginName: 'marsha-p-johnson',
     variantPluginDependency: path.join(__dirname, '..', 'fixtures', 'plugins', 'marsha-p-johnson')
