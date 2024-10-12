@@ -372,7 +372,7 @@ async function runDev () {
 
   function start(entryPoint = undefined) {
     scriptProcess = fork(path.join(kitRoot, entryPoint), {
-      cwd: kitRoot,
+      cwd: projectDir,
       env: { ...process.env },
       stdio: 'inherit',
       eventEmitter: events,
