@@ -1,0 +1,38 @@
+{% extends "now-prototype-it-design-system/layouts/standard.njk" %}
+
+{% block pageTitle %}
+  Todo app
+{% endblock %}
+
+{% block content %}
+  {% if not todo.length and not done.length %}
+    <h1>No items in todo or done</h1>
+  {% endif %}
+  {% if todo.length %}
+    <h1>To do:</h1>
+    <ul id="todo-items">
+      {% for item in todo %}
+        <li>{{ item.name }} <form action="/todo/done" method="post"><input type="hidden" name="id" value="{{ item.id }}"/>{{ nowPrototypeItSubmitButton({text: 'Mark as done'}) }}</form></li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  <form action="/todo/create" method="post" id="add-item">
+    <h2>Add a todo item</h2>
+    {{ nowPrototypeItTextInput({nameAndId: 'name', label: 'What\'s the task?'}) }}
+    {{ nowPrototypeItSubmitButton({text: 'Add'}) }}
+  </form>
+  {% if done.length %}
+    <h1>Done:</h1>
+    <ul>
+      {% for item in done %}
+        <li>{{ item.name }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  <form action="/todo/clear" method="post">
+    <h2>Clear all completed items (this cannot be undone)</h2>
+
+    {{ nowPrototypeItSubmitButton({text: 'Clear completed items'}) }}
+  </form>
+
+{% endblock %}

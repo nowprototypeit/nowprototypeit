@@ -5,6 +5,7 @@
 ### New Features
 
 - Added a link to 404 pages to allow users to quickly create the page that should have been found.
+- Added a persistence layer to allow an object to be stored between restarts - this is both for local development and the hosting platform we're working on.
 
 ## 0.8.1
 

@@ -1,0 +1,66 @@
+//
+// For guidance on how to create routes see:
+// https://docs.nowprototype.it/0.7.0/routers/create-routes
+//
+
+const prototypeCore = require('nowprototypeit')
+const router = prototypeCore.requests.setupRouter()
+const listOfTasks = {}
+
+if (!listOfTasks.todo) {
+  listOfTasks.todo = []
+}
+if (!listOfTasks.done) {
+  listOfTasks.done = []
+}
+
+// Add your routes here
+
+router.get('/todo', (req, res) => {
+  const model = { todo: listOfTasks.todo, done: listOfTasks.done }
+  res.render('todo/get', model)
+})
+
+router.post('/todo/create', (req, res) => {
+  const { name } = req.body
+  if (name){
+    listOfTasks.todo.push({ name, id: '' + Date.now() })
+  }
+  res.redirect('/todo')
+})
+
+router.post('/todo/done', (req, res) => {
+  const { id } = req.body
+  if (id) {
+    const index = listOfTasks.todo.findIndex(task => task.id === id)
+    if (index > -1) {
+      listOfTasks.done.push(listOfTasks.todo[index])
+      listOfTasks.todo.splice(index, 1)
+    } else {
+      console.log('no matching item for id', id)
+    }
+  } else {
+    console.log('no id provided when calling /todo/done')
+  }
+  res.redirect('/todo')
+})
+
+router.post('/todo/rename', (req, res) => {
+  const { id, name } = req.body
+  if (id && name) {
+    const item = listOfTasks.todo.find(task => task.id === id)
+    if (item) {
+      item.name = name
+    } else {
+      console.log('no item found in todo with id', id)
+    }
+  } else {
+    console.log('either no id, no name or both for /todo/rename')
+  }
+  res.redirect('/todo')
+})
+
+router.post('/todo/clear', (req, res) => {
+  listOfTasks.done = []
+  res.redirect('/todo')
+})

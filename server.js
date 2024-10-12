@@ -24,6 +24,7 @@ const utils = require('./lib/utils')
 const sessionUtils = require('./lib/session.js')
 const plugins = require('./lib/plugins/plugins.js')
 const routesApi = require('./lib/routes/api.js')
+const { setupPersistenceSync } = require('./lib/persistence/api.js')
 
 const app = express()
 routesApi.setApp(app)
@@ -166,6 +167,7 @@ app.use((req, res, next) => {
 })
 
 const { encryptPassword } = require('./lib/utils')
+
 app.get('/manage-prototype/password', function (req, res) {
   const error = req.query.error
   res.render('prototype-core/views/password.njk', {
@@ -223,6 +225,8 @@ if ((config.useAuth && config.isProduction) || config.passwordMissing) {
     res.redirect('/manage-prototype/password?returnURL=' + encodeURIComponent(req.originalUrl))
   })
 }
+
+setupPersistenceSync()
 
 highPriorityPluginRoutes()
 utils.addRouters(app)
