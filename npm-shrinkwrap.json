@@ -8,7 +8,6 @@
       "name": "nowprototypeit",
       "version": "0.9.1",
       "dependencies": {
-        "@nowprototypeit/design-system": "^1.0.6",
         "ansi-colors": "^4.1.3",
         "body-parser": "^1.20.2",
         "chokidar": "^3.6.0",
@@ -1780,11 +1779,6 @@
       "engines": {
         "node": ">= 8"
       }
-    },
-    "node_modules/@nowprototypeit/design-system": {
-      "version": "1.0.6",
-      "resolved": "https://registry.npmjs.org/@nowprototypeit/design-system/-/design-system-1.0.6.tgz",
-      "integrity": "sha512-OqUF1N9cKzDW/7nG3hgUfMmvptoSzYMTwysX25Ax1GH2uc+XiKZRAN0C8+HMbQ0y3xd4P2qLXd5moTxwXM9dPw=="
     },
     "node_modules/@pkgjs/parseargs": {
       "version": "0.11.0",
@@ -12665,11 +12659,6 @@
         "@nodelib/fs.scandir": "2.1.5",
         "fastq": "^1.6.0"
       }
-    },
-    "@nowprototypeit/design-system": {
-      "version": "1.0.6",
-      "resolved": "https://registry.npmjs.org/@nowprototypeit/design-system/-/design-system-1.0.6.tgz",
-      "integrity": "sha512-OqUF1N9cKzDW/7nG3hgUfMmvptoSzYMTwysX25Ax1GH2uc+XiKZRAN0C8+HMbQ0y3xd4P2qLXd5moTxwXM9dPw=="
     },
     "@pkgjs/parseargs": {
       "version": "0.11.0",
