@@ -408,8 +408,8 @@ async function runDev () {
     }
     console.log('Running stop')
     await stop()
-    console.log('Waiting for one second')
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    console.log('Waiting for 30 seconds')
+    await new Promise(resolve => setTimeout(resolve, 30000))
     console.log('Running start')
     start(info.entryPoint || kitEntryPoint)
   })
