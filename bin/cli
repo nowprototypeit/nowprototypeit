@@ -398,6 +398,7 @@ async function runDev () {
   }
 
   events.on(eventTypes.FULL_KIT_RESTART, async (info) => {
+    console.log('FKR Handler', info)
     if (info.message) {
       console.log(info.message)
     } else {
