@@ -368,6 +368,12 @@ async function runDev () {
   console.log('starting...')
   const closeEvent = 'KIT_PROCESS_CLOSED'
 
+  process.on('SIGTERM', (info) => {
+    stop().then(() => {
+      process.exit(0)
+    })
+  })
+
   let scriptProcess
 
   function start (entryPoint = undefined) {
