@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Fixing in-browser update on Windows, adding test now we have versions in production that can be used for testing.
+
 ## 0.9.2
 
 ### Fixes

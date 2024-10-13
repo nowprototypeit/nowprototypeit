@@ -2,8 +2,10 @@ const { Given, When, Then } = require('@cucumber/cucumber')
 const { kitStartTimeout, expect, pluginActionPageTimeout, pluginActionTimeout, mediumActionTimeout, standardTimeout } = require('./utils')
 const { By } = require('selenium-webdriver')
 const { exec } = require('../../lib/exec')
+const fsp = require('fs').promises
 const path = require('path')
 const { sleep } = require('../../lib/utils')
+const currentKitVersion = require('../../package.json').version
 
 Given('I have the {string} \\({string}\\) plugin installed', pluginActionPageTimeout, async function (pluginName, pluginRef) {
   await this.browser.openUrl('/manage-prototype/plugins')
@@ -78,25 +80,26 @@ function loadPluginDetailsForPluginRef (browser, pluginRef) {
 
 async function getActionButton (browser, pluginRef, buttonId, timeout) {
   const start = Date.now()
-  let uninstallButton
+  let actionButton
 
-  while (uninstallButton === undefined && (start + timeout) > Date.now()) {
+  while (actionButton === undefined && (start + timeout) > Date.now()) {
     await sleep(100)
     await loadPluginDetailsForPluginRef(browser, pluginRef)
     try {
-      uninstallButton = await browser.queryId(buttonId)
+      actionButton = await browser.queryId(buttonId)
     } catch (e) {
     }
   }
-  if (!uninstallButton) {
+  if (!actionButton) {
     throw new Error(`There is no [${buttonId}] button for plugin [${pluginRef}]`)
   }
-  return uninstallButton
+  console.log('returning action button')
+  return actionButton
 }
 
 const visitPluginPageAndRunAction = async (browser, pluginRef, buttonId, expectToWaitForAction) => {
-  const uninstallButton = await getActionButton(browser, pluginRef, buttonId, pluginActionTimeout.timeout / 3)
-  await uninstallButton.click()
+  const $actionButton = await getActionButton(browser, pluginRef, buttonId, pluginActionTimeout.timeout / 3)
+  await $actionButton.click()
   if (expectToWaitForAction) {
     await waitForPluginInstallUpdateOrUninstall(browser)
   }
@@ -121,6 +124,30 @@ When('I update the {string} plugin', pluginActionTimeout, async function (plugin
 })
 When('I try to update the {string} plugin', pluginActionTimeout, async function (pluginRef) {
   await visitPluginPageAndRunAction(this.browser, pluginRef, 'action-update', false)
+})
+When('I install the {string} version of the kit from NPM', pluginActionTimeout, async function (version) {
+  await visitPluginPageAndRunAction(this.browser, `npm:nowprototypeit:${version}`, 'action-install', true)
+})
+When('I install the version of the kit being tested', pluginActionTimeout, async function () {
+  const dependencyBeingTested = getDependencyBeingTested()
+  console.log('dependency dir (when)', dependencyBeingTested)
+  await visitPluginPageAndRunAction(this.browser, `fs:${dependencyBeingTested}`, 'action-install', true)
+})
+
+Then('I should be using version of the kit being tested', pluginActionTimeout, async function () {
+  const dependencyBeingTested = getDependencyBeingTested()
+  console.log('dependency dir (then)', dependencyBeingTested)
+  const packageJson = await fsp.readFile(path.join(this.kit.dir, 'package.json'), 'utf8')
+  const parsedPackageJson = JSON.parse(packageJson)
+
+  kitDependencyMatches(dependencyBeingTested, parsedPackageJson.dependencies.nowprototypeit)
+
+  await this.browser.openUrl('/manage-prototype/version')
+  const kitVersion = await (await this.browser.queryId('kit-version')).getText()
+  const kitDependency = await (await this.browser.queryId('npi-dependency')).getText()
+
+  ;(await expect(kitVersion)).to.eq(currentKitVersion)
+  kitDependencyMatches(dependencyBeingTested, kitDependency)
 })
 
 When('I uninstall the {string} plugin using the console', pluginActionPageTimeout, async function (pluginName) {
@@ -150,3 +177,22 @@ When('I continue with the install', pluginActionPageTimeout, continueWithUpdateI
 Given('I view the plugin details for the {string} plugin', pluginActionPageTimeout, async function (pluginRef) {
   await loadPluginDetailsForPluginRef(this.browser, pluginRef)
 })
+
+Then('I should be using version {string} of the kit from NPM', standardTimeout, async function (version) {
+  const packageJson = await fsp.readFile(path.join(this.kit.dir, 'package.json'), 'utf8')
+  const parsedPackageJson = JSON.parse(packageJson)
+  ;(await expect(parsedPackageJson.dependencies.nowprototypeit)).to.eq(version)
+})
+
+function getDependencyBeingTested () {
+  return process.env.TEST_KIT_DEPENDENCY || path.join(__dirname, '..', '..')
+}
+
+function kitDependencyMatches (dependencyBeingTested, kitDependency) {
+  const kitDepExpectedStart = 'file:'
+  const kitDepExpectedEnd = dependencyBeingTested
+
+  if (!kitDependency.startsWith(kitDepExpectedStart) || !kitDependency.endsWith(kitDepExpectedEnd)) {
+    throw new Error(`Expected kit dependency to start with [${kitDepExpectedStart}] and end with [${kitDepExpectedEnd}], but got [${kitDependency}]`)
+  }
+}

@@ -87,8 +87,9 @@ async function startKit (config = {}) {
 
   if (config.kitDependency) {
     const dep = config.kitDependency
+    const version = config.kitCreateVersionSetting || config.kitDependency
     const command = 'npx'
-    const args = ['-y', `-package=${dep}`, 'nowprototypeit', 'create', ...additionalCliArgs, `--version=${dep}`, dir]
+    const args = ['-y', `-package=${dep}`, 'nowprototypeit', 'create', ...additionalCliArgs, `--version=${version}`, dir]
     const execResult = exec({
       command,
       args
@@ -333,7 +334,8 @@ async function getPrototypeKitAndBrowser (options = {}) {
     kitDependency: options.kitDependency || process.env.TEST_KIT_DEPENDENCY,
     variantPluginName: options.variantPluginName,
     variantPluginDependency: options.variantPluginDependency,
-    appConfigAdditions: options.appConfigAdditions
+    appConfigAdditions: options.appConfigAdditions,
+    kitCreateVersionSetting: options.kitCreateVersionSetting
   }
 
   const [kit, browser] = await Promise.all([
