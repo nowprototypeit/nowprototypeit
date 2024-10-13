@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.9.2
+
 ### Fixes
 
 - Correcting the messages URL in the management pages.
