@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.9.1
+
 ### Fixes
 
 - Correcting updates when commands (e.g. install/update/remove plugins) fail.
