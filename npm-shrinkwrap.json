@@ -1,12 +1,12 @@
 {
   "name": "nowprototypeit",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "lockfileVersion": 2,
   "requires": true,
   "packages": {
     "": {
       "name": "nowprototypeit",
-      "version": "0.9.0",
+      "version": "0.9.1",
       "dependencies": {
         "ansi-colors": "^4.1.3",
         "body-parser": "^1.20.2",
