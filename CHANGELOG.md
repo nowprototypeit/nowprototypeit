@@ -6,6 +6,7 @@
 
 - Added a link to 404 pages to allow users to quickly create the page that should have been found.
 - Added a persistence layer to allow an object to be stored between restarts - this is both for local development and the hosting platform we're working on.
+- Preparation work for allowing the kit to update itself, this is particularly hard to test without making releases so no call-to-action has been added yet.
 
 ## 0.8.1
 

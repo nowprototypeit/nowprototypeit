@@ -30,14 +30,18 @@ const { npmInstall } = require('./utils')
 const { projectDir } = require('../lib/utils/paths')
 const { validatePlugin } = require('../lib/plugins/plugin-validator')
 const { flattenArray } = require('../lib/utils/arrayTools')
+const events = require('../lib/dev-server/dev-server-events')
+const eventTypes = require('../lib/dev-server/dev-server-event-types')
 
 // Avoid requiring any kit server code at the top-level as we might want to
 // change environment variables below.
 
 const currentDirectory = process.cwd()
 const kitRoot = path.join(__dirname, '..')
-const kitVersion = require('../package.json').version
-const kitProjectName = require('../package.json').name
+const packageJsonContents = require('../package.json')
+const kitVersion = packageJsonContents.version
+const kitProjectName = packageJsonContents.name
+const kitEntryPoint = packageJsonContents._cliDevEntryPoint
 
 const argv = parse(process.argv, {
   booleans: ['no-version-control', 'verbose', 'running-within-create-script', 'use-njk-extensions', 'suppress-node-version-warning']
@@ -132,8 +136,7 @@ function writeEmptyPackageJson (installDirectory) {
 }
 
 function getArgumentsToPassThrough () {
-  const additionalArgs = Object.keys(argv.options).map(name => `--${name}="${argv.options[name]}"`)
-  return additionalArgs
+  return Object.keys(argv.options).map(name => `--${name}="${argv.options[name]}"`)
 }
 
 async function runCreate () {
@@ -363,8 +366,60 @@ async function runDev () {
   console.log(`Now Prototype It Kit ${kitVersion}`)
   console.log('')
   console.log('starting...')
+  const closeEvent = 'KIT_PROCESS_CLOSED'
 
-  await require('../lib/dev-server/dev-server').runDevServer()
+  process.on('SIGTERM', (info) => {
+    stop().then(() => {
+      process.exit(0)
+    })
+  })
+
+  let scriptProcess
+
+  function start (entryPoint = undefined) {
+    scriptProcess = fork(path.join(kitRoot, entryPoint), {
+      cwd: projectDir,
+      env: { ...process.env },
+      stdio: 'inherit',
+      eventEmitter: events,
+      passOnEvents: [eventTypes.FULL_KIT_RESTART, eventTypes.FULL_KIT_STOP],
+      logAllEvents: true,
+      closeEvent
+    })
+  }
+
+  function stop () {
+    return new Promise(resolve => {
+      events.once(closeEvent, () => {
+        resolve()
+      })
+      scriptProcess.close()
+    })
+  }
+
+  events.on(eventTypes.FULL_KIT_RESTART, async (info) => {
+    if (info.message) {
+      console.log(info.message)
+    } else {
+      console.log(`Fully restarting your prototype${info.reason ? ` ${info.reason}` : ''}.`)
+    }
+    await stop()
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    start(info.entryPoint || kitEntryPoint)
+  })
+
+  events.on(eventTypes.FULL_KIT_STOP, async (info) => {
+    if (info.logMessage) {
+      console.log(info.logMessage)
+    } else {
+      console.log(`Fully stopping your prototype${info.reason ? ` ${info.reason}` : ''}.`)
+    }
+    stop().then(() => {
+      console.log('Prototype stopped.')
+    })
+  })
+
+  start(kitEntryPoint)
 }
 
 function runServe () {
