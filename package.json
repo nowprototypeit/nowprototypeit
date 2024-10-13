@@ -1,7 +1,7 @@
 {
   "name": "nowprototypeit",
   "description": "A fully configurable, high-fidelity prototype kit",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "engines": {
     "node": "^16.x || ^18.x || >= 20.x"
   },
@@ -110,5 +110,5 @@
     ],
     "testTimeout": 5000
   },
-  "_cliDevEntryPoint": "lib/dev-server/init.js"
+  "_cliDevEntryPoint": "example.js"
 }
