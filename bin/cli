@@ -363,6 +363,7 @@ async function runInit () {
 }
 
 async function runDev () {
+  let isRunningRestart = false
   console.log(`Now Prototype It Kit ${kitVersion}`)
   console.log('')
   console.log('starting...')
@@ -377,15 +378,24 @@ async function runDev () {
   let scriptProcess
 
   function start (entryPoint = undefined) {
-    scriptProcess = fork(path.join(kitRoot, entryPoint), {
-      cwd: projectDir,
-      env: { ...process.env },
-      stdio: 'inherit',
-      eventEmitter: events,
-      passOnEvents: [eventTypes.FULL_KIT_RESTART, eventTypes.FULL_KIT_STOP],
-      logAllEvents: true,
-      closeEvent
-    })
+    try {
+      scriptProcess = fork(path.join(kitRoot, entryPoint), {
+        cwd: projectDir,
+        env: { ...process.env },
+        stdio: 'inherit',
+        eventEmitter: events,
+        passOnEvents: [eventTypes.FULL_KIT_RESTART, eventTypes.FULL_KIT_STOP],
+        logAllEvents: true,
+        closeEvent
+      })
+      isRunningRestart = false
+    } catch (e) {
+      if (isRunningRestart) {
+        console.log('Error thrown while running restart', e)
+      } else {
+        console.log('Error thrown... not running start', e)
+      }
+    }
   }
 
   function stop () {
@@ -398,6 +408,7 @@ async function runDev () {
   }
 
   events.on(eventTypes.FULL_KIT_RESTART, async (info) => {
+    isRunningRestart = true
     console.log('full kit restart triggered')
     if (info.message) {
       console.log('showing message')
