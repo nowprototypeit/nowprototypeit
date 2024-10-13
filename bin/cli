@@ -363,10 +363,10 @@ async function runInit () {
 }
 
 async function runDev () {
+  let currentlyRunningKit
   console.log(`Now Prototype It Kit ${kitVersion}`)
   console.log('')
   console.log('starting...')
-  const closeEvent = 'KIT_PROCESS_CLOSED'
 
   process.on('SIGTERM', (info) => {
     stop().then(() => {
@@ -377,22 +377,30 @@ async function runDev () {
   let scriptProcess
 
   function start (entryPoint = undefined) {
-    scriptProcess = fork(path.join(kitRoot, entryPoint), {
+    scriptProcess = fork(path.join(projectDir, 'node_modules', 'nowprototypeit', entryPoint), {
       cwd: projectDir,
       env: { ...process.env },
       stdio: 'inherit',
       eventEmitter: events,
       passOnEvents: [eventTypes.FULL_KIT_RESTART, eventTypes.FULL_KIT_STOP],
-      logAllEvents: true,
-      closeEvent
+      logAllEvents: true
     })
+    currentlyRunningKit = scriptProcess
   }
 
   function stop () {
+    if (!currentlyRunningKit) {
+      return Promise.resolve()
+    }
+
     return new Promise(resolve => {
-      events.once(closeEvent, () => {
-        resolve()
-      })
+      currentlyRunningKit.finishedPromise
+        .catch((err) => { console.log(err ? '' : '') })
+        .then(() => {
+          currentlyRunningKit = undefined
+          resolve()
+        })
+
       scriptProcess.close()
     })
   }
