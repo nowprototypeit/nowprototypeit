@@ -398,13 +398,19 @@ async function runDev () {
   }
 
   events.on(eventTypes.FULL_KIT_RESTART, async (info) => {
+    console.log('full kit restart triggered')
     if (info.message) {
+      console.log('showing message')
       console.log(info.message)
     } else {
+      console.log('not showing message')
       console.log(`Fully restarting your prototype${info.reason ? ` ${info.reason}` : ''}.`)
     }
+    console.log('Running stop')
     await stop()
+    console.log('Waiting for one second')
     await new Promise(resolve => setTimeout(resolve, 1000))
+    console.log('Running start')
     start(info.entryPoint || kitEntryPoint)
   })
 
