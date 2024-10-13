@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.9.0
+
 ### New Features
 
 - Added a link to 404 pages to allow users to quickly create the page that should have been found.
