@@ -363,7 +363,7 @@ async function runInit () {
 }
 
 async function runDev () {
-  let isRunningRestart = false
+  let currentlyRunningKit
   console.log(`Now Prototype It Kit ${kitVersion}`)
   console.log('')
   console.log('starting...')
@@ -378,50 +378,53 @@ async function runDev () {
   let scriptProcess
 
   function start (entryPoint = undefined) {
-    try {
-      scriptProcess = fork(path.join(kitRoot, entryPoint), {
-        cwd: projectDir,
-        env: { ...process.env },
-        stdio: 'inherit',
-        eventEmitter: events,
-        passOnEvents: [eventTypes.FULL_KIT_RESTART, eventTypes.FULL_KIT_STOP],
-        logAllEvents: true,
-        closeEvent
-      })
-      isRunningRestart = false
-    } catch (e) {
-      if (isRunningRestart) {
-        console.log('Error thrown while running restart', e)
-      } else {
-        console.log('Error thrown... not running start', e)
-      }
-    }
+    scriptProcess = fork(path.join(kitRoot, entryPoint), {
+      cwd: projectDir,
+      env: { ...process.env },
+      stdio: 'inherit',
+      eventEmitter: events,
+      passOnEvents: [eventTypes.FULL_KIT_RESTART, eventTypes.FULL_KIT_STOP],
+      logAllEvents: true,
+      closeEvent
+    })
+    currentlyRunningKit = scriptProcess
   }
 
   function stop () {
+    if (!currentlyRunningKit) {
+      return Promise.resolve()
+    }
+
     return new Promise(resolve => {
+      let hasResolvedPromise = false
+      function resolvePromiseIfNotYetResolved () {
+        if (!hasResolvedPromise) {
+          hasResolvedPromise = true
+          resolve()
+        }
+      }
+      currentlyRunningKit.finishedPromise.catch((err) => {
+        console.log('ignoring error while stopping kit', err)
+      }).then(() => {
+        currentlyRunningKit = undefined
+        resolvePromiseIfNotYetResolved()
+      })
+
       events.once(closeEvent, () => {
-        resolve()
+        resolvePromiseIfNotYetResolved()
       })
       scriptProcess.close()
     })
   }
 
   events.on(eventTypes.FULL_KIT_RESTART, async (info) => {
-    isRunningRestart = true
-    console.log('full kit restart triggered')
     if (info.message) {
-      console.log('showing message')
       console.log(info.message)
     } else {
-      console.log('not showing message')
       console.log(`Fully restarting your prototype${info.reason ? ` ${info.reason}` : ''}.`)
     }
-    console.log('Running stop')
     await stop()
-    console.log('Waiting for 30 seconds')
-    await new Promise(resolve => setTimeout(resolve, 30000))
-    console.log('Running start')
+    await new Promise(resolve => setTimeout(resolve, 1000))
     start(info.entryPoint || kitEntryPoint)
   })
 
