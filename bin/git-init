@@ -26,7 +26,7 @@ const { exec } = require('../lib/exec')
   const commitMessage = 'Create prototype'
   await exec(`git commit -am "${commitMessage}"`)
     .catch(() =>
-      exec(`git -c "user.email=gov.uk-prototype@digital.cabinet-office.gov.uk" -c "user.name=GOV.UK Prototype Kit" commit -am "${commitMessage}"`)
+      exec(`git -c "user.email=support@nowprototype.it" -c "user.name=Now Prototype It" commit -am "${commitMessage}"`)
     )
     .catch(failSilently)
 })()
