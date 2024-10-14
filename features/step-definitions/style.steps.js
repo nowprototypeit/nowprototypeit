@@ -1,5 +1,12 @@
 const { Then } = require('@cucumber/cucumber')
-const { waitForConditionToBeMet, styleBuildTimeout, mediumActionTimeout, makeGetRequest, expect } = require('./utils')
+const {
+  waitForConditionToBeMet,
+  styleBuildTimeout,
+  mediumActionTimeout,
+  makeGetRequest,
+  expect,
+  standardTimeout
+} = require('./utils')
 const path = require('path')
 const { promises: fsp } = require('fs')
 const { sleep } = require('../../lib/utils')
@@ -56,13 +63,27 @@ async function makeSureBackgroundImageCanBeLoaded (browser, prototypeDir, timeou
     throw new Error(`No file path could be found (looking for background image) [${output.backgroundImage}]`)
   }
   const filePath = path.join(prototypeDir, 'node_modules', filePathFromNodeModules)
-  const fileOnFileSystem = await fsp.readFile(filePath)
-  await makeGetRequest(url).then(async response => {
-    ;(await expect(response.statusCode)).to.equal(200)
-    ;(await expect(response.headers['content-type'])).to.equal('image/png')
-    const comparison = Buffer.compare(response.body, fileOnFileSystem)
-    if (comparison !== 0) {
-      throw new Error(`Comparing file system to response failed [${comparison}]`)
+  const fileOnFileSystem = await fsp.readFile(filePath, 'utf8')
+  let lastKnownError
+  await waitForConditionToBeMet(standardTimeout, async () => {
+    const response = await makeGetRequest(url)
+    const statusCode = response.statusCode
+    const contentType = response.headers['content-type']
+    if (statusCode !== 200) {
+      lastKnownError = `Expected status code 200, got ${statusCode}`
+      return false
     }
-  }).catch(err => console.error(err))
+    if (contentType !== 'image/svg+xml; charset=utf-8') {
+      lastKnownError = `Expected content type image/svg+xml, got ${contentType}`
+      return false
+    }
+    if (response.body.toString() !== fileOnFileSystem) {
+      console.log('response.body', response.body.toString())
+      lastKnownError = 'Response body doesn\'t match file on file system'
+      return false
+    }
+    return true
+  }, () => {
+    throw new Error(`Gave up waiting for background image meet conditions: ${lastKnownError}`)
+  })
 }

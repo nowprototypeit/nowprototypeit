@@ -1,5 +1,5 @@
 const { Before, AfterStep, AfterAll, After, setDefaultTimeout } = require('@cucumber/cucumber')
-const { kitStartTimeout, cleanupEverything, setupKitAndBrowserForTestScope } = require('./utils')
+const { kitStartTimeout, cleanupEverything, setupKitAndBrowserForTestScope, removeKit } = require('./utils')
 const colors = require('ansi-colors')
 const { sleep } = require('../../lib/utils')
 const path = require('path')
@@ -74,6 +74,9 @@ After(kitStartTimeout, async function (scenario) {
   const scenarioName = scenario.pickle.name
   if (isFailure) {
     anyFailures = true
+  }
+  if (scenario.willBeRetried) {
+    await removeKit(this.kit)
   }
   process.stdout.write(colors.bold(' ' + (isFailure ? colors.red('✘ ' + scenarioName) : colors.green('✓ ' + scenarioName))))
   console.log('')

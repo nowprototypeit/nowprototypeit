@@ -25,13 +25,23 @@ const kitAndBrowserStore = (() => {
   return {
     get: (options) => store[getKeyFromOptions(options)],
     set: (kitAndBrowser, options) => {
-      store[getKeyFromOptions(options)] = kitAndBrowser
+      const key = getKeyFromOptions(options)
+      kitAndBrowser.kit.storageKey = key
+      store[key] = kitAndBrowser
     },
     remove: (options) => delete store[getKeyFromOptions(options)],
+    removeByKey: (key) => delete store[key],
     getAllKits: () => flattenArray(Object.values(store).map(({ kit }) => kit)),
     getAllBrowsers: () => flattenArray(Object.values(store).map(({ browser }) => browser))
   }
 })()
+
+async function removeKit (kit) {
+  const key = kit.storageKey
+  await kit.close()
+  await kit.cleanup()
+  kitAndBrowserStore.removeByKey(key)
+}
 
 async function cleanupEverything (deleteKit = true) {
   await Promise.all([
@@ -529,6 +539,7 @@ module.exports = {
   makeGetRequest,
   waitForConditionToBeMet,
   setupKitAndBrowserForTestScope,
+  removeKit,
   readFixtureFile,
   readPrototypeFile,
   writePrototypeFile,
