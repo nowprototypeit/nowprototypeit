@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Fixes
+
+- Removed unused and underused dependencies to reduce the size of the kit and the number of opportunities for
+vulnerabilities.  This also makes the kit quicker to install and run.  Fixed npm audit issues.
+
 ## 0.9.3
 
 ### Fixes
