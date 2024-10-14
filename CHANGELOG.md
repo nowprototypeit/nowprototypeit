@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.9.3
+
 ### Fixes
 
 - Fixing in-browser update on Windows, adding a version endpoint to allow future tests to know which kit version is 
