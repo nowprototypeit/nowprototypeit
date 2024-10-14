@@ -35,20 +35,38 @@ const variantConfigs = {
   '@lma-variant': {
     variantPluginName: 'louisa-may-alcott',
     variantPluginDependency: path.join(__dirname, '..', 'fixtures', 'plugins', 'louisa-may-alcott')
+  },
+  '@kit-update': {
+    neverReuseThisKit: true,
+    variantPluginName: '@nowprototypeit/design-system'
+  },
+  '@kit-update-from-0.9.0': {
+    neverReuseThisKit: true,
+    variantPluginName: '@nowprototypeit/design-system',
+    kitDependency: 'nowprototypeit@0.9.0',
+    kitCreateVersionSetting: '0.9.0'
   }
+}
+
+function getVariantConfig (variantTag) {
+  const result = variantConfigs[variantTag]
+  if (result && result.neverReuseThisKit) {
+    return Object.assign({}, result, { unique: Date.now() })
+  }
+  return result
 }
 
 Before(kitStartTimeout, async function (scenario) {
   const tagNames = scenario.pickle.tags.map(x => x.name)
-  const variantTags = tagNames.filter(x => x.endsWith('-variant'))
+  const variantTags = tagNames.filter(x => x.endsWith('-variant') || x.startsWith('@kit-update'))
   if (variantTags.length > 1) {
     throw new Error('More than one variant tag found: ' + JSON.stringify(variantTags))
   }
   const variantTag = variantTags[0]
   if (!variantTag) {
-    return
+    throw new Error('No variant tag found')
   }
-  const variantConfig = variantConfigs[variantTag]
+  const variantConfig = getVariantConfig(variantTag)
 
   const appConfigAdditions = Object.keys(experimentTagSettings)
     .filter(tag => tagNames.includes(tag)).map(key => experimentTagSettings[key])
