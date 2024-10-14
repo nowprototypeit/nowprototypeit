@@ -1,6 +1,7 @@
 const { Before, AfterStep, AfterAll, After, setDefaultTimeout } = require('@cucumber/cucumber')
 const { kitStartTimeout, cleanupEverything, setupKitAndBrowserForTestScope, removeKit } = require('./utils')
-const colors = require('ansi-colors')
+
+const colors = require('../../lib/utils/terminal-colors')
 const { sleep } = require('../../lib/utils')
 const path = require('path')
 const os = require('os')
