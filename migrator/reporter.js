@@ -1,5 +1,5 @@
 // npm dependencies
-const c = require('ansi-colors')
+const c = require('../lib/utils/terminal-colors')
 
 // local dependencies
 const logger = require('./logger')
