@@ -246,13 +246,9 @@ Then('the list with ID {string} should be empty', standardTimeout, async functio
 
 When('I restart my prototype by updating the file {string}', { timeout: 30 * 1000 }, async function (relativeFilePath) {
   const currentUrl = await this.browser.getCurrentUrl()
-  console.log('currentUrl', currentUrl)
   await this.browser.openUrl('about:blank')
-  console.log('opened about blank')
   const restartedPromise = new Promise(resolve => {
-    console.log('setup promise')
     this.kit.addNextKitRestartListener(() => {
-      console.log('kit restarted')
       resolve()
     })
   })
@@ -262,4 +258,8 @@ When('I restart my prototype by updating the file {string}', { timeout: 30 * 100
   console.log('kit restarted')
   await this.browser.openUrl(currentUrl)
   console.log('url opened')
+})
+
+Then('I intentionally fail the tests', function () {
+  throw new Error('Intentional failure')
 })
