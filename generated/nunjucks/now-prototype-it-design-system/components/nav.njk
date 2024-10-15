@@ -1,0 +1,11 @@
+{% macro nowPrototypeItNav(config) %}
+  <nav>
+    <ul class="{{ config.listClasses }}">
+      {% for item in config.items %}
+        <li class="{{ config.itemClasses }} {% if item.isCurrentPage %} {{ config.currentItemClasses }} {% endif %}"><a href="{{ item.url }}"
+                                                           {% if item.newTab %}target="_blank"{% endif %}>{{ item.name }}</a
+          ></li>
+      {% endfor %}
+    </ul>
+  </nav>
+{% endmacro %}
