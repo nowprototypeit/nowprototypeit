@@ -382,7 +382,6 @@ async function runDev () {
       env: { ...process.env },
       stdio: 'inherit',
       eventEmitter: events,
-      passOnEvents: [eventTypes.FULL_KIT_RESTART, eventTypes.FULL_KIT_STOP],
       logAllEvents: true
     })
     currentlyRunningKit = scriptProcess
