@@ -129,13 +129,11 @@ When('I install the {string} version of the kit from NPM', pluginActionTimeout, 
 })
 When('I install the version of the kit being tested', pluginActionTimeout, async function () {
   const dependencyBeingTested = getDependencyBeingTested()
-  console.log('dependency dir (when)', dependencyBeingTested)
   await visitPluginPageAndRunAction(this.browser, `fs:${dependencyBeingTested}`, 'action-install', true)
 })
 
 Then('I should be using version of the kit being tested', pluginActionTimeout, async function () {
   const dependencyBeingTested = getDependencyBeingTested()
-  console.log('dependency dir (then)', dependencyBeingTested)
   const packageJson = await fsp.readFile(path.join(this.kit.dir, 'package.json'), 'utf8')
   const parsedPackageJson = JSON.parse(packageJson)
 
