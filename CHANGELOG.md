@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.9.4
+
 ### Fixes
 
 - Removed unused and underused dependencies to reduce the size of the kit and the number of opportunities for
