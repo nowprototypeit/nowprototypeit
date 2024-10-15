@@ -197,7 +197,7 @@ async function startKit (config = {}) {
     cleanup: async () => {
       const shouldCleanUpDir = config.shouldCleanupDir ?? !config.dir
       if (shouldCleanUpDir) {
-        await fsp.rm(dir, { recursive: true })
+        await fsp.rm(dir, { recursive: true, force: true })
       }
       if (config.afterCleanup) {
         config.afterCleanup()
