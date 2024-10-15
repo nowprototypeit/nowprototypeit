@@ -1,4 +1,4 @@
-# No Prototype It - GOV.UK Prototype Kit
+# Now Prototype It - GOV.UK Prototype Kit
 
 This prototype kit is designed to be compatible with [The GOV.UK Prototype Kit](https://prototype-kit.service.gov.uk/docs), 
 

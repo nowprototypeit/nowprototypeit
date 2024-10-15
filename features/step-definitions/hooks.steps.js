@@ -40,11 +40,11 @@ const variantConfigs = {
     neverReuseThisKit: true,
     variantPluginName: '@nowprototypeit/design-system'
   },
-  '@kit-update-from-0.9.0': {
+  '@kit-update-from-0.9.4': {
     neverReuseThisKit: true,
     variantPluginName: '@nowprototypeit/design-system',
-    kitDependency: 'nowprototypeit@0.9.0',
-    kitCreateVersionSetting: '0.9.0'
+    kitDependency: 'nowprototypeit@0.9.4',
+    kitCreateVersionSetting: '0.9.4'
   }
 }
 
