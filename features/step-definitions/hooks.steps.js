@@ -153,5 +153,9 @@ AfterAll(kitStartTimeout, async function () {
 
   const kitShouldBeDeleted = process.env.LEAVE_KIT_AFTER_TEST !== 'true'
 
-  await cleanupEverything(kitShouldBeDeleted)
+  try {
+    await cleanupEverything(kitShouldBeDeleted)
+  } catch (e) {
+    console.error('Error during cleanup (ignoring as the tests have already passed):', e)
+  }
 })
