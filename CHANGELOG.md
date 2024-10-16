@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Improvements to the authentication and hosting pages.
+
 ## 0.9.4
 
 ### Fixes
