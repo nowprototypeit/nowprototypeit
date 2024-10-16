@@ -50,8 +50,35 @@
     vertical-align: top;
     position: absolute;
     right: 20px;
-    top: 50%;
+    top: 60px;
     transform: translateY(-50%);
     margin-top: 1rem;
+  }
+
+  .nowprototypeit-profile-links-area {
+    text-align: left;
+    .user-profile-nav {
+      padding: 0 1rem;
+    }
+    .user-profile-nav__item {
+      text-align: left;
+      display: inline-block;
+      margin-right: 20px;
+      font-weight: bold;
+      color: #333;
+      text-decoration: none;
+      transition: color .2s ease-in-out;
+
+      &:hover {
+        color: #000;
+      }
+    }
+  }
+}
+
+.nowprototypeit-login-links .nowprototypeit-form-item-wrapper {
+  display: inline-block;
+  + .nowprototypeit-form-item-wrapper {
+    margin-left: 1rem;
   }
 }

@@ -4,6 +4,8 @@
 {% from "components/submit-button.njk" import nowPrototypeItSubmitButton %}
 {% from "components/error.njk" import nowPrototypeItError %}
 
+{% set pageName="Hosting" %}
+
 {% block content %}
 
   <div class="nowprototypeit-profile-banner">
@@ -12,7 +14,13 @@
       <div class="nowprototypeit-user-name">{{ name }}</div>
     </div>
     <div class="nowprototypeit-sign-out-wrapper"><form method="post" action="/manage-prototype/hosting/logout">{{ nowPrototypeItSubmitButton({text: 'Sign out'}) }}</form></div>
+    <div class="nowprototypeit-profile-links-area">
+      {% if links and links.items.length %}
+        {{ nowPrototypeItNav(links) }}
+      {% endif %}
+    </div>
   </div>
+
 
   {% if errorSplash %}
     {{ nowPrototypeItError({

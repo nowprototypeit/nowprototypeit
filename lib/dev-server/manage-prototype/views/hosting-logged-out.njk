@@ -4,6 +4,8 @@
 {% from "components/submit-button.njk" import nowPrototypeItSubmitButton %}
 {% from "components/error.njk" import nowPrototypeItError %}
 
+{% set pageName="Hosting" %}
+
 {% block content %}
 
   <h1>Prototype Hosting from Now Prototype It</h1>
@@ -18,11 +20,17 @@
       ]}) }}
   {% endif %}
 
-  <form action="/manage-prototype/hosting/begin-login" method="post">
+  <form action="/manage-prototype/hosting/begin-login" method="post" class="nowprototypeit-login-links">
     {{ nowPrototypeItSubmitButton({
-      text: 'Log in'
+      nameAndId: 'login',
+      text: 'Log in',
+      value: 'login'
+    }) }}
+    {{ nowPrototypeItSubmitButton({
+      nameAndId: 'create-account',
+      text: 'Create an account',
+      value: 'create-account'
     }) }}
   </form>
-
 
 {% endblock %}

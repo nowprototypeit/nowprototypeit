@@ -4,31 +4,37 @@
 {% from "components/submit-button.njk" import nowPrototypeItSubmitButton %}
 {% from "components/error.njk" import nowPrototypeItError %}
 
+{% set pageName="Hosting" %}
+
+{% set contentWhenStarted %}
+
+  <h1>You're in the process of logging in</h1>
+
+  <p>Please continue that login process or <a href="/manage-prototype/hosting">start again</a>.</p>
+
+{% endset %}
+
 {% block content %}
 
   {% if loginUrl %}
+    <div id="phase-one">
+      <h1>A login window should have opened</h1>
 
-    <h1>A login window should have opened</h1>
+      <p>If it hasn't opened you can <strong><a href="{{ loginUrl }}" target="_blank" data-dom-widget="auth-process-open-window" {% if shouldAutoOpen %}data-auto-open="on"{% endif %}>try opening it again</a></strong>.</p>
 
-    <p>If it hasn't opened you can <a href="{{ loginUrl }}" target="_blank">try opening it again</a>.</p>
-
-    <p>This page will automatically refresh once you're logged in.</p>
-
+      <p>This page will automatically refresh once you're logged in.</p>
+    </div>
+    <div id="phase-two" style="display:none">
+      {{ contentWhenStarted | safe }}
+    </div>
   {% else %}
-
-    <h1>You're in the process of logging in</h1>
-
-    <p>Please continue that login process or <a href="/manage-prototype/hosting">start again</a>.</p>
-
+    {{ contentWhenStarted | safe }}
   {% endif %}
+  <p><a href="/manage-prototype">Back to Manage Your Prototype</a></p>
+{% endblock %}
 
-  <script>
-    {% if shouldAutoOpen and loginUrl %}
-    window.open('{{ loginUrl }}', 'NPILoginWindow', 'width=600,height=400,top=50,left=50,').focus()
-    {% endif %}
-    setTimeout(function() {
-      window.location.reload()
-    }, 1000)
-  </script>
-
+{% block pageScripts %}
+<script>
+  window.NOW_PROTOTYPE_IT.AUTH_FUNCTIONS.checkForUpdates({{ checkForUpdatesUrl | safe }})
+</script>
 {% endblock %}
