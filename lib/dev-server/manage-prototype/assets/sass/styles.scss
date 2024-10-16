@@ -75,3 +75,10 @@
     }
   }
 }
+
+.nowprototypeit-login-links .nowprototypeit-form-item-wrapper {
+  display: inline-block;
+  + .nowprototypeit-form-item-wrapper {
+    margin-left: 1rem;
+  }
+}

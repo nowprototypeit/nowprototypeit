@@ -20,13 +20,17 @@
       ]}) }}
   {% endif %}
 
-  <form action="/manage-prototype/hosting/begin-login" method="post">
+  <form action="/manage-prototype/hosting/begin-login" method="post" class="nowprototypeit-login-links">
     {{ nowPrototypeItSubmitButton({
-      text: 'Log in'
+      nameAndId: 'login',
+      text: 'Log in',
+      value: 'login'
+    }) }}
+    {{ nowPrototypeItSubmitButton({
+      nameAndId: 'create-account',
+      text: 'Create an account',
+      value: 'create-account'
     }) }}
   </form>
-
-  <p>If you don't already have an account you can
-    <strong><a href="https://nowprototype.it/account/register">register for a new account</a></strong>.</p>
 
 {% endblock %}
