@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.9.5
+
 ### Improvements
 
 - Improvements to the authentication and hosting pages.
