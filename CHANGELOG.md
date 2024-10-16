@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-### Fixes
+### Improvements
 
 - Improvements to the authentication and hosting pages.
 

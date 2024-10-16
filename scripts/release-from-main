@@ -127,6 +127,7 @@ async function updateChangelogAndPublish (kitDir) {
   const unreleasedLineIndex = findIndexOfFirstMatchingLine(changelogLines, /^#+\s+Unreleased\s*$/i)
   const previousReleaseLineIndex = findIndexOfFirstMatchingLine(changelogLines, /^#+\s+\d+\.\d+\.\d+\s*$/i)
   const firstFixes = findIndexOfFirstMatchingLine(changelogLines, /^#+\s+Fixes\s*$/i)
+  const firstImprovements = findIndexOfFirstMatchingLine(changelogLines, /^#+\s+Improvements\s*$/i)
   const firstNewFeatures = findIndexOfFirstMatchingLine(changelogLines, /^#+\s+New Features\s*$/i)
   const firstBreakingChanges = findIndexOfFirstMatchingLine(changelogLines, /^#+\s+Breaking changes\s*$/i)
 
@@ -137,6 +138,8 @@ async function updateChangelogAndPublish (kitDir) {
   } else if (firstNewFeatures > unreleasedLineIndex && firstNewFeatures < previousReleaseLineIndex) {
     releaseType = 'minor'
   } else if (firstFixes > unreleasedLineIndex && firstFixes < previousReleaseLineIndex) {
+    releaseType = 'patch'
+  } else if (firstImprovements > unreleasedLineIndex && firstImprovements < previousReleaseLineIndex) {
     releaseType = 'patch'
   }
 
