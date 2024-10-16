@@ -20,7 +20,7 @@
     <div id="phase-one">
       <h1>A login window should have opened</h1>
 
-      <p>If it hasn't opened you can <a href="{{ loginUrl }}" target="_blank" {% if shouldAutoOpen %}data-dom-widget="auth-process-auto-open"{% endif %}>try opening it again</a>.</p>
+      <p>If it hasn't opened you can <strong><a href="{{ loginUrl }}" target="_blank" data-dom-widget="auth-process-open-window" {% if shouldAutoOpen %}data-auto-open="on"{% endif %}>try opening it again</a></strong>.</p>
 
       <p>This page will automatically refresh once you're logged in.</p>
     </div>
