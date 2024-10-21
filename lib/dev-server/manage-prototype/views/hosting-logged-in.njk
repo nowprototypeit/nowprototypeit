@@ -37,16 +37,13 @@
   {% if successSplash %}
     <div class="nowprototypeit-success-splash">
       <h1>{{ successSplash.title }}</h1>
-      <p>{{ successSplash.message }} <a href="{{ successSplash.url }}" target="_blank">{{ successSplash.url }}</a></p>
+      <p>{{ successSplash.message }} <strong><a href="{{ successSplash.actualUrl }}" target="_blank">{{ successSplash.displayUrl }}</a></strong>.</p>
     </div>
-  {% endif %}
-  {% if splash == 'success' and url %}
-    <p>Your prototype is now hosted at <a href="{{ url }}" target="_blank">{{ url }}</a>.</p>
   {% endif %}
   {% if userCanUpload %}
 
     <form action="{{ uploadPrototypeUrl }}" method="post">
-    <h1>Upload your prototype to nowuserresearch.it</h1>
+    <h1>Upload your prototype to nowview.it</h1>
     <p>You can upload {{ uploadCapacity }} {% if uploadedCount > 0 %} more {% endif %} prototypes. If this isn't enough please <strong><a target="_blank" href="/manage-prototype/hosting/redirect-to-logged-in-url/set-up-account-for-increased-hosting">visit your profile on the Now Prototype It website</a></strong> where you can remove unused prototypes or increase your limit.</p>
 
     {{ nowPrototypeItTextInput({
