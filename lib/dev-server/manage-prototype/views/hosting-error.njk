@@ -1,0 +1,22 @@
+{% extends "layouts/auto-reload.njk" %}
+
+{% set bodyClasses = 'nowprototypeit-error-page' %}
+
+{% block pageTitle %}
+  Error connecting to the hosting environment
+{% endblock %}
+
+
+{% block content %}
+
+  <h1>
+    There was an error while communicating with the hosting platform
+  </h1>
+
+  {% if messageHtml %}
+    {{ messageHtml | safe }}
+  {% endif %}
+
+  <p><a href="/manage-prototype">Back to Manage Your Prototype</a></p>
+
+{% endblock %}

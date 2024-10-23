@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Improvements
+
+- More improvements to the hosting pages.
+
 ## 0.9.5
 
 ### Improvements
