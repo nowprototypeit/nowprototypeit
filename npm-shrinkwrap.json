@@ -1,12 +1,12 @@
 {
   "name": "nowprototypeit",
-  "version": "0.9.5",
+  "version": "0.10.0",
   "lockfileVersion": 2,
   "requires": true,
   "packages": {
     "": {
       "name": "nowprototypeit",
-      "version": "0.9.5",
+      "version": "0.10.0",
       "dependencies": {
         "@nowprototypeit/design-system": "^1.0.7",
         "body-parser": "^1.20.2",
