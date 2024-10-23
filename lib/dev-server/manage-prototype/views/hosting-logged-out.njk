@@ -22,8 +22,11 @@
 
   <h1>Prototype Hosting from Now Prototype It</h1>
 
-  <p>To start hosing you'll need to log in to your nowprototype.it account.</p>
+  <p>To start hosting you'll need to log in to your nowprototype.it account.</p>
 
+  {% if loggedOutMessage %}
+    <p>{{ loggedOutMessage | safe }}</p>
+  {% endif %}
   {% if errorSplash %}
     {{ nowPrototypeItError({
       titleText: errorSplash.title,
