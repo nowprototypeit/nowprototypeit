@@ -1,8 +1,8 @@
 // SASS settings should be brought in before plugins so the user can configure settings for their plugins
-@import ".tmp/sass/user/settings";
+@forward ".tmp/sass/user/settings";
 
 // Import GOV.UK Frontend and any plugin styles if plugins have been configured
-@import ".tmp/sass/plugins";
+@forward ".tmp/sass/plugins";
 
 // SASS that is user defined
-@import ".tmp/sass/user/application";
+@forward ".tmp/sass/user/application";
