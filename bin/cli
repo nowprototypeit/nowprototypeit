@@ -441,6 +441,7 @@ function runBuild () {
 }
 
 function runServePreBuilt () {
+  console.log('Starting server with pre-built assets')
   process.env.NODE_ENV = process.env.NODE_ENV || 'production'
   require('../listen-on-port')
 }

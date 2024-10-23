@@ -10,10 +10,14 @@
 
   <div class="nowprototypeit-profile-banner">
     <div class="nowprototypeit-user-area-wrapper">
-      <div class="nowprototypeit-profile-picture-wrapper"><img src="/manage-prototype/hosting/profile-picture" alt="User profile picture"/></div>
+      <div class="nowprototypeit-profile-picture-wrapper"><img src="/manage-prototype/hosting/profile-picture"
+                                                               alt="User profile picture"/></div>
       <div class="nowprototypeit-user-name">{{ name }}</div>
     </div>
-    <div class="nowprototypeit-sign-out-wrapper"><form method="post" action="/manage-prototype/hosting/logout">{{ nowPrototypeItSubmitButton({text: 'Sign out'}) }}</form></div>
+    <div class="nowprototypeit-sign-out-wrapper">
+      <form method="post"
+            action="/manage-prototype/hosting/logout">{{ nowPrototypeItSubmitButton({text: 'Sign out'}) }}</form>
+    </div>
     <div class="nowprototypeit-profile-links-area">
       {% if links and links.items.length %}
         {{ nowPrototypeItNav(links) }}
@@ -28,28 +32,34 @@
       errorList: [
         {text: errorSplash.message}
       ]}) }}
+    <p>If you need help with this please <a target="_blank" href="/manage-prototype/hosting/redirect-to-logged-in-url/request-hosting-support">request support</a>.</p>
   {% endif %}
   {% if successSplash %}
     <div class="nowprototypeit-success-splash">
       <h1>{{ successSplash.title }}</h1>
-      <p>{{ successSplash.message}} <a href="{{ successSplash.url }}" target="_blank">{{ successSplash.url }}</a></p>
+      <p>{{ successSplash.message }} <strong><a href="{{ successSplash.actualUrl }}" target="_blank">{{ successSplash.displayUrl }}</a></strong>.</p>
     </div>
   {% endif %}
-  {% if splash == 'success' and url %}
-    <p>Your prototype is now hosted at <a href="{{ url }}" target="_blank">{{ url }}</a>.</p>
-  {% endif %}
+  {% if userCanUpload %}
 
-  <form action="{{ uploadPrototypeUrl }}" method="post">
-    <h1>Upload your prototype to nowuserresearch.it</h1>
+    <form action="{{ uploadPrototypeUrl }}" method="post">
+    <h1>Upload your prototype to Now Prototype It's hosting platform</h1>
+    <p>You can upload {{ uploadCapacity }} {% if uploadedCount > 0 %} more {% endif %} prototypes. If this isn't enough please <strong><a target="_blank" href="/manage-prototype/hosting/redirect-to-logged-in-url/set-up-account-for-increased-hosting">visit your profile on the Now Prototype It website</a></strong> where you can remove unused prototypes or increase your limit.</p>
 
     {{ nowPrototypeItTextInput({
       label: "Name of prototype",
+      hintText: "This must be lowercase and contain only letters, numbers and hyphens",
       nameAndId: "prototype-name"
     }) }}
 
     {{ nowPrototypeItSubmitButton({
       text: "Upload prototype"
     }) }}
+  {% elseif uploadCapacity == 0 %}
+    <p>Your account is not set up for uploading prototypes, to set this up please <strong><a target="_blank" href="/manage-prototype/hosting/redirect-to-logged-in-url/set-up-account-for-hosting">visit your profile on the Now Prototype It website</a></strong>.</p>
+  {% else %}
+    <p>You have {{ uploadedCount }} hosted prototypes and have reached your {{ uploadCapacity }} prototype limit. to find out more or to increase your limit please <strong><a target="_blank" href="/manage-prototype/hosting/redirect-to-logged-in-url/set-up-account-for-additional-hosting">visit your profile on the Now Prototype It website</a></strong>.</p>
+  {% endif %}
 
   </form>
 
