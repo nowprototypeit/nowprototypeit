@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### New Features
+
+- Added the hosting tab to Manage Prototype
+
 ### Improvements
 
 - More improvements to the hosting pages.
