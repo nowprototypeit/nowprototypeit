@@ -1,7 +1,7 @@
 {
   "name": "nowprototypeit",
   "description": "A fully configurable, high-fidelity prototype kit",
-  "version": "0.9.5",
+  "version": "0.10.0",
   "engines": {
     "node": "^16.x || ^18.x || >= 20.x"
   },

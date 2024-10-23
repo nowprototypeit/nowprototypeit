@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.10.0
+
 ### New Features
 
 - Added the hosting tab to Manage Prototype
