@@ -77,7 +77,7 @@
     "proper-lockfile": "^4.1.2",
     "selenium-webdriver": "^4.16.0",
     "standard": "^17.1.0",
-    "supertest": "^6.3.3"
+    "supertest": "^7.0.0"
   },
   "standard": {
     "ignore": [
