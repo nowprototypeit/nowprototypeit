@@ -69,7 +69,6 @@
     "cheerio": "^1.0.0-rc.12",
     "clean-publish": "^4.2.0",
     "cross-env": "^7.0.3",
-    "eslint-plugin-cypress": "^2.15.1",
     "eslint-plugin-jest": "^27.4.3",
     "extract-zip": "^2.0.1",
     "glob": "^10.3.10",
@@ -78,7 +77,6 @@
     "proper-lockfile": "^4.1.2",
     "selenium-webdriver": "^4.16.0",
     "standard": "^17.1.0",
-    "start-server-and-test": "^2.0.1",
     "supertest": "^6.3.3"
   },
   "standard": {
@@ -87,11 +85,9 @@
       "prototype-starter/"
     ],
     "plugins": [
-      "cypress",
       "jest"
     ],
     "envs": [
-      "cypress/globals",
       "jest/globals"
     ]
   },
