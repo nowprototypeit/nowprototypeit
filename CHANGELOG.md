@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### New Features
+
+- Hosting improvements including update messages while your prototype is being uploaded
+
+### Fixes
+
+- Removed unused dependencies, reducing the size of the kit and the number of opportunities for vulnerabilities - this also makes the kit quicker to install and run
+- Updated to the latest version of various dependencies to reduce vulnerabilities
+
 ## 0.10.0
 
 ### New Features
