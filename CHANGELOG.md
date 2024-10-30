@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.11.0
+
 ### New Features
 
 - Hosting improvements including update messages while your prototype is being uploaded
