@@ -7,8 +7,8 @@
     "": {
       "name": "nowprototypeit",
       "version": "0.11.0",
+      "license": "MIT",
       "dependencies": {
-        "@nowprototypeit/design-system": "1.0.8",
         "body-parser": "^1.20.2",
         "chokidar": "^3.6.0",
         "cookie-parser": "^1.4.6",
@@ -1776,11 +1776,6 @@
       "engines": {
         "node": ">= 8"
       }
-    },
-    "node_modules/@nowprototypeit/design-system": {
-      "version": "1.0.8",
-      "resolved": "https://registry.npmjs.org/@nowprototypeit/design-system/-/design-system-1.0.8.tgz",
-      "integrity": "sha512-WxAIJafFxDfkUhNkwYeNhENNhO7d/dNTnaRM58zXvuAwduSljGGa8DYCoMq5E3QingGYCfqtW1PY7nU/W/DsXA=="
     },
     "node_modules/@pkgjs/parseargs": {
       "version": "0.11.0",
@@ -11937,11 +11932,6 @@
         "@nodelib/fs.scandir": "2.1.5",
         "fastq": "^1.6.0"
       }
-    },
-    "@nowprototypeit/design-system": {
-      "version": "1.0.8",
-      "resolved": "https://registry.npmjs.org/@nowprototypeit/design-system/-/design-system-1.0.8.tgz",
-      "integrity": "sha512-WxAIJafFxDfkUhNkwYeNhENNhO7d/dNTnaRM58zXvuAwduSljGGa8DYCoMq5E3QingGYCfqtW1PY7nU/W/DsXA=="
     },
     "@pkgjs/parseargs": {
       "version": "0.11.0",
