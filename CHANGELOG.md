@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.11.1
+
 ### Improvements
 
  - Improved the plugin validator, partially caught up with the new features in the plugin system
