@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Improvements
+
+ - Improved the plugin validator, partially caught up with the new features in the plugin system
+ - Included the licence in the package.json so it can be seen more clearly in the npm registry (we were already using the MIT licence, just not displaying it in NPM)
+
 ## 0.11.0
 
 ### New Features
