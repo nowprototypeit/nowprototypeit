@@ -46,7 +46,6 @@ app.locals.managePrototypeUrl = '/manage-prototype'
 app.locals.useAutoStoreData = config.useAutoStoreData
 app.locals.releaseVersion = 'v' + releaseVersion
 app.locals.isRunningInPrototypeKit = true
-app.locals.serviceName = config.serviceName
 // pluginConfig sets up variables used to add the scripts and stylesheets to each page.
 app.locals.pluginConfig = plugins.getAppConfig({
   scripts: utils.prototypeAppScripts
