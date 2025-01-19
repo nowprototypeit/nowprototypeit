@@ -30,3 +30,19 @@ Feature: Error handling
     And the error details should contain additional information starting with "The following directories were checked:"
     And the source code should start at line 1
     And the source code should end at line 6
+
+  @no-variant
+  @serverside-js
+  Scenario: Server-side JavaScript error, broken session data defaults
+    Given I create a file "app/data/session-data-defaults.js" based on the fixture file "serverside-js/broken-session-data-defaults_js"
+    When I visit "/"
+    Then the main heading should be updated to "Your prototype failed to start"
+    Then the page title should read "Error running your prototype – Now Prototype It"
+    Then I should see an error page
+    And the error details should contain "File path:" "app/views/broken-session-data-defaults.js"
+    And the error details should contain "Line number:" "2"
+    And the error details should contain "Error type:" "SyntaxError"
+    And the error details should contain "Error message:" "Unexpected string"
+    And the source code should start at line 1
+    And the source code should end at line 4
+    And only line 2 should be highlighted

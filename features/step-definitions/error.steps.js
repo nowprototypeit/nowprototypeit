@@ -1,6 +1,7 @@
 const { Then } = require('@cucumber/cucumber')
 const { expect, standardTimeout } = require('./utils')
 const { By } = require('selenium-webdriver')
+const path = require('path')
 
 Then('I should see an error page', standardTimeout, async function () {
   let classArray
@@ -59,6 +60,10 @@ Then('the error details should contain additional information starting with {str
   ;(await expect(additionalDetails.split('\n')[0].trim())).to.eq(startOfAdditionalInfo)
 })
 
+function standardiseWindowsFilenamesForTestAssertion (output, index, text) {
+  return output[index] === 'File path:' ? text.split(path.sep).join('/') : text
+}
+
 Then('the error details should contain {string} {string}', standardTimeout, async function (name, value) {
   const info = await getErrorDetailElements(this.browser)
 
@@ -70,7 +75,8 @@ Then('the error details should contain {string} {string}', standardTimeout, asyn
       output.push(text)
     } else if (tagName === 'dd') {
       const index = output.length - 1
-      output[index] = output[index] + separator + text
+      const preparedText = standardiseWindowsFilenamesForTestAssertion(output, index, text)
+      output[index] = output[index] + separator + preparedText
     }
   })
 
