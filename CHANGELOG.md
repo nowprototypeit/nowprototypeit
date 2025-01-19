@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.11.2
+
 ### Improvements
 
  - Service name is no longer included in the core config as it's only for some plugins, it is included in the plugin configuration for those plugins that need it
