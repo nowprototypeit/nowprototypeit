@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Improvements
+
+ - Service name is no longer included in the core config as it's only for some plugins, it is included in the plugin configuration for those plugins that need it
+ - If the session-data-defaults.js file is malformed an error is shown to the user rather than the default silently being used
+
 ## 0.11.1
 
 ### Improvements
