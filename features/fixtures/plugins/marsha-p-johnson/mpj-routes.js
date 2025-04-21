@@ -25,15 +25,19 @@ function setupNamespacedRouter (router, { contextPath }) {
     const nextPage = currentPage + 1
     const nextInfoPageExists = infoPages[nextPage]
     const userWantsNextPage = req.body.knowMore === 'yes'
+    const userDoesntWantToKnowMore = req.body.knowMore === 'no'
     console.log({
       nextInfoPageExists,
       userWantsNextPage,
+      userDoesntWantToKnowMore,
       nextPage
     })
     if (userWantsNextPage && nextInfoPageExists) {
       res.redirect(`${contextPath}/info/${nextPage}`)
-    } else {
+    } else if (userDoesntWantToKnowMore) {
       res.redirect(`${contextPath}/info/end`)
+    } else {
+      res.redirect(`${contextPath}/info/no-selection-made`)
     }
   })
 
@@ -53,6 +57,9 @@ function setupNamespacedRouter (router, { contextPath }) {
 
   router.get('/info/end', (req, res, next) => {
     res.render('/marsha-p-johnson/journey/end.njk')
+  })
+  router.get('/info/no-selection-made', (req, res, next) => {
+    res.render('/marsha-p-johnson/journey/no-selection-made.njk')
   })
 
   router.use((req, res, next) => {
