@@ -4,8 +4,8 @@ Feature: Nunjucks editing
   @no-variant
   @auto-refresh
   Scenario: Auto refresh when creating a new page
-    Given I am viewing a 404 page at "/abc/def/ghi/jkl"
-    When I create a file "app/views/abc/def/ghi/jkl.njk" with contents "<h1>Hello world</h1>"
+    Given I am viewing a 404 page at "/this/page/should/not/exist/at/the/start/of/the/test"
+    When I create a file "app/views/this/page/should/not/exist/at/the/start/of/the/test.njk" with contents "<h1>Hello world</h1>"
     Then the main heading should be updated to "Hello world"
 
   @no-variant

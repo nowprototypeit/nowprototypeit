@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Improvements
+
+ - Improved error handling when uploading a prototype to the hosted environment
+ - Clearer feedback in the plugin validator
+
 ## 0.11.2
 
 ### Improvements
