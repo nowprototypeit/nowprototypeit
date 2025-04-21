@@ -73,12 +73,19 @@ When('I press {string}', standardTimeout, async function (buttonText) {
 })
 
 Then('I should see the settings saved message', standardTimeout, async function () {
-  const toast = (await this.browser.queryClass('nowprototypeit-toast'))[0]
-  if (!toast) {
-    throw new Error('Could not find toast')
-  }
-  const toastText = await toast.getText()
-  ;(await expect(toastText)).to.contain('Settings saved')
+  let lastKnownContent
+  const expectedContent = 'Settings saved'
+  await waitForConditionToBeMet({ timeout: standardTimeout.timeout * 0.9 }, async () => {
+    const toast = (await this.browser.queryClass('nowprototypeit-toast'))[0]
+    if (!toast) {
+      return false
+    }
+    lastKnownContent = await toast.getText()
+    return lastKnownContent.includes(expectedContent)
+  }, () => {
+    const summary = lastKnownContent ? `[${lastKnownContent}]` : 'never found'
+    throw new Error(`Expected toast message to be [${expectedContent}], but was ${summary}`)
+  })
 })
 
 When('I visit the homepage', standardTimeout, async function () {

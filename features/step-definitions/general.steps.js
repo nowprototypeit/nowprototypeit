@@ -77,11 +77,18 @@ Then('the page title should become {string}', mediumActionTimeout, async functio
   }
 })
 const statusCodeCheck = async function (statusCode, url) {
-  const [response] = await Promise.all([
-    makeGetRequest(this.browser.getFullUrl(url)),
-    this.browser.openUrl(url)
-  ])
-  ;(await expect(response.statusCode)).to.equal(statusCode)
+  let latestStatusCode = 0
+  await waitForConditionToBeMet({ timeout: standardTimeout.timeout * 0.9 }, async () => {
+    const response = await makeGetRequest(this.browser.getFullUrl(url))
+    latestStatusCode = response.statusCode
+    if (latestStatusCode === statusCode) {
+      await this.browser.openUrl(url)
+      return true
+    }
+    return false
+  }, async () => {
+    throw new Error(`Gave up waiting for status code [${latestStatusCode}] to become equal to [${statusCode}] for URL [${url}]`)
+  })
 }
 Given('I am viewing a {int} page at {string}', standardTimeout, statusCodeCheck)
 Then('I should receive a {int} for page at {string}', standardTimeout, statusCodeCheck)
