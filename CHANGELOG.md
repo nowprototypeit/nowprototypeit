@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.11.3
+
 ### Improvements
 
  - Improved error handling when uploading a prototype to the hosted environment
