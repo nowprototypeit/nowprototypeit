@@ -405,7 +405,10 @@ function waitForConditionToBeMet (timeoutDeclaration, isCorrect, errorCallback) 
 
     const delayBetweenRetries = 150
     const timeoutCallback = async () => {
-      const result = await isCorrect()
+      let result = false
+      try {
+        result = await isCorrect()
+      } catch (e) {}
       if (result) {
         return resolve()
       }

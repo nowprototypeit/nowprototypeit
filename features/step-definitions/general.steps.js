@@ -44,20 +44,16 @@ Then('the first paragraph should read {string}', standardTimeout, async function
 
 Then('the main heading should be updated to {string}', mediumActionTimeout, async function (expectedHeading) {
   let actualH1
-  const isCorrect = async () => {
+  return waitForConditionToBeMet(mediumActionTimeout, async () => {
     try {
       actualH1 = await (await this.browser.queryTag('h1'))[0]?.getText()
     } catch (e) {
       actualH1 = undefined
     }
     return actualH1 === expectedHeading
-  }
-
-  function errorCallback (reject) {
+  }, function (reject) {
     return reject(new Error(`Gave up waiting for heading [${actualH1}] to become equal to [${expectedHeading}]`))
-  }
-
-  return waitForConditionToBeMet(mediumActionTimeout, isCorrect, errorCallback)
+  })
 })
 
 Then('the page title should read {string}', standardTimeout, async function (expectedTitle) {
@@ -66,15 +62,13 @@ Then('the page title should read {string}', standardTimeout, async function (exp
 })
 
 Then('the page title should become {string}', mediumActionTimeout, async function (expectedTitle) {
-  const start = Date.now()
   let actualTitleText
-  while (actualTitleText !== expectedTitle) {
-    if (Date.now() - start > (mediumActionTimeout.timeout - 600)) {
-      throw new Error(`Gave up waiting for title [${actualTitleText}] to become equal to [${expectedTitle}]`)
-    }
-    await sleep(100)
+  await waitForConditionToBeMet(mediumActionTimeout, async () => {
     actualTitleText = await this.browser.getTitle()
-  }
+    return actualTitleText === expectedTitle
+  }, () => {
+    throw new Error(`Gave up waiting for title [${actualTitleText}] to become equal to [${expectedTitle}]`)
+  })
 })
 const statusCodeCheck = async function (statusCode, url) {
   let latestStatusCode = 0
@@ -181,11 +175,24 @@ async function submitForm (form) {
 }
 
 When('I submit the form', standardTimeout, async function () {
-  const forms = await this.browser.queryTag('form')
-  if (forms.length !== 1) {
-    throw new Error(`Expected exactly one form on the page, found [${forms.length}]`)
-  }
-  await submitForm(forms[0])
+  let lastKnownError
+  await waitForConditionToBeMet(standardTimeout, async () => {
+    const forms = await this.browser.queryTag('form')
+    const numberOfForms = forms.length
+    if (numberOfForms !== 1) {
+      lastKnownError = `Expected exactly one form on the page, found [${numberOfForms}]`
+      return false
+    }
+    try {
+      await submitForm(forms[0])
+    } catch (e) {
+      lastKnownError = e.message
+      return false
+    }
+    return true
+  }, () => {
+    throw new Error(lastKnownError || 'Failed to submit form (for an unknown reason')
+  })
 })
 
 When('I submit the form with ID {string}', standardTimeout, async function (formId) {
@@ -197,11 +204,21 @@ When('I submit the form with ID {string}', standardTimeout, async function (form
 })
 
 When('I select the {string} radio button', standardTimeout, async function (radioElementId) {
-  const $elem = await this.browser.queryId(radioElementId)
-  if (!$elem) {
-    throw new Error(`no element with ID ${radioElementId}`)
-  }
-  await $elem.click()
+  let lastKnownError = 'Failed to select radio button'
+  await waitForConditionToBeMet(standardTimeout, async () => {
+    const $elem = await this.browser.queryId(radioElementId)
+    if (!$elem) {
+      lastKnownError = `no element with ID ${radioElementId}`
+      return false
+    }
+    if (!await $elem.isSelected()) {
+      await $elem.click()
+    }
+    await sleep(100)
+    return await $elem.isSelected()
+  }, () => {
+    throw new Error(lastKnownError)
+  })
 })
 
 When('I click the link with text {string}', standardTimeout, async function (linkText) {

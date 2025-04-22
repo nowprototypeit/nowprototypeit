@@ -116,10 +116,15 @@ When('I click through to the page I created from a template', standardTimeout, a
 
 Then('I should see the GOV.UK Header', standardTimeout, async function () {
   const classToLookFor = 'govuk-header__logo'
-  const elems = await this.browser.queryClass(classToLookFor)
-  if (elems.length === 0) {
+  await waitForConditionToBeMet(standardTimeout.timeout, async () => {
+    const elems = await this.browser.queryClass(classToLookFor)
+    if (elems.length === 0) {
+      return false
+    }
+    return true
+  }, () => {
     throw new Error(`Expected GOV.UK Header but couldn't find element with class [${classToLookFor}]`)
-  }
+  })
 })
 
 Then('I should not see the GOV.UK Header', standardTimeout, async function () {
