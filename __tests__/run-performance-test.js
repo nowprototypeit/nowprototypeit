@@ -27,12 +27,12 @@ const execArgs = {
   passThroughEnv: true
 }
 
-const numberOfRuns = Number(process.argv[2]) || 10
+const numberOfRuns = Number(process.argv[2]) || 40
 const numberOfDevRuns = Math.ceil(numberOfRuns / 5)
 const npiVersionToCompare = '0.11.2'
 const minimumAcceptablePercentageImprovements = {
   preBuilt: 35,
-  serve: 2, // I'm not putting too much effort into this, just making sure it's not getting worse
+  serve: 0, // As we improve the other two, this should not get worse
   dev: 15
 }
 const packLocation = path.join(packDir, `nowprototypeit-${require('../package.json').version}.tgz`)
