@@ -25,3 +25,5 @@ jobs:
       - run: npm run
 
       - run: npm run test:perf
+        env:
+          NPI_PERF_UNDERPOWERED: 'true'

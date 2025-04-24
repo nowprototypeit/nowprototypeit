@@ -1,5 +1,11 @@
 #!/usr/bin/env node
 
+const underpowered = process.env.NPI_PERF_UNDERPOWERED === 'true'
+
+if (underpowered) {
+  console.log('Running with underpowered benchmark expectations - this is based on the GitHub runners')
+}
+
 const path = require('path')
 const os = require('os')
 const { execv2 } = require('../lib/exec')
@@ -31,9 +37,9 @@ const numberOfRuns = Number(process.argv[2]) || 40
 const numberOfDevRuns = Math.ceil(numberOfRuns / 5)
 const npiVersionToCompare = '0.11.2'
 const minimumAcceptablePercentageImprovements = {
-  preBuilt: 35,
+  preBuilt: underpowered ? 35 : 40,
   serve: 0, // As we improve the other two, this should not get worse
-  dev: 15
+  dev: underpowered ? 8 : 13 // We're seeing much bigger improvements in the range of 15% on a reasonably powerful laptop, this benchmark needs to run on GitHub default workers where there's less power and we don't see as much of an improvement
 }
 const packLocation = path.join(packDir, `nowprototypeit-${require('../package.json').version}.tgz`)
 
