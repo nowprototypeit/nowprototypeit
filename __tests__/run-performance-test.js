@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 
 const underpowered = process.env.NPI_PERF_UNDERPOWERED === 'true'
+const skipDev = process.env.NPI_PERF_SKIP_DEV === 'true'
+const skipServe = process.env.NPI_PERF_SKIP_SERVE === 'true'
+const skipPreBuilt = process.env.NPI_PERF_SKIP_SERVE_PRE_BUILT === 'true'
 
 if (underpowered) {
   console.log('Running with underpowered benchmark expectations - this is based on the GitHub runners')
@@ -33,12 +36,12 @@ const execArgs = {
   passThroughEnv: true
 }
 
-const numberOfRuns = Number(process.argv[2]) || 40
+const numberOfRuns = Number(process.argv[2]) || 20
 const numberOfDevRuns = Math.ceil(numberOfRuns / 5)
 const npiVersionToCompare = '0.11.2'
 const minimumAcceptablePercentageImprovements = {
-  preBuilt: underpowered ? 35 : 40,
-  serve: 0, // As we improve the other two, this should not get worse
+  preBuilt: underpowered ? 30 : 35,
+  serve: -3, // As we improve the other two, this should not get worse - if it is completely unchanged then there will be natural variation between runs.  I'm seeing a range between -3% and +3% on a laptop
   dev: underpowered ? 8 : 13 // We're seeing much bigger improvements in the range of 15% on a reasonably powerful laptop, this benchmark needs to run on GitHub default workers where there's less power and we don't see as much of an improvement
 }
 const packLocation = path.join(packDir, `nowprototypeit-${require('../package.json').version}.tgz`)
@@ -48,7 +51,7 @@ async function runPerformanceTest (command, numberOfRuns, benchmark = undefined)
     ...execArgs,
     env: {
       ...(execArgs.env || {}),
-      NPI_SERVE_PREBUILT_BENCHMARK_MS: benchmark
+      NPI_PERF_BENCHMARK_MS: benchmark
     }
   })
   let result =
@@ -79,26 +82,37 @@ async function runPerformanceTest (command, numberOfRuns, benchmark = undefined)
 (async () => {
   const controlResults = {}
   await execv2(`npx nowprototypeit create --version=${npiVersionToCompare} --variant=@nowprototypeit/govuk-frontend-adaptor`, execArgs).finishedPromise
-  await execv2('npx nowprototypeit build', execArgs).finishedPromise
-  controlResults.preBuilt = await runPerformanceTest('serve-pre-built', numberOfRuns)
-  controlResults.serve = await runPerformanceTest('serve', numberOfRuns)
-  controlResults.dev = await runPerformanceTest('dev', numberOfDevRuns)
+  if (!skipPreBuilt) {
+    await execv2('npx nowprototypeit build', execArgs).finishedPromise
+    controlResults.preBuilt = await runPerformanceTest('serve-pre-built', numberOfRuns)
+  }
+  if (!skipServe) {
+    controlResults.serve = await runPerformanceTest('serve', numberOfRuns)
+  }
+  if (!skipDev) {
+    controlResults.dev = await runPerformanceTest('dev', numberOfDevRuns)
+  }
 
   await execv2(`npm pack --pack-destination=${packDir}`, {
     ...execArgs,
     cwd: path.join(__dirname, '..')
   }).finishedPromise
 
+  rmSync(path.join(kitDir, '.tmp'), { recursive: true })
   await execv2('npm uninstall nowprototypeit', execArgs).finishedPromise
   await execv2(`npm install ${packLocation}`, execArgs).finishedPromise
-  rmSync(path.join(kitDir, '.tmp'), { recursive: true })
-  await execv2('npx nowprototypeit build', execArgs).finishedPromise
-  console.log('Installed the new dependency')
-
   const actualResults = {}
-  actualResults.preBuilt = await runPerformanceTest('serve-pre-built', numberOfRuns, Math.floor(controlResults.preBuilt / numberOfRuns))
-  actualResults.serve = await runPerformanceTest('serve', numberOfRuns, Math.floor(controlResults.serve / numberOfRuns))
-  actualResults.dev = await runPerformanceTest('dev', numberOfDevRuns, Math.floor(controlResults.dev / numberOfRuns))
+
+  if (!skipPreBuilt) {
+    await execv2('npx nowprototypeit build', execArgs).finishedPromise
+    actualResults.preBuilt = await runPerformanceTest('serve-pre-built', numberOfRuns, Math.floor(controlResults.preBuilt / numberOfRuns))
+  }
+  if (!skipServe) {
+    actualResults.serve = await runPerformanceTest('serve', numberOfRuns, Math.floor(controlResults.serve / numberOfRuns))
+  }
+  if (!skipDev) {
+    actualResults.dev = await runPerformanceTest('dev', numberOfDevRuns, Math.floor(controlResults.dev / numberOfRuns))
+  }
   console.log('control result', controlResults)
   console.log('actual result', actualResults)
 

@@ -29,7 +29,7 @@ if (!command) {
   process.exit(1)
 }
 
-const benchmark = Number(process.env.NPI_SERVE_PREBUILT_BENCHMARK_MS)
+const benchmark = Number(process.env.NPI_PERF_BENCHMARK_MS)
 
 const reportsToHandle = []
 
@@ -125,6 +125,6 @@ runReportAndWait().then(() => {
   console.log(prepareReport())
   console.log()
   const average = timeTaken / numberOfRuns
-  const benchmarkSummary = benchmark ? ` ... ${(Math.round((1 - (average / benchmark)) * 100))}% improvement from benchmark` : ''
+  const benchmarkSummary = benchmark ? ` ... ${(Math.round((((benchmark-average) / benchmark)) * 100))}% improvement from benchmark` : ''
   console.log(`Total time: [${timeTaken}]ms for [${numberOfRuns}] runs ([${average}]ms per run average${benchmarkSummary} for command [${command}]`)
 })
