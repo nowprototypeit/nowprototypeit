@@ -4,6 +4,7 @@ const underpowered = process.env.NPI_PERF_UNDERPOWERED === 'true'
 const skipDev = process.env.NPI_PERF_SKIP_DEV === 'true'
 const skipServe = process.env.NPI_PERF_SKIP_SERVE === 'true'
 const skipPreBuilt = process.env.NPI_PERF_SKIP_SERVE_PRE_BUILT === 'true'
+const depToTest = process.env.NPI_PERF_DEP_TO_TEST
 
 if (underpowered) {
   console.log('Running with underpowered benchmark expectations - this is based on the GitHub runners')
@@ -44,8 +45,6 @@ const minimumAcceptablePercentageImprovements = {
   serve: -3, // As we improve the other two, this should not get worse - if it is completely unchanged then there will be natural variation between runs.  I'm seeing a range between -3% and +3% on a laptop
   dev: underpowered ? 30 : 35 // We're seeing much bigger improvements in the range of 15% on a reasonably powerful laptop, this benchmark needs to run on GitHub default workers where there's less power and we don't see as much of an improvement
 }
-const packLocation = path.join(packDir, `nowprototypeit-${require('../package.json').version}.tgz`)
-
 async function runPerformanceTest (command, numberOfRuns, benchmark = undefined) {
   const process = execv2(`${path.join(__dirname, 'single-performance-run.js')} ${kitDir} ${numberOfRuns} ${command}`, {
     ...execArgs,
@@ -79,6 +78,17 @@ async function runPerformanceTest (command, numberOfRuns, benchmark = undefined)
   return Number(result)
 }
 
+async function packIfNeededAndGetDependencyIdentifier() {
+  if (depToTest) {
+    return depToTest
+  }
+  await execv2(`npm pack --pack-destination=${packDir}`, {
+    ...execArgs,
+    cwd: path.join(__dirname, '..')
+  }).finishedPromise
+  return path.join(packDir, `nowprototypeit-${require('../package.json').version}.tgz`);
+}
+
 (async () => {
   const controlResults = {}
   await execv2(`npx nowprototypeit create --version=${npiVersionToCompare} --variant=@nowprototypeit/govuk-frontend-adaptor`, execArgs).finishedPromise
@@ -93,14 +103,11 @@ async function runPerformanceTest (command, numberOfRuns, benchmark = undefined)
     controlResults.dev = await runPerformanceTest('dev', numberOfDevRuns)
   }
 
-  await execv2(`npm pack --pack-destination=${packDir}`, {
-    ...execArgs,
-    cwd: path.join(__dirname, '..')
-  }).finishedPromise
+  const dep = await packIfNeededAndGetDependencyIdentifier();
 
   rmSync(path.join(kitDir, '.tmp'), { recursive: true })
   await execv2('npm uninstall nowprototypeit', execArgs).finishedPromise
-  await execv2(`npm install ${packLocation}`, execArgs).finishedPromise
+  await execv2(`npm install ${dep}`, execArgs).finishedPromise
   const actualResults = {}
 
   if (!skipPreBuilt) {

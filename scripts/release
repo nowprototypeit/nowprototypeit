@@ -6,48 +6,61 @@ const fsp = require('node:fs').promises
 
 const execTools = require('../lib/exec')
 const { sleep } = require('../lib/utils')
+const argvParser = require('../bin/utils/argv-parser')
 
-const branchName = process.argv[2] && process.argv[2] !== '--dry-run' ? process.argv[2] : 'main'
+const argv = argvParser.parse(process.argv, {
+  booleans: ['dry-run', 'release-candidate', 'skip-tests']
+})
 
-const isDryRun = process.argv.includes('--dry-run')
+console.log('argv', argv)
 
-const wait = time => new Promise((resolve) => setTimeout(resolve, time))
+const branch = argv.options.branch ?? 'main'
+const isRc = argv.options['release-candidate']
+const skipTests = argv.options['skip-tests']
+if (branch !== 'main' && !isRc) {
+  console.error('The branch name must be main unless this is a release candidate (--release-candidate).')
+  process.exit(1)
+}
 
+if (skipTests && !isRc) {
+  console.error('The --skip-tests option is only available for release candidates.')
+  process.exit(2)
+}
+
+const branchName = branch
+
+const isDryRun = argv.options['dry-run']
 ;(async () => {
+
+  console.log(`${isDryRun ? 'DRY RUN: ' : ''}Releasing from [${branch}] branch${isRc ? ` as release candidate` : ''}.`)
+
   const tmpDir = await mkTmpDir()
   console.log('tmpDir:', tmpDir)
   const kitDir = path.join(tmpDir, 'nowprototypeit')
-  await exec('git clone git@github.com:nowprototypeit/nowprototypeit.git', {
-    cwd: tmpDir
-  })
-  await exec(`git checkout ${branchName}`, {
-    cwd: kitDir
-  })
+
+  function execInKitDir(command) {
+    console.log('execInKitDir', command, kitDir)
+    return exec(command, {
+      cwd: kitDir
+    });
+  }
+  await exec('git clone git@github.com:nowprototypeit/nowprototypeit.git', {cwd: tmpDir})
+  await execInKitDir(`git checkout ${branchName}`)
   await checkForUnpublishedDependencies(kitDir)
-  await exec(`git checkout -b release-prep-${Date.now()}`, {
-    cwd: kitDir
-  })
-  await exec('npm install', {
-    cwd: kitDir
-  })
-  await exec('npm run lint', {
-    cwd: kitDir
-  })
-  await exec('npm run build:destructive', {
-    cwd: kitDir
-  })
-  await exec('git add -A .', {
-    cwd: kitDir
-  })
-  await exec('git commit -am "Destructively built ready for release"', {
-    cwd: kitDir
-  })
+  await execInKitDir(`git checkout -b release-prep-${Date.now()}`)
+  await execInKitDir('npm install')
+  await execInKitDir('npm run lint')
+  await execInKitDir('npm run build:destructive')
+  await execInKitDir('git add -A .')
+  await execInKitDir('git commit -am "Destructively built ready for release"')
   const result = await execAndCaptureStdout('npm pack', {
     cwd: kitDir
   })
   const dependency = path.join(kitDir, result)
   console.log('dependency:', dependency)
-  await runBrowserTests(dependency)
+  if (!skipTests) {
+    await runBrowserTests(dependency)
+  }
   await updateChangelogAndPublish(kitDir)
 })()
 
@@ -148,8 +161,7 @@ async function updateChangelogAndPublish (kitDir) {
     process.exit(13)
   }
 
-  const command = `npm --no-git-tag-version version ${releaseType}`
-  const newVersion = await execAndCaptureStdout(command, standardExecOptions).then(stdout => stdout.split('v')[1].trim())
+  const newVersion = await getNewVersionName(releaseType, kitDir)
 
   console.log('new version', newVersion)
 
@@ -190,7 +202,7 @@ async function updateChangelogAndPublish (kitDir) {
   const correctNpmUser = 'nowprototypeit'
 
   do {
-    await wait(2000)
+    await sleep(2000)
     let output = ''
     try {
       output = await execAndCaptureStdout('npm whoami', { allowStderr: true, allowErrorCode: true, hideStd: true })
@@ -239,4 +251,18 @@ async function checkForUnpublishedDependencies (kitDir) {
     process.exit(11)
   }
   console.log('No unpublished dependencies detected, continuing.')
+}
+
+async function getNewVersionName(releaseType, kitDir) {
+  const name = await execAndCaptureStdout(`npm --no-git-tag-version version ${releaseType}`, {cwd: kitDir}).then(stdout => stdout.split('v')[1].trim());
+  if (!isRc) {
+    return name
+  }
+  const rcVersionWithoutNumber = `${name}-rc.`
+  const existingVersions = await execAndCaptureStdout(`npm view nowprototypeit versions json`, {cwd: kitDir}).then(notQuiteJson => JSON.parse(notQuiteJson.replaceAll("'", '"')))
+  const alreadyUsedNumbers = existingVersions.filter(x => x.startsWith(rcVersionWithoutNumber)).map(x => Number(x.replace(rcVersionWithoutNumber, ''))).filter(x => !isNaN(x))
+
+  const maxAlreadyUsedNumber = alreadyUsedNumbers.reduce((acc, x) => Math.max(acc, x), 0)
+  const fullVersion = rcVersionWithoutNumber + (maxAlreadyUsedNumber + 1);
+  return await execAndCaptureStdout(`npm --no-git-tag-version version ${fullVersion}`, {cwd: kitDir}).then(stdout => stdout.split('v')[1].trim())
 }
