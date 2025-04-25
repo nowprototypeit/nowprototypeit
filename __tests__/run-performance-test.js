@@ -78,7 +78,7 @@ async function runPerformanceTest (command, numberOfRuns, benchmark = undefined)
   return Number(result)
 }
 
-async function packIfNeededAndGetDependencyIdentifier() {
+async function packIfNeededAndGetDependencyIdentifier () {
   if (depToTest) {
     return depToTest
   }
@@ -86,7 +86,7 @@ async function packIfNeededAndGetDependencyIdentifier() {
     ...execArgs,
     cwd: path.join(__dirname, '..')
   }).finishedPromise
-  return path.join(packDir, `nowprototypeit-${require('../package.json').version}.tgz`);
+  return path.join(packDir, `nowprototypeit-${require('../package.json').version}.tgz`)
 }
 
 (async () => {
@@ -103,7 +103,7 @@ async function packIfNeededAndGetDependencyIdentifier() {
     controlResults.dev = await runPerformanceTest('dev', numberOfDevRuns)
   }
 
-  const dep = await packIfNeededAndGetDependencyIdentifier();
+  const dep = await packIfNeededAndGetDependencyIdentifier()
 
   rmSync(path.join(kitDir, '.tmp'), { recursive: true })
   await execv2('npm uninstall nowprototypeit', execArgs).finishedPromise

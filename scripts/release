@@ -31,20 +31,19 @@ const branchName = branch
 
 const isDryRun = argv.options['dry-run']
 ;(async () => {
-
-  console.log(`${isDryRun ? 'DRY RUN: ' : ''}Releasing from [${branch}] branch${isRc ? ` as release candidate` : ''}.`)
+  console.log(`${isDryRun ? 'DRY RUN: ' : ''}Releasing from [${branch}] branch${isRc ? ' as release candidate' : ''}.`)
 
   const tmpDir = await mkTmpDir()
   console.log('tmpDir:', tmpDir)
   const kitDir = path.join(tmpDir, 'nowprototypeit')
 
-  function execInKitDir(command) {
+  function execInKitDir (command) {
     console.log('execInKitDir', command, kitDir)
     return exec(command, {
       cwd: kitDir
-    });
+    })
   }
-  await exec('git clone git@github.com:nowprototypeit/nowprototypeit.git', {cwd: tmpDir})
+  await exec('git clone git@github.com:nowprototypeit/nowprototypeit.git', { cwd: tmpDir })
   await execInKitDir(`git checkout ${branchName}`)
   await checkForUnpublishedDependencies(kitDir)
   await execInKitDir(`git checkout -b release-prep-${Date.now()}`)
@@ -253,16 +252,16 @@ async function checkForUnpublishedDependencies (kitDir) {
   console.log('No unpublished dependencies detected, continuing.')
 }
 
-async function getNewVersionName(releaseType, kitDir) {
-  const name = await execAndCaptureStdout(`npm --no-git-tag-version version ${releaseType}`, {cwd: kitDir}).then(stdout => stdout.split('v')[1].trim());
+async function getNewVersionName (releaseType, kitDir) {
+  const name = await execAndCaptureStdout(`npm --no-git-tag-version version ${releaseType}`, { cwd: kitDir }).then(stdout => stdout.split('v')[1].trim())
   if (!isRc) {
     return name
   }
   const rcVersionWithoutNumber = `${name}-rc.`
-  const existingVersions = await execAndCaptureStdout(`npm view nowprototypeit versions json`, {cwd: kitDir}).then(notQuiteJson => JSON.parse(notQuiteJson.replaceAll("'", '"')))
+  const existingVersions = await execAndCaptureStdout('npm view nowprototypeit versions json', { cwd: kitDir }).then(notQuiteJson => JSON.parse(notQuiteJson.replaceAll("'", '"')))
   const alreadyUsedNumbers = existingVersions.filter(x => x.startsWith(rcVersionWithoutNumber)).map(x => Number(x.replace(rcVersionWithoutNumber, ''))).filter(x => !isNaN(x))
 
   const maxAlreadyUsedNumber = alreadyUsedNumbers.reduce((acc, x) => Math.max(acc, x), 0)
-  const fullVersion = rcVersionWithoutNumber + (maxAlreadyUsedNumber + 1);
-  return await execAndCaptureStdout(`npm --no-git-tag-version version ${fullVersion}`, {cwd: kitDir}).then(stdout => stdout.split('v')[1].trim())
+  const fullVersion = rcVersionWithoutNumber + (maxAlreadyUsedNumber + 1)
+  return await execAndCaptureStdout(`npm --no-git-tag-version version ${fullVersion}`, { cwd: kitDir }).then(stdout => stdout.split('v')[1].trim())
 }

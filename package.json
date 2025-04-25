@@ -30,7 +30,7 @@
   "scripts": {
     "start": "echo 'This project cannot be started, in order to test this project please create a prototype kit using the cli.'",
     "build:destructive": "./scripts/build-destructive",
-    "lint": "standard . bin/cli scripts/create-prototype-and-run.js scripts/release-from-main",
+    "lint": "standard . bin/cli scripts/create-prototype-and-run.js scripts/release",
     "lint:fix": "npm run lint -- --fix",
     "test:unit": "jest --detectOpenHandles lib bin",
     "test:browser:all": "cucumber-js",
