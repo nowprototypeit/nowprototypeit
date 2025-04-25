@@ -1,0 +1,39 @@
+name: Unit Tests
+
+on:
+  push:
+    branches:
+      - main
+      - support/*
+  pull_request:
+
+jobs:
+  tests:
+
+    strategy:
+      fail-fast: false  # continue other tests if one test in matrix fails
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+
+    name: Unit test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+
+    steps:
+    - run: |
+        git config --global core.autocrlf false
+        git config --global core.eol lf
+
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Use Node v22
+      uses: actions/setup-node@v4
+      with:
+        cache: 'npm'
+        node-version: 22
+
+    - run: npm ci
+
+    - run: npm run test:unit && npm run test:unit

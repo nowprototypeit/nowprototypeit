@@ -125,6 +125,6 @@ runReportAndWait().then(() => {
   console.log(prepareReport())
   console.log()
   const average = timeTaken / numberOfRuns
-  const benchmarkSummary = benchmark ? ` ... ${(Math.round((((benchmark-average) / benchmark)) * 100))}% improvement from benchmark` : ''
+  const benchmarkSummary = benchmark ? ` ... ${(Math.round((((benchmark - average) / benchmark)) * 100))}% improvement from benchmark` : ''
   console.log(`Total time: [${timeTaken}]ms for [${numberOfRuns}] runs ([${average}]ms per run average${benchmarkSummary} for command [${command}]`)
 })
