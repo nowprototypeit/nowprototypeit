@@ -4,11 +4,14 @@ const path = require('path')
 const url = require('url')
 global.logTimeFromStart('Server dependencies (A)')
 // npm dependencies
-
 const bodyParser = require('body-parser')
 
+global.logTimeFromStart('Server dependencies (A.1)')
 const cookieParser = require('cookie-parser')
+
+global.logTimeFromStart('Server dependencies (A.2)')
 const dotenv = require('dotenv')
+global.logTimeFromStart('Server dependencies (A.3)')
 const express = require('express')
 global.logTimeFromStart('Server dependencies (B)')
 

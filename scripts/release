@@ -217,6 +217,10 @@ async function updateChangelogAndPublish (kitDir) {
 
   await execWithStdio(`npm publish${isRc ? ' --tag snapshot' : ''}`, standardExecOptions)
 
+  if (isRc) {
+    console.log('Release candidate published, skipping release.')
+    return
+  }
   await execAndPrintStdout({
     command: 'gh',
     args: ['release', 'create', `v${newVersion}`, '--notes-file', prBodyFile, '--target', branchName, '--title', `v${newVersion}`, '--latest']
