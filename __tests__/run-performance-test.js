@@ -41,7 +41,7 @@ const numberOfRuns = Number(process.argv[2]) || 20
 const numberOfDevRuns = Math.ceil(numberOfRuns / 5)
 const npiVersionToCompare = '0.11.2'
 const minimumAcceptablePercentageImprovements = {
-  preBuilt: underpowered ? 30 : 35,
+  preBuilt: underpowered ? 45 : 55,
   serve: -3, // As we improve the other two, this should not get worse - if it is completely unchanged then there will be natural variation between runs.  I'm seeing a range between -3% and +3% on a laptop
   dev: underpowered ? 30 : 35 // We're seeing much bigger improvements in the range of 15% on a reasonably powerful laptop, this benchmark needs to run on GitHub default workers where there's less power and we don't see as much of an improvement
 }

@@ -42,6 +42,7 @@ global.logTimeFromStart('Server dependencies (L)')
 const routesApi = require('./lib/routes/api.js')
 global.logTimeFromStart('Server dependencies (M)')
 const { setupPersistenceSync } = require('./lib/persistence/api.js')
+const crypto = require('crypto')
 
 global.logTimeFromStart('Server dependencies end')
 
@@ -186,8 +187,6 @@ app.use((req, res, next) => {
   res.setHeader('X-Robots-Tag', 'noindex')
   next()
 })
-
-const { encryptPassword } = require('./lib/utils')
 
 app.get('/manage-prototype/password', function (req, res) {
   const error = req.query.error
@@ -368,3 +367,9 @@ app.use((err, req, res, next) => {
 app.close = stopWatchingNunjucks
 
 module.exports = app
+
+function encryptPassword (password) {
+  const hash = crypto.createHash('sha256')
+  hash.update(password)
+  return hash.digest('hex')
+}
