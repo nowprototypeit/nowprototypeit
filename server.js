@@ -1,37 +1,49 @@
 // core dependencies
-global.logTimeFromStart('Start of server.js dependencies')
-
+global.logTimeFromStart('Server dependencies start')
 const path = require('path')
 const url = require('url')
-
+global.logTimeFromStart('Server dependencies (A))')
 // npm dependencies
+
 const bodyParser = require('body-parser')
+
 const cookieParser = require('cookie-parser')
 const dotenv = require('dotenv')
 const express = require('express')
+global.logTimeFromStart('Server dependencies (B))')
 
 const { expressNunjucks, getNunjucksAppEnv, stopWatchingNunjucks } = require('./lib/nunjucks/nunjucksConfiguration')
+global.logTimeFromStart('Server dependencies (C))')
 const { setupDesignSystemRoutes } = require('./lib/dev-server/manage-prototype/routes/management-pages/design-system-routes')
+global.logTimeFromStart('Server dependencies (D))')
 const { highPriorityPluginRoutes, lowPriorityPluginRoutes } = require('./lib/plugins/plugins-routes.js')
+global.logTimeFromStart('Server dependencies (E))')
 
 // We want users to be able to keep api keys, config variables and other
 // envvars in a `.env` file, run dotenv before other code to make sure those
 // variables are available
 dotenv.config()
-global.logTimeFromStart('Bot-Mid of server.js dependencies')
+global.logTimeFromStart('Server dependencies (F))')
 
 // Local dependencies
 const { projectDir, appViewsDir } = require('./lib/utils/paths')
+global.logTimeFromStart('Server dependencies (G))')
 
 const config = require('./lib/config.js').getConfig()
+global.logTimeFromStart('Server dependencies (H))')
 const packageJson = require('./package.json')
+global.logTimeFromStart('Server dependencies (I))')
 const { forceHttps, prototypeAppScripts, addNunjucksFilters, addRouters, matchRoutes, addNunjucksFunctions, addMarkdownRenderers } = require('./lib/utils/utilsForServer')
+global.logTimeFromStart('Server dependencies (J)')
 const sessionUtils = require('./lib/session.js')
+global.logTimeFromStart('Server dependencies (K)')
 const plugins = require('./lib/plugins/plugins.js')
+global.logTimeFromStart('Server dependencies (L)')
 const routesApi = require('./lib/routes/api.js')
+global.logTimeFromStart('Server dependencies (M)')
 const { setupPersistenceSync } = require('./lib/persistence/api.js')
 
-global.logTimeFromStart('End of server.js dependencies')
+global.logTimeFromStart('Server dependencies end')
 
 const app = express()
 routesApi.setApp(app)

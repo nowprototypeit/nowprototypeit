@@ -215,7 +215,7 @@ async function updateChangelogAndPublish (kitDir) {
     }
   } while (!loggedInAsCorrectNpmUser)
 
-  await execWithStdio('npm publish', standardExecOptions)
+  await execWithStdio(`npm publish${isRc ? ' --tag snapshot' : ''}`, standardExecOptions)
 
   await execAndPrintStdout({
     command: 'gh',
