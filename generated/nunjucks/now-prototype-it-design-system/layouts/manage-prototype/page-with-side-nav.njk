@@ -1,0 +1,7 @@
+{% set pinSideBar=pinSideBar | default(true) %}
+
+{% extends "now-prototype-it-design-system/layouts/manage-prototype/page-with-side-bar.njk" %}
+
+{% block sideBar %}
+    {% include "now-prototype-it-design-system/includes/side-nav.njk" %}
+{% endblock %}
