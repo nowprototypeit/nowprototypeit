@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
+const noVersionControlArg = 'no-version-control'
 const { parse } = require('./utils/argv-parser')
-const argv = parse(process.argv)
+const argv = parse(process.argv, { booleans: noVersionControlArg })
 const { verboseLogger, progressLogger } = require('./utils/loggers')
 const { exec } = require('../lib/exec')
   
 ;(async () => {
-  const noVersionControlArg = 'no-version-control'
   if (argv.options[noVersionControlArg]) {
     verboseLogger(`User specified --${noVersionControlArg}, skipping.`)
     return

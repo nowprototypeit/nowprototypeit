@@ -110,6 +110,6 @@ Then('the service name in the GOV.UK header should become {string}', standardTim
     actual = await serviceNameElement.getText()
     return actual === string
   }, () => {
-    throw new Error(`Expected service name to be ${string}, but was ${actual}`)
+    throw new Error(`Gave up waiting for service name to become [${string}], it was [${actual}]`)
   })
 })

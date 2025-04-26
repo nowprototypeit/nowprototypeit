@@ -1,30 +1,29 @@
-// core dependencies
+global.logTimeFromStart('Server dependencies start')
 const path = require('path')
 const url = require('url')
+const crypto = require('crypto')
 
-// npm dependencies
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const dotenv = require('dotenv')
 const express = require('express')
+
 const { expressNunjucks, getNunjucksAppEnv, stopWatchingNunjucks } = require('./lib/nunjucks/nunjucksConfiguration')
 const { setupDesignSystemRoutes } = require('./lib/dev-server/manage-prototype/routes/management-pages/design-system-routes')
 const { highPriorityPluginRoutes, lowPriorityPluginRoutes } = require('./lib/plugins/plugins-routes.js')
 
-// We want users to be able to keep api keys, config variables and other
-// envvars in a `.env` file, run dotenv before other code to make sure those
-// variables are available
 dotenv.config()
 
-// Local dependencies
 const { projectDir, appViewsDir } = require('./lib/utils/paths')
 const config = require('./lib/config.js').getConfig()
 const packageJson = require('./package.json')
-const utils = require('./lib/utils')
+const { forceHttps, prototypeAppScripts, addNunjucksFilters, addRouters, matchRoutes, addNunjucksFunctions, addMarkdownRenderers } = require('./lib/utils/utilsForServer')
 const sessionUtils = require('./lib/session.js')
 const plugins = require('./lib/plugins/plugins.js')
 const routesApi = require('./lib/routes/api.js')
 const { setupPersistenceSync } = require('./lib/persistence/api.js')
+
+global.logTimeFromStart('Server dependencies end')
 
 const app = express()
 routesApi.setApp(app)
@@ -36,7 +35,7 @@ const releaseVersion = packageJson.version
 // asking for username/password twice (for `http`, then `https`).
 const isSecure = (config.isProduction && config.useHttps)
 if (isSecure) {
-  app.use(utils.forceHttps)
+  app.use(forceHttps)
   app.set('trust proxy', 1) // needed for secure cookies on heroku
 }
 
@@ -48,7 +47,7 @@ app.locals.releaseVersion = 'v' + releaseVersion
 app.locals.isRunningInPrototypeKit = true
 // pluginConfig sets up variables used to add the scripts and stylesheets to each page.
 app.locals.pluginConfig = plugins.getAppConfig({
-  scripts: utils.prototypeAppScripts
+  scripts: prototypeAppScripts
 })
 
 plugins.getNunjucksVariables().forEach(({ key, value }) => {
@@ -92,11 +91,11 @@ const nunjucksAppEnv = getNunjucksAppEnv(
 
 expressNunjucks(nunjucksAppEnv, app)
 
-utils.addNunjucksFilters(nunjucksAppEnv)
+addNunjucksFilters(nunjucksAppEnv)
 
-utils.addNunjucksFunctions(nunjucksAppEnv)
+addNunjucksFunctions(nunjucksAppEnv)
 
-utils.addMarkdownRenderers(nunjucksAppEnv)
+addMarkdownRenderers(nunjucksAppEnv)
 
 function prepareError (err) {
   return {
@@ -108,6 +107,7 @@ function prepareError (err) {
 }
 
 if (config.isDevelopment) {
+  global.logTimeFromStart('development mode detected')
   const events = require('./lib/dev-server/dev-server-events')
   const eventTypes = require('./lib/dev-server/dev-server-event-types')
 
@@ -137,6 +137,8 @@ if (config.isDevelopment) {
       })
     }
   })
+} else {
+  global.logTimeFromStart('production mode detected')
 }
 
 // Set views engine
@@ -164,8 +166,6 @@ app.use((req, res, next) => {
   res.setHeader('X-Robots-Tag', 'noindex')
   next()
 })
-
-const { encryptPassword } = require('./lib/utils')
 
 app.get('/manage-prototype/password', function (req, res) {
   const error = req.query.error
@@ -228,7 +228,7 @@ if ((config.useAuth && config.isProduction) || config.passwordMissing) {
 setupPersistenceSync()
 
 highPriorityPluginRoutes()
-utils.addRouters(app)
+addRouters(app)
 
 app.get('/manage-prototype/clear-data', function (req, res) {
   if (!req.query.returnUrl && req.headers.referer) {
@@ -265,7 +265,7 @@ app.get(regExp, (req, res) => {
 
 // App folder routes get priority
 app.get(/^([^.]+)$/, async (req, res, next) => {
-  await utils.matchRoutes(req, res, next)
+  await matchRoutes(req, res, next)
 })
 
 lowPriorityPluginRoutes()
@@ -346,3 +346,9 @@ app.use((err, req, res, next) => {
 app.close = stopWatchingNunjucks
 
 module.exports = app
+
+function encryptPassword (password) {
+  const hash = crypto.createHash('sha256')
+  hash.update(password)
+  return hash.digest('hex')
+}
