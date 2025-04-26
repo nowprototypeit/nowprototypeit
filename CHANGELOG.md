@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.11.4-rc.2
+
 ### Improvements
 
  - Improved performance, there are now thresholds for performance which are checked before any new code is merged.  The thresholds are a little conservative but on a developer laptop we're seeing:
