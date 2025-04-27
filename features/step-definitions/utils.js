@@ -192,7 +192,8 @@ async function startKit (config = {}) {
       nextManagementAppRestartListeners.push(listener)
     },
     close: async () => {
-      await kitThread.close()
+      kitThread.stdio.stdin.write('exit\n')
+      await kitThread.finishedPromise
     },
     cleanup: async () => {
       const shouldCleanUpDir = config.shouldCleanupDir ?? !config.dir

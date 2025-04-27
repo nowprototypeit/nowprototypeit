@@ -8,6 +8,7 @@
    - 40% faster to start 'npm run dev'
    - 60% faster for our dedicated hosting environment (because we're able to set things up in an ideal way)
    - 8% faster for hosting platforms like Heroku
+ - Added an "exit" command that can be written into the terminal to stop the kit, this can also be used by automated tols
 
 ## 0.11.3
 

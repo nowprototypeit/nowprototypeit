@@ -45,8 +45,8 @@ const minimumAcceptablePercentageImprovements = {
   serve: 4,
   dev: underpowered ? 30 : 35
 }
-async function runPerformanceTest (command, numberOfRuns, benchmark = undefined) {
-  const process = execv2(`${path.join(__dirname, 'single-performance-run.js')} ${kitDir} ${numberOfRuns} ${command}`, {
+async function runPerformanceTest (command, numberOfRuns, exitType='system', benchmark = undefined) {
+  const process = execv2(`${path.join(__dirname, 'single-performance-run.js')} ${kitDir} ${numberOfRuns} ${command} ${exitType}`, {
     ...execArgs,
     env: {
       ...(execArgs.env || {}),
@@ -112,13 +112,13 @@ async function packIfNeededAndGetDependencyIdentifier () {
 
   if (!skipPreBuilt) {
     await execv2('npx nowprototypeit build', execArgs).finishedPromise
-    actualResults.preBuilt = await runPerformanceTest('serve-pre-built', numberOfRuns, Math.floor(controlResults.preBuilt / numberOfRuns))
+    actualResults.preBuilt = await runPerformanceTest('serve-pre-built', numberOfRuns, 'exit', Math.floor(controlResults.preBuilt / numberOfRuns))
   }
   if (!skipServe) {
-    actualResults.serve = await runPerformanceTest('serve', numberOfRuns, Math.floor(controlResults.serve / numberOfRuns))
+    actualResults.serve = await runPerformanceTest('serve', numberOfRuns, 'exit', Math.floor(controlResults.serve / numberOfRuns))
   }
   if (!skipDev) {
-    actualResults.dev = await runPerformanceTest('dev', numberOfDevRuns, Math.floor(controlResults.dev / numberOfRuns))
+    actualResults.dev = await runPerformanceTest('dev', numberOfDevRuns, 'exit', Math.floor(controlResults.dev / numberOfRuns))
   }
   console.log('control result', controlResults)
   console.log('actual result', actualResults)

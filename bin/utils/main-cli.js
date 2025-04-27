@@ -412,6 +412,11 @@ async function runDev () {
 }
 
 async function runServe () {
+  process.stdin.on('data', (data) => {
+    if (data.toString().trim() === 'exit') {
+      process.exit(0)
+    }
+  })
   global.runningOnServerWatchNotNeeded = true
   warnIfNpmStart(argv, process.env)
   process.env.NODE_ENV = process.env.NODE_ENV || 'production'

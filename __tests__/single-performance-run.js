@@ -7,6 +7,7 @@ const { execv2 } = require('../lib/exec')
 const prototypeDir = process.argv[2]
 const numberOfRuns = Number(process.argv[3])
 const command = process.argv[4]
+const exitType = process.argv[5] || 'system'
 
 if (!existsSync(prototypeDir)) {
   console.error('Failed to find prototype dir', prototypeDir)
@@ -46,7 +47,13 @@ async function runReport () {
   result.stdio.stdout.on('data', async (data) => {
     const log = data.toString()
     if (log.includes('Your prototype is running on port') || log.includes('The Prototype Kit is now running at')) {
-      await result.exit()
+      if (exitType === 'system') {
+        console.log('sending system exit command.')
+        await result.exit(1000)
+      } else {
+        console.log(`sending custom exit command [${exitType}].`)
+        result.stdio.stdin.write(`${exitType}\n`)
+      }
     }
     if (log.startsWith('[perf]')) {
       reportsToHandle.push(log)

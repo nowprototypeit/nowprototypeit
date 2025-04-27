@@ -27,6 +27,11 @@ if (process.argv.indexOf('--suppress-node-version-warning') === -1 || (process.a
 }
 
 if (process.argv[2] === 'serve-pre-built' || process.env.NPI_SERVE_PRE_BUILT === 'true') {
+  process.stdin.on('data', (data) => {
+    if (data.toString().trim() === 'exit') {
+      process.exit(0)
+    }
+  })
   global.logTimeFromStart('Detected pre-built')
   console.log('Starting server with pre-built assets')
   global.runningOnServerWatchNotNeeded = true
