@@ -2,12 +2,21 @@
 
 ## Unreleased
 
+### New Features
+
+ - You can now type `exit` or `stop` to stop the kit, this is mostly designed for tooling like the desktop app we've started building and the dedicated hosting environment, but you can use it too!  To ensure that it's working we've updated the test suite to use this when it stops kits.
+
 ### Improvements
 
  - Improved performance, there are now thresholds for performance which are checked before any new code is merged.  The thresholds are a little conservative but on a developer laptop we're seeing:
-   - 40% faster to start 'npm run dev'
-   - 60% faster for our dedicated hosting environment (because we're able to set things up in an ideal way)
-   - 8% faster for hosting platforms like Heroku
+   - 31% faster to start 'npm run dev'
+   - 60% faster to start on our dedicated hosting environment (because we're able to set things up in an ideal way)
+   - 8% faster to start on hosting platforms like Heroku
+ - Improved reliability of watchers
+
+### Fixes
+
+ - The watcher wasn't being shut down when the kit stopped, that's now fixed and we've improved the shutdown process to avoid similar issues in the future
 
 ## 0.11.3
 

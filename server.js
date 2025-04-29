@@ -62,6 +62,8 @@ plugins.getNunjucksVariables().forEach(({ key, value }) => {
   }
   context[keyParts.shift()] = value
 })
+app.locals.NowPrototypeIt = app.locals.NowPrototypeIt || {}
+app.locals.NowPrototypeIt.isDevelopment = config.isDevelopment
 
 plugins.getAppLocalModifiers().forEach(item => {
   console.log('modifier', item)

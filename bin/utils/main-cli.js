@@ -22,6 +22,7 @@ const eventTypes = require('../../lib/dev-server/dev-server-event-types')
 const currentDirectory = process.cwd()
 const kitRoot = path.join(__dirname, '..', '..')
 const packageJsonContents = require('../../package.json')
+const { runShutdownFunctions } = require('../../lib/utils/shutdownHandlers')
 const kitVersion = packageJsonContents.version
 const kitProjectName = packageJsonContents.name
 const kitEntryPoint = packageJsonContents._cliDevEntryPoint
@@ -343,17 +344,23 @@ async function runInit () {
 
 async function runDev () {
   let currentlyRunningKit
-  console.log(`Now Prototype It Kit ${kitVersion}`)
+  console.log(`Now Prototype It ${kitVersion}`)
   console.log('')
   console.log('starting...')
 
-  const handler = () => {
-    stop().then(() => {
-      process.exit(0)
-    })
+  const handler = async () => {
+    console.log('Stopping prototype...')
+    events.emit(eventTypes.SHUTDOWN)
+    await runShutdownFunctions()
+    process.exit(0)
   }
-  process.on('SIGTERM', handler)
-  process.on('SIGINT', handler)
+  process.on('SIGTERM', () => {
+    events.emit(eventTypes.SHUTDOWN)
+  })
+  process.on('SIGINT', () => {
+    events.emit(eventTypes.SHUTDOWN)
+  })
+  events.once(eventTypes.SHUTDOWN, handler)
 
   let scriptProcess
 
@@ -364,7 +371,8 @@ async function runDev () {
       env: { ...process.env },
       stdio: 'inherit',
       eventEmitter: events,
-      logAllEvents: true
+      logAllEvents: true,
+      passOnEvents: eventTypes.all
     })
     currentlyRunningKit = scriptProcess
   }

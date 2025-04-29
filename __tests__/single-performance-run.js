@@ -3,6 +3,7 @@
 const { existsSync } = require('fs')
 const path = require('path')
 const { execv2 } = require('../lib/exec')
+const { findAvailablePortWithoutUser } = require('../features/step-definitions/utils.js')
 
 const prototypeDir = process.argv[2]
 const numberOfRuns = Number(process.argv[3])
@@ -33,27 +34,48 @@ const benchmark = Number(process.env.NPI_PERF_BENCHMARK_MS)
 
 const reportsToHandle = []
 
-async function runReport () {
+async function runReport ({ port }) {
+  const logLines = []
+  const startHrTime = process.hrtime.bigint()
+  let endHrTime
   const result = execv2(`${script} ${command}`, {
     passThroughEnv: true,
     hideStdio: process.env.SHOW_KIT_STDIO !== 'true',
+    cwd: prototypeDir,
     env: {
-      PORT: 0,
+      PORT: port,
       LOG_SERVE_PREBUILT_PERFORMANCE: 'true'
     }
   })
 
+  result.stdio.stderr.on('data', async (data) => {
+    logLines.push(data.toString())
+  })
+
   result.stdio.stdout.on('data', async (data) => {
     const log = data.toString()
-    if (log.includes('Your prototype is running on port') || log.includes('The Prototype Kit is now running at')) {
+    let triggerExit = false
+    log.split('\n').forEach((log) => {
+      if (log.includes('Your prototype is running on port') || log.includes('The Prototype Kit is now running at')) {
+        endHrTime = process.hrtime.bigint()
+        triggerExit = true
+        logLines.push(log)
+      } else if (log.startsWith('[perf]')) {
+        reportsToHandle.push(log)
+      } else {
+        logLines.push(log)
+      }
+    })
+    if (triggerExit) {
       await result.exit()
-    }
-    if (log.startsWith('[perf]')) {
-      reportsToHandle.push(log)
     }
   })
 
   await result.finishedPromise
+  return {
+    time: Number((endHrTime - startHrTime) / BigInt(1000000)),
+    logs: logLines.filter(x => x).join('\n')
+  }
 }
 
 function errorTimeout (ms) {
@@ -76,15 +98,18 @@ function errorTimeout (ms) {
 }
 
 async function runReportAndWait () {
+  const portToUse = await findAvailablePortWithoutUser()
+  const resultsFromEachRun = []
   for (let i = 0; i < numberOfRuns; i++) {
     console.log('Remaining: ', numberOfRuns - i)
     const timeout = errorTimeout(15000)
-    await Promise.race([
-      runReport(),
+    resultsFromEachRun.push(await Promise.race([
+      runReport({ port: portToUse }),
       timeout.promise
-    ])
+    ]))
     timeout.abandon()
   }
+  return resultsFromEachRun
 }
 
 function prepareReport () {
@@ -119,12 +144,36 @@ function display ({ message, mean, median, nintythPercentile }) {
   return parts.join('\n')
 }
 
-const startTime = Date.now()
-runReportAndWait().then(() => {
-  const timeTaken = Date.now() - startTime
+function errorIfLogLinesDidNotMatch (logLinesFromEachRun) {
+  const summary = logLinesFromEachRun.reduce((accum, logLines) => {
+    if (!accum[logLines]) {
+      accum[logLines] = 0
+    }
+    accum[logLines]++
+    return accum
+  }, {})
+  if (Object.keys(summary).length === 1) {
+    console.log('All runs matched')
+  } else {
+    console.log('Log lines from test runs did not match each other')
+    console.log('Divergences were:')
+    const output = Object.keys(summary).map((key) => ({
+      count: summary[key],
+      lines: key
+    })).map(({ count, lines }) => `${count} runs matched:\n\n${lines}`)
+    console.log(['', ...output, ''].join('\n\n - - - - \n\n'))
+    throw new Error('Log lines did not match.')
+  }
+}
+
+runReportAndWait().then((resultsFromEachRun) => {
+  const timesFromEachRun = resultsFromEachRun.map(x => x.time)
+  const timeTaken = timesFromEachRun.reduce((accum, x) => accum + x, 0)
+  const average = timeTaken / timesFromEachRun.length
+  const nintythPercentile = timesFromEachRun.sort((a, b) => a - b)[Math.floor(timesFromEachRun.length * 0.9)]
   console.log(prepareReport())
   console.log()
-  const average = timeTaken / numberOfRuns
   const benchmarkSummary = benchmark ? ` ... ${(Math.round((((benchmark - average) / benchmark)) * 100))}% improvement from benchmark` : ''
-  console.log(`Total time: [${timeTaken}]ms for [${numberOfRuns}] runs ([${average}]ms per run average${benchmarkSummary} for command [${command}]`)
+  console.log(`Total time: [${timeTaken}]ms for [${numberOfRuns}] runs ([${average}]ms per run average${benchmarkSummary} and 90th percentile [${nintythPercentile}]ms for command [${command}]`)
+  errorIfLogLinesDidNotMatch(resultsFromEachRun.map(x => x.logs))
 })
