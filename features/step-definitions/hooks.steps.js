@@ -57,7 +57,6 @@ function getVariantConfig (variantTag) {
 }
 
 Before(kitStartTimeout, async function (scenario) {
-  console.log('')
   const tagNames = scenario.pickle.tags.map(x => x.name)
   const variantTags = tagNames.filter(x => x.endsWith('-variant') || x.startsWith('@kit-update'))
   if (variantTags.length > 1) {

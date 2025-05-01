@@ -1,14 +1,9 @@
-global.logTimeFromStart = global.logTimeFromStart || function () {}
 const config = require('./lib/config.js').getConfig(null, false)
-global.logTimeFromStart('config loaded')
 const server = require('./server.js')
-global.logTimeFromStart('all dependencies loaded')
 
 if (config.isProduction) {
-  const handler = server.listen(config.port, () => {
-    global.logTimeFromStart('listening')
-    console.log(`Your prototype is running on port ${handler.address().port}`)
-  })
+  server.listen(config.port)
+  console.log(`Your prototype is running on port ${config.port}`)
 } else {
   process.on('disconnect', () => {
     process.exit()
