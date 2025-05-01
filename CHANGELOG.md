@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.11.4
+
 ### Fixes
 
  - Allowing users to use the latest (5.10.0) `govuk-frontend` which directly references `govuk-prototype-kit` - this change will not negatively affect those prototyping outside GOV.UK
