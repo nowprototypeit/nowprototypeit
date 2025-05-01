@@ -1,4 +1,5 @@
 const config = require('./lib/config.js').getConfig(null, false)
+require('./lib/utils/replace-require').replaceRequire()
 const server = require('./server.js')
 
 if (config.isProduction) {
