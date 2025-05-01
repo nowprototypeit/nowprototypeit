@@ -124,7 +124,7 @@ After(kitStartTimeout, async function (scenario) {
     process.exitCode = 10
   }
   await this.kit?.reset()
-  this.browser?.openUrl('about:blank')
+  await this.browser?.openUrl('about:blank')
   if (process.env.DELAY_BETWEEN_TESTS) {
     await sleep(parseInt(process.env.DELAY_BETWEEN_TESTS, 10))
   }

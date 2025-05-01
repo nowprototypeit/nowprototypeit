@@ -65,7 +65,7 @@ async function cleanupEverything (deleteKit = true) {
   ])
 }
 
-async function findAvailablePort () {
+async function findAvailablePortWithoutUser () {
   return await new Promise((resolve) => {
     let port
     const tmpServer = net.createServer(function (sock) {
@@ -144,7 +144,7 @@ async function startKit (config = {}) {
     }
   }
 
-  const kitPort = await findAvailablePort()
+  const kitPort = await findAvailablePortWithoutUser()
   const pathToCli = path.join(dir, 'node_modules', 'nowprototypeit', 'bin', 'cli')
   if (!fs.existsSync(pathToCli)) {
     throw new Error('Could not find the CLI at ' + pathToCli)
@@ -192,7 +192,13 @@ async function startKit (config = {}) {
       nextManagementAppRestartListeners.push(listener)
     },
     close: async () => {
-      await kitThread.close()
+      returnValue.sendStdin('stop')
+      const forceExitTimeout = setTimeout(() => {
+        console.log('needing to force exit')
+        kitThread.close()
+      }, 1000)
+      await kitThread.finishedPromise
+      clearTimeout(forceExitTimeout)
     },
     cleanup: async () => {
       const shouldCleanUpDir = config.shouldCleanupDir ?? !config.dir
@@ -489,24 +495,20 @@ async function resetKit (kit) {
   await runCommand('git reset --hard HEAD')
 
   if (status.includes('package.json')) {
+    const restartPromise = new Promise((resolve) => {
+      kit.addNextKitRestartListener(() => {
+        resolve()
+      })
+    })
     await runCommand('npm install')
     await runCommand('npm prune')
-
-    const restartPromise = Promise.all([
-      new Promise((resolve) => {
-        kit.addNextKitRestartListener(() => {
-          resolve()
-        })
-      }),
-      new Promise((resolve) => {
-        kit.addNextKitRestartListener(() => {
-          resolve()
-        })
-      })
-    ])
     kit.sendStdin('rs')
 
+    const timeout = setTimeout(() => {
+      throw new Error('Took too long to reset, maybe the kit did not log that the kit has restarted.')
+    }, 3000)
     await restartPromise
+    clearTimeout(timeout)
 
     resetPromiseResolve()
   } else {
@@ -541,6 +543,7 @@ module.exports = {
     const chai = await chaiPromise
     return chai.expect(...arguments)
   },
+  findAvailablePortWithoutUser,
   makeGetRequest,
   waitForConditionToBeMet,
   setupKitAndBrowserForTestScope,

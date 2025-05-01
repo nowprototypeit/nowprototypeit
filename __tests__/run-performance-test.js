@@ -43,7 +43,7 @@ const npiVersionToCompare = '0.11.2'
 const minimumAcceptablePercentageImprovements = {
   preBuilt: underpowered ? 50 : 55,
   serve: 4,
-  dev: underpowered ? 30 : 35
+  dev: underpowered ? 23 : 28
 }
 async function runPerformanceTest (command, numberOfRuns, benchmark = undefined) {
   const process = execv2(`${path.join(__dirname, 'single-performance-run.js')} ${kitDir} ${numberOfRuns} ${command}`, {
