@@ -2,13 +2,6 @@
 
 ## Unreleased
 
-### Improvements
-
- - Improved performance, there are now thresholds for performance which are checked before any new code is merged.  The thresholds are a little conservative but on a developer laptop we're seeing:
-   - 40% faster to start 'npm run dev'
-   - 60% faster for our dedicated hosting environment (because we're able to set things up in an ideal way)
-   - 8% faster for hosting platforms like Heroku
-
 ## 0.11.3
 
 ### Improvements

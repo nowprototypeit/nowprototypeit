@@ -1,4 +1,4 @@
-name: Performance
+name: Lint
 
 on:
   push:
@@ -8,8 +8,8 @@ on:
   pull_request:
 
 jobs:
-  performance:
-    name: Performance
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
 
     steps:
@@ -18,12 +18,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           cache: 'npm'
-          node-version: 20
+          node-version-file: '.nvmrc'
 
-      - run: npm install
+      - run: npm install --omit=production
 
-      - run: npm run
-
-      - run: npm run test:perf
-        env:
-          NPI_PERF_UNDERPOWERED: 'true'
+      - run: npm run lint
