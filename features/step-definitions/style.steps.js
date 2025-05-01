@@ -41,26 +41,26 @@ Then('the first paragraph margin top should become {string}', styleBuildTimeout,
 })
 
 Then('I should see the crown icon in the footer', mediumActionTimeout, async function () {
-  await makeSureBackgroundImageCanBeLoaded(this.browser, this.kit.dir, mediumActionTimeout.timeout)
+  await makeSureMaskImageCanBeLoaded(this.browser, this.kit.dir, mediumActionTimeout.timeout)
 })
 
-async function makeSureBackgroundImageCanBeLoaded (browser, prototypeDir, timeout) {
+async function makeSureMaskImageCanBeLoaded (browser, prototypeDir, timeout) {
   const start = Date.now()
   let output = 'none'
-  while (output === 'none' && (start + timeout) > Date.now()) {
+  while ((output === 'none' || output === null) && (start + (timeout / 2)) > Date.now()) {
     await sleep(100)
     const element = (await browser.queryClass('govuk-footer__copyright-logo'))[0]
     if (element) {
-      output = await browser.driver.executeScript('const style = window.getComputedStyle(arguments[0]); return {backgroundImage: style.backgroundImage};', element)
+      output = await browser.driver.executeScript('return getComputedStyle(document.querySelector(".govuk-footer__copyright-logo"), ":before").getPropertyValue("mask-image")')
     }
   }
 
-  const [before, url, after] = output.backgroundImage.split('"')
+  const [before, url, after] = output.split('"')
   ;(await expect(before)).to.equal('url(')
   ;(await expect(after)).to.equal(')')
   const filePathFromNodeModules = url.split('plugin-assets/')[1]
   if (!filePathFromNodeModules) {
-    throw new Error(`No file path could be found (looking for background image) [${output.backgroundImage}]`)
+    throw new Error(`No file path could be found (looking for mask image) [${output}]`)
   }
   const filePath = path.join(prototypeDir, 'node_modules', filePathFromNodeModules)
   const fileOnFileSystem = await fsp.readFile(filePath, 'utf8')
