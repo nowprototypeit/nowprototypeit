@@ -20,6 +20,7 @@ actual result { serve: 38238, dev: 14738 }
  - We've replaced the browser test management, it now uses Playwright which seems a lot more reliable tha selenium
  - We were previously having a lot of test failures on GitHub runners, we were running multiple prototype kits at once during the tests.  As part of the new browser test management we are now only running one kit at a time (creating a new kit for each test).  This makes the tests slower to run but more reliable, they pass in around 8 minutes on a developer laptop and in around 12 minutes on GitHub Actions.  We will be reintroducing some efficiency savings in the test runner but we want to be able to compare that to a reliable baseline which is what this update provides.
 - Improved reliability of watchers
+- If the management pages crash they will now automatically restart
 
 ### Fixes
 
