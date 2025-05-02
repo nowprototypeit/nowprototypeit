@@ -17,6 +17,9 @@ const experimentTagSettings = {
   },
   '@edit-in-browser-experiment-on': {
     editInBrowser: true
+  },
+  '@hosting-experiment-on': {
+    hostingEnabled: true
   }
 }
 
