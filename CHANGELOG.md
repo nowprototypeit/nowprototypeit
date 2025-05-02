@@ -26,6 +26,7 @@ actual result { serve: 38238, dev: 14738 }
 
  - The watcher wasn't being shut down when the kit stopped, that's now fixed and we've improved the shutdown process to avoid similar issues in the future
  - An earlier version of this PR was merged and the reverted - this was a result of messaging happening in an unpredictable order, this is now resolved and the performance tests would fail if the user sees different logs on different runs 
+ - Hosting page now works with Node 18 
 
 ## 0.11.4
 
