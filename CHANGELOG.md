@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Improvements
+
+ - If the management pages crash they will now automatically restart
+
 ## 0.11.4
 
 ### Fixes
