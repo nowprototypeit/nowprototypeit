@@ -40,6 +40,6 @@ jobs:
 
     - run: npm run test:unit && npm run test:browser:${{ matrix.type }} -- --retry 2
       env:
-        ADDITIONAL_TIMEOUT_MULTIPLIER: 3
-        SHOW_KIT_STDIO: ${{ runner.debug }}
+        ADDITIONAL_TIMEOUT_MULTIPLIER: 1
+        SHOW_KIT_STDIO: true
         VERBOSE: ${{ runner.debug }}
