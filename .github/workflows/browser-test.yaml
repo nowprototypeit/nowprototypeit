@@ -13,9 +13,9 @@ jobs:
     strategy:
       fail-fast: false  # continue other tests if one test in matrix fails
       matrix:
-        node-version: [22.x]
+        node-version: [20.x]
         os: [better-windows-runner]
-        type: [acceptance]
+        type: [acceptance, integration]
 
     name: Test ${{ matrix.type }} on Node v${{ matrix.node-version }} (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
