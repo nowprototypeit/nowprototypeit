@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.12.0-rc.2
+
 ### New Features
 
  - You can now type `exit` or `stop` to stop the kit, this is mostly designed for tooling like the desktop app we've started building and the dedicated hosting environment, but you can use it too!
