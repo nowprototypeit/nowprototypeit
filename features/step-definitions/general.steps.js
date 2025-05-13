@@ -1,11 +1,13 @@
 const { Given, Then, When } = require('@cucumber/cucumber')
 const { expect } = require('./utils')
 const { sleep } = require('../../lib/utils')
-const { intentionalDelayTimeout, waitForConditionToBeMet, makeGetRequest, tinyTimeout } = require('./utils')
+const { waitForConditionToBeMet, makeGetRequest } = require('./utils')
 const path = require('node:path')
 const fs = require('node:fs')
-const { mediumActionTimeout, standardTimeout, readFixtureFile, writePrototypeFile } = require('./utils')
+const { readFixtureFile, writePrototypeFile } = require('./utils')
 const { By } = require('selenium-webdriver')
+const { verboseLog } = require('../../lib/utils/verboseLogger')
+const { standardTimeout, mediumActionTimeout, intentionalDelayTimeout, tinyTimeout } = require('./setup-helpers/timeouts')
 
 const { promises: fsp } = fs
 const kitVersion = require('../../package.json').version
@@ -28,12 +30,12 @@ Given('I refresh the browser', standardTimeout, async function () {
 })
 
 Then('the main heading should read {string}', standardTimeout, async function (expectedHeading) {
-  const actualH1 = await (await this.browser.queryTag('h1'))[0]?.getText()
+  const actualH1 = await this.browser.getTextFromSelector('h1')
   ;(await expect(actualH1)).to.equal(expectedHeading)
 })
 
 Then('the page should include a paragraph that reads {string}', standardTimeout, async function (expectedHeading) {
-  const allPText = await Promise.all((await this.browser.queryTag('p')).map(elem => elem.getText()))
+  const allPText = await this.browser.getTextFromSelectorAll('p')
   ;(await expect(allPText)).to.include(expectedHeading)
 })
 
@@ -46,12 +48,15 @@ Then('the main heading should be updated to {string}', mediumActionTimeout, asyn
   let actualH1
   return waitForConditionToBeMet(mediumActionTimeout, async () => {
     try {
-      actualH1 = await (await this.browser.queryTag('h1'))[0]?.getText()
+      actualH1 = await (await this.browser.getTextFromSelector('h1'))
+      verboseLog('Waiting for h1 [%s] to be [%s]}:', actualH1, expectedHeading)
     } catch (e) {
+      verboseLog('Error looking up H1:', e)
       actualH1 = undefined
     }
     return actualH1 === expectedHeading
   }, function (reject) {
+    verboseLog('Gave up waiting for h1 [%s] to be [%s]}:', actualH1, expectedHeading)
     return reject(new Error(`Gave up waiting for heading [${actualH1}] to become equal to [${expectedHeading}]`))
   })
 })
@@ -80,8 +85,8 @@ const statusCodeCheck = async function (statusCode, url) {
       return true
     }
     return false
-  }, async () => {
-    throw new Error(`Gave up waiting for status code [${latestStatusCode}] to become equal to [${statusCode}] for URL [${url}]`)
+  }, (reject) => {
+    reject(new Error(`Gave up waiting for status code [${latestStatusCode}] to become equal to [${statusCode}] for URL [${url}]`))
   })
 }
 Given('I am viewing a {int} page at {string}', standardTimeout, statusCodeCheck)
@@ -158,80 +163,25 @@ Then('I should have the {string} plugin installed properly', standardTimeout, as
 })
 
 When('I enter {string} into the {string} field', tinyTimeout, async function (value, fieldName) {
-  const input = (await this.browser.queryCss(`input[name="${fieldName}"]`))[0]
-  if (!input) {
-    throw new Error(`Could not find input with name [${fieldName}]`)
-  }
-  await input.clear()
-  await input.sendKeys(value)
+  await this.browser.fillFormFields({
+    [fieldName]: value
+  })
 })
 
-async function submitForm (form) {
-  const submitButtons = await form.findElements(By.css('button[type="submit"], input[type="submit"]'))
-  if (submitButtons.length !== 1) {
-    throw new Error(`Expected exactly one submit button in the form, found [${submitButtons.length}]`)
-  }
-  await submitButtons[0].click()
-}
-
 When('I submit the form', standardTimeout, async function () {
-  let lastKnownError
-  await waitForConditionToBeMet(standardTimeout, async () => {
-    const forms = await this.browser.queryTag('form')
-    const numberOfForms = forms.length
-    if (numberOfForms !== 1) {
-      lastKnownError = `Expected exactly one form on the page, found [${numberOfForms}]`
-      return false
-    }
-    try {
-      await submitForm(forms[0])
-    } catch (e) {
-      lastKnownError = e.message
-      return false
-    }
-    return true
-  }, () => {
-    throw new Error(lastKnownError || 'Failed to submit form (for an unknown reason')
-  })
+  await this.browser.submitTheOnlyFormOnThePage(standardTimeout)
 })
 
 When('I submit the form with ID {string}', standardTimeout, async function (formId) {
-  const form = await this.browser.queryId(formId)
-  if (!form) {
-    throw new Error(`Failed to find form with ID [${formId}]`)
-  }
-  await submitForm(form)
+  await this.browser.submitFormBySelector(`#${formId}`, standardTimeout)
 })
 
 When('I select the {string} radio button', standardTimeout, async function (radioElementId) {
-  let lastKnownError = 'Failed to select radio button'
-  await waitForConditionToBeMet(standardTimeout, async () => {
-    const $elem = await this.browser.queryId(radioElementId)
-    if (!$elem) {
-      lastKnownError = `no element with ID ${radioElementId}`
-      return false
-    }
-    if (!await $elem.isSelected()) {
-      await $elem.click()
-    }
-    await sleep(100)
-    return await $elem.isSelected()
-  }, () => {
-    throw new Error(lastKnownError)
-  })
+  await this.browser.selectRadioButtonById(radioElementId)
 })
 
 When('I click the link with text {string}', standardTimeout, async function (linkText) {
-  const $links = await this.browser.queryTag('a')
-  const $matchingLinks = (await Promise.all($links.map(async ($link) => (await $link.getText()) === linkText ? $link : undefined)))
-    .filter(x => !!x)
-  if ($matchingLinks.length === 0) {
-    throw new Error(`Could not find link with text [${linkText}]`)
-  }
-  if ($matchingLinks.length > 1) {
-    throw new Error(`Found ${$matchingLinks.length} links with text [${linkText}]`)
-  }
-  await $matchingLinks[0].click()
+  await this.browser.clickLinkWithText(linkText)
 })
 
 When('I log the page URL', standardTimeout, async function () {
@@ -239,15 +189,8 @@ When('I log the page URL', standardTimeout, async function () {
 })
 
 Then('the list with ID {string} should contain an item which starts with text {string}', standardTimeout, async function (id, text) {
-  const $list = await this.browser.queryId(id)
-  if (!$list) {
-    throw new Error(`no element with ID ${id}`)
-  }
-  const $items = await $list.findElements(By.css('li'))
-  if ($items.length === 0) {
-    throw new Error(`no list items found in list with ID ${id}`)
-  }
-  const itemTexts = await Promise.all($items.map(async ($item) => await $item.getText()))
+  const itemTexts = await this.browser.getTextFromSelectorAll(`#${id} > *`)
+
   const matchingItems = itemTexts.filter(x => x.startsWith(text))
   if (matchingItems.length === 0) {
     throw new Error(`no list items found in list with ID ${id} starting with text ${text}, found items: ${itemTexts.join(', ')}`)

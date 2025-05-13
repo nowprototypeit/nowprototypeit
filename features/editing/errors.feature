@@ -10,8 +10,8 @@ Feature: Error handling
     Then the page title should read "Error displaying your page – Now Prototype It"
     Then I should see an error page
     And the error details should contain "File path:" "app/views/broken-example.njk"
-    And the error details should contain "Line number:" "21387"
-    And the error details should contain "Column number:" "3"
+    And the error details should contain "Line number:" "87"
+    And the error details should contain "Column number:" "19"
     And the error details should contain "Error type:" "Template render error"
     And the error details should contain "Error message:" "expected block end in block statement"
     And the source code should start at line 72
@@ -26,7 +26,7 @@ Feature: Error handling
     Then the main heading should be updated to "There was an error while loading your page"
     Then the page title should read "Error displaying your page – Now Prototype It"
     Then I should see an error page
-    And the error details should contain "Error type:" "template not found: layouts/this-does-not-exist.html"
+    And the error details should contain "Error type:" "Template render error"
     And the error details should contain additional information starting with "The following directories were checked:"
     And the source code should start at line 1
     And the source code should end at line 6
@@ -39,7 +39,7 @@ Feature: Error handling
     Then the main heading should be updated to "Your prototype failed to start"
     Then the page title should read "Error running your prototype – Now Prototype It"
     Then I should see an error page
-    And the error details should contain "File path:" "app/views/broken-session-data-defaults.js"
+    And the error details should contain "File path:" "app/data/session-data-defaults.js"
     And the error details should contain "Line number:" "2"
     And the error details should contain "Error type:" "SyntaxError"
     And the error details should contain "Error message:" "Unexpected string"

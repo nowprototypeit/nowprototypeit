@@ -1,52 +1,38 @@
 const { When, Then } = require('@cucumber/cucumber')
-const { standardTimeout, waitForConditionToBeMet, readFixtureFile, readPrototypeFile } = require('./utils')
-const waitForEditorElem = getEditorElem
+const { waitForConditionToBeMet, readFixtureFile, readPrototypeFile } = require('./utils')
+const { standardTimeout, tinyTimeout } = require('./setup-helpers/timeouts')
 
 When('I open the in-browser editor', standardTimeout, async function () {
-  const $button = await this.browser.queryId('nowprototypeit-in-browser-bar_edit-button')
-  await $button.click()
+  await this.browser.clickId('nowprototypeit-in-browser-bar_edit-button')
 })
 
-async function getEditorElem (browser) {
-  let $elem
-  await waitForConditionToBeMet(standardTimeout, async () => {
-    const $elems = await browser.queryCss('.nowprototypeit-in-browser-editor__editor .lines-content')
-    if ($elems.length === 0) {
-      return false
-    }
-    $elem = $elems[0]
-    return true
-  }, () => {
-    throw new Error('Waiting for editor to load but it never did')
-  })
-  return $elem
-}
-
 Then('I should see the contents of {string} in the in-browser editor', standardTimeout, async function (fileRelativePath) {
-  await waitForEditorElem(this.browser)
-
   let actual
-  const expected = (await readPrototypeFile(this.kit, fileRelativePath))
+  const expected = replaceWindowsLineBreaks(await readPrototypeFile(this.kit, fileRelativePath)).split('\n').join('')
   await waitForConditionToBeMet(standardTimeout, async () => {
-    actual = await getEditorContents(this.browser)
-
+    actual = await this.browser.getTextFromSelector('.nowprototypeit-in-browser-editor__editor .lines-content')
     return actual === expected
-  }, () => {
-    throw new Error(`Expected editor to contain ${expected}, but was ${actual}`)
+  }, (reject) => {
+    reject(new Error(`Expected editor content to equal [${expected}], but was [${actual}]`))
   })
 })
 
 When('I replace the contents of the in-browser editor with the fixture file {string}', standardTimeout, async function (fixtureFilePath) {
-  await waitForEditorElem(this.browser)
   const fixtureFileContents = await readFixtureFile(fixtureFilePath)
 
-  await setEditorContents(this.browser, fixtureFileContents)
+  await this.browser.setEditorContents(fixtureFileContents, tinyTimeout)
 })
 
 When('I press the save button for the in-browser editor', standardTimeout, async function () {
-  const $saveButton = await this.browser.queryId('nowprototypeit-in-browser-editor__submit-button')
-  await $saveButton.click()
+  await this.browser.clickButtonWithText('Save changes')
 })
+
+function replaceWindowsLineBreaks (str) {
+  if (!str?.replaceAll) {
+    return str
+  }
+  return str.replaceAll('\r\n', '\n')
+}
 
 Then('the file {string} should contain the same content as the fixture file {string}', standardTimeout, async function (string, string2) {
   let actual
@@ -54,16 +40,8 @@ Then('the file {string} should contain the same content as the fixture file {str
   await waitForConditionToBeMet(standardTimeout, async () => {
     actual = await readPrototypeFile(this.kit, string)
 
-    return actual === expected
-  }, () => {
-    throw new Error(`Expected file to contain ${expected}, but was ${actual}`)
+    return replaceWindowsLineBreaks(actual) === replaceWindowsLineBreaks(expected)
+  }, (reject) => {
+    reject(new Error(`Expected file to contain ${expected}, but was ${actual}`))
   })
 })
-
-async function getEditorContents (browser) {
-  return await browser.executeScript('return window.NOW_PROTOTYPE_IT.__for_automation_only_currentEditor.getValue()')
-}
-
-async function setEditorContents (browser, val) {
-  return await browser.executeScript('window.NOW_PROTOTYPE_IT.__for_automation_only_currentEditor.setValue(`' + val.replaceAll('`', '\\`') + '`)')
-}

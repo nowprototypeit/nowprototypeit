@@ -1,6 +1,7 @@
 const { Then } = require('@cucumber/cucumber')
 const { exec } = require('../../lib/exec')
-const { expect, standardTimeout } = require('./utils')
+const { expect } = require('./utils')
+const { standardTimeout } = require('./setup-helpers/timeouts')
 
 Then('my project should be set up to use git', standardTimeout, async function () {
   let result = ''
