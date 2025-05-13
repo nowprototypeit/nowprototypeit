@@ -3,7 +3,7 @@ Feature: Plugin settings
   @govuk-variant
   Scenario: Service name from homepage
     Given I am on the plugin settings page for the "GOV.UK Frontend Adaptor" plugin
-    When I fill in "serviceName" with "An example service"
+    When I enter "An example service" into the "serviceName" field
     And I press "Save changes"
     And I wait for the prototype to reload
     Then I should see the settings saved message

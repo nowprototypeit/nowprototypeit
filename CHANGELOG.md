@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+### New Features
+
+ - You can now type `exit` or `stop` to stop the kit, this allows us to handle Windows, Linux and Mac environments in a more consistent way. To ensure that it's working we've updated the test suite to use this when it stops kits.
+ - If you have a tool starting the prototype (like the desktop app we're building) you can fire a `{"type":"SHUTDOWN"}` event over IPC (Inter-Process Communication) and the kit will shut down.
+
+### Improvements
+
+actual result { preBuilt: 2149, serve: 12609, dev: 5973 }
+actual result { serve: 38238, dev: 14738 }
+
+ - Improved performance, there are now thresholds for performance which are checked before any new code is merged.  The thresholds are a little conservative but the results we're seeing are:
+   - 22-28% faster to start 'npm run dev'
+   - 60-65% faster to start on our dedicated hosting environment (because we're able to set things up in an ideal way)
+   - 7-10% faster to start on hosting platforms like Heroku
+   - (the command we ran was `NPI_PERF_DEP_FOR_BENCHMARK=0.11.4 NPI_PERF_DEP_TO_TEST=nowprototypeit@0.12.0-rc.2 npm run test:perf 20`, feel free to try it for yourself)
+ - We've replaced the browser test management, it now uses Playwright which seems a lot more reliable tha selenium
+ - We were previously having a lot of test failures on GitHub runners, we were running multiple prototype kits at once during the tests.  As part of the new browser test management we are now only running one kit at a time (creating a new kit for each test).  This makes the tests slower to run but more reliable, they pass in around 8 minutes on a developer laptop and in around 12 minutes on GitHub Actions.  We will be reintroducing some efficiency savings in the test runner but we want to be able to compare that to a reliable baseline which is what this update provides.
+- Improved reliability of watchers
+
+### Fixes
+
+ - The watcher wasn't being shut down when the kit stopped, that's now fixed and we've improved the shutdown process to avoid similar issues in the future
+ - An earlier version of this PR was merged and the reverted - this was a result of messaging happening in an unpredictable order, this is now resolved and the performance tests would fail if the user sees different logs on different runs 
+
 ## 0.11.4
 
 ### Fixes

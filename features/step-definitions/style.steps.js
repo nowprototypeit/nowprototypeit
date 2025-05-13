@@ -1,36 +1,34 @@
 const { Then } = require('@cucumber/cucumber')
 const {
   waitForConditionToBeMet,
-  styleBuildTimeout,
-  mediumActionTimeout,
   makeGetRequest,
-  expect,
-  standardTimeout
+  expect
 } = require('./utils')
 const path = require('path')
 const { promises: fsp } = require('fs')
 const { sleep } = require('../../lib/utils')
+const { styleBuildTimeout, standardTimeout, mediumActionTimeout } = require('./setup-helpers/timeouts')
 
 Then('the body background color should become {string}', styleBuildTimeout, async function (expectedColor) {
   let style
-
   await waitForConditionToBeMet(styleBuildTimeout, async () => {
-    style = await this.browser.driver.executeScript('return window.getComputedStyle(document.body).backgroundColor;')
+    const url = await this.browser.getCurrentUrl()
+    if (url === 'chrome-error://chromewebdata/') {
+      console.error(`The page URL is [${url}], this is usually caused by "request headers already sent" which doesn't have a helpful stack trace.  To investigate remove this protection and re-run a the "Regenerate styles, then reload page" test 100 times.`)
+      await this.browser.refresh()
+    }
+    style = await this.browser.getBodyBackgroundColor()
     return style === expectedColor
-  }, (reject) => {
-    return reject(new Error(`Gave up waiting for background color [${style}] to become equal to [${expectedColor}]`))
+  }, async (reject) => {
+    return reject(new Error(`Gave up waiting for background color [${style}] to become equal to [${expectedColor}] on URL ${await this.browser.getCurrentUrl()}`))
   })
 })
 
 Then('the first paragraph margin top should become {string}', styleBuildTimeout, async function (expectedMarginTop) {
   let marginTop
   await waitForConditionToBeMet(styleBuildTimeout, async () => {
-    const firstParagraph = (await this.browser.queryTag('p'))[0]
-    if (!firstParagraph) {
-      throw new Error('Could not find first paragraph')
-    }
     try {
-      marginTop = await firstParagraph.getCssValue('margin-top')
+      marginTop = await this.browser.getMarginTopOfFirstParagraph(styleBuildTimeout)
       return marginTop === expectedMarginTop
     } catch (e) {
       return false
@@ -49,9 +47,13 @@ async function makeSureMaskImageCanBeLoaded (browser, prototypeDir, timeout) {
   let output = 'none'
   while ((output === 'none' || output === null) && (start + (timeout / 2)) > Date.now()) {
     await sleep(100)
-    const element = (await browser.queryClass('govuk-footer__copyright-logo'))[0]
-    if (element) {
-      output = await browser.driver.executeScript('return getComputedStyle(document.querySelector(".govuk-footer__copyright-logo"), ":before").getPropertyValue("mask-image")')
+    try {
+      output = await browser.getMaskImageForBeforeOfSelector('.govuk-footer__copyright-logo')
+    } catch (e) {
+      console.log('Error getting mask image', e)
+    }
+    if (!output) {
+      await sleep(100)
     }
   }
 

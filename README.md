@@ -1,6 +1,7 @@
-# Now Prototype It - GOV.UK Prototype Kit
+# Now Prototype It
+## An open source low-code high-fidelity prototype kit powered by your design system
 
-This prototype kit is designed to be compatible with [The GOV.UK Prototype Kit](https://prototype-kit.service.gov.uk/docs), 
+This project was forked from [The GOV.UK Prototype Kit](https://prototype-kit.service.gov.uk/docs), we remain compatible with all the tools used within the UK Government.  We've added new features (check the CHANGELOG.md) for the latest updates, we've made it more performant and we're providing additional tooling like a dedicated hosting environment you can upload to without leaving your browser and we're working on a desktop app to save you from needing Node etc. to be installed (https://github.com/nowprototypeit/npi-desktop). 
 
 ## Support
 

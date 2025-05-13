@@ -38,6 +38,8 @@ jobs:
 
     - run: npm ci
 
-    - run: npm run test:unit && npm run test:browser:${{ matrix.type }} -- --retry 2
+    - run: npx playwright install
+
+    - run: npm run test:browser:${{ matrix.type }}
       env:
         ADDITIONAL_TIMEOUT_MULTIPLIER: 3

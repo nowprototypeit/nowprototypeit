@@ -1,13 +1,17 @@
-const { Before, AfterStep, AfterAll, After, setDefaultTimeout } = require('@cucumber/cucumber')
-const { kitStartTimeout, cleanupEverything, setupKitAndBrowserForTestScope, removeKit } = require('./utils')
+const { Before, AfterStep, AfterAll, After, setDefaultTimeout, BeforeStep } = require('@cucumber/cucumber')
+
+const { setupKitAndBrowserForTestScope, removeKit } = require('./utils')
 
 const colors = require('../../lib/utils/terminal-colors')
 const { sleep } = require('../../lib/utils')
 const path = require('path')
 const os = require('os')
-const fsp = require('fs').promises
+const { runShutdownFunctions } = require('../../lib/utils/shutdownHandlers')
+const standardTimeout = require('./utils')
+const { kitStartTimeout } = require('./setup-helpers/timeouts')
 const resultsByTag = {}
 let anyFailures = false
+let anyPasses = false
 
 setDefaultTimeout(1)
 
@@ -56,6 +60,18 @@ function getVariantConfig (variantTag) {
   return result
 }
 
+const configuredToLogEachStep = process.env.LOG_EACH_STEP === 'true'
+if (configuredToLogEachStep) {
+  BeforeStep(standardTimeout, async function (scenario) {
+    console.log('')
+    const content = `Starting step ${scenario.pickleStep.text}`
+    const topAndBottomOfBox = '-'.repeat(content.length + 6)
+    console.log(topAndBottomOfBox)
+    console.log(`|  ${content}  |`)
+    console.log(topAndBottomOfBox)
+  })
+}
+
 Before(kitStartTimeout, async function (scenario) {
   const tagNames = scenario.pickle.tags.map(x => x.name)
   const variantTags = tagNames.filter(x => x.endsWith('-variant') || x.startsWith('@kit-update'))
@@ -81,18 +97,37 @@ Before(kitStartTimeout, async function (scenario) {
   await setupKitAndBrowserForTestScope(this, variantConfig)
 })
 
-if (process.env.DELAY_BETWEEN_TESTS) {
-  const ms = parseInt(process.env.DELAY_BETWEEN_TESTS, 10)
-  AfterStep({ timeout: ms + 1000 }, async function () {
+const ms = parseInt(process.env.DELAY_BETWEEN_TESTS, 10)
+AfterStep({ timeout: ms + 1000 }, async function (info) {
+  if (configuredToLogEachStep) {
+    if (info.result.status === 'PASSED') {
+      console.log('step passed')
+    } else {
+      console.log('step failed')
+      console.log(info.result.exception)
+    }
+  }
+
+  if (process.env.DELAY_BETWEEN_TESTS) {
     await sleep(ms)
-  })
-}
+  }
+})
 
 After(kitStartTimeout, async function (scenario) {
   const isFailure = scenario.result.status === 'FAILED'
   const scenarioName = scenario.pickle.name
   if (isFailure) {
     anyFailures = true
+    console.log('')
+    console.log(' - - - ')
+    console.log('Full kit stderr:')
+    console.log('')
+    console.log(this.kit?.getFullStderr())
+    console.log('')
+    console.log(' - - - ')
+    console.log('')
+  } else {
+    anyPasses = true
   }
   if (scenario.willBeRetried) {
     await removeKit(this.kit)
@@ -104,32 +139,29 @@ After(kitStartTimeout, async function (scenario) {
     resultsByTag[tag.name] = resultsByTag[tag.name] || { successes: 0, failures: 0 }
     resultsByTag[tag.name][isFailure ? 'failures' : 'successes']++
   })
-
   if (isFailure) {
     if (process.env.TAKE_SCREENSHOT_AFTER_FAILURE === 'true') {
-      try {
-        await this.browser?.setWindowSizeToPageSize()
-      } catch (e) {}
       const file = path.join(process.env.SCREENSHOT_DIR || path.join(os.tmpdir(), 'nowprototypeit-test-failures'), (scenarioName || Date.now()).replaceAll(' ', '-').replaceAll('.', '-') + '-failure-screenshot.png')
-      const image = await this.browser?.driver.takeScreenshot()
-      if (image) {
-        await fsp.mkdir(path.dirname(file), { recursive: true })
-        await fsp.writeFile(file, image, 'base64')
-      }
+      this.browser.takeScreenshot(file)
     }
     if (process.env.DELAY_AFTER_FAILED_TEST !== undefined) {
       await sleep(parseInt(process.env.DELAY_AFTER_FAILED_TEST, 10))
     }
     process.exitCode = 10
   }
-  await this.kit?.reset()
-  this.browser?.openUrl('about:blank')
+  if (!this.kit?.neverReuseThisKit) {
+    await this.kit?.reset()
+    await this.browser?.openUrl('about:blank')
+  }
   if (process.env.DELAY_BETWEEN_TESTS) {
     await sleep(parseInt(process.env.DELAY_BETWEEN_TESTS, 10))
   }
 })
 
 AfterAll(kitStartTimeout, async function () {
+  if (configuredToLogEachStep) {
+    console.log('starting after all')
+  }
   if (anyFailures) {
     console.log('')
     console.log('----')
@@ -151,11 +183,13 @@ AfterAll(kitStartTimeout, async function () {
     console.log('')
   }
 
-  const kitShouldBeDeleted = process.env.LEAVE_KIT_AFTER_TEST !== 'true'
-
-  try {
-    await cleanupEverything(kitShouldBeDeleted)
-  } catch (e) {
-    console.error('Error during cleanup (ignoring as the tests have already passed):', e)
+  console.log('Starting cleanup')
+  await runShutdownFunctions()
+  console.log('Cleanup complete')
+  if (!anyPasses && !anyFailures) {
+    console.log('')
+    console.log('No tests run, failing.')
+    console.log('')
+    process.exit(100)
   }
 })
