@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.12.0
+
 ### New Features
 
  - You can now type `exit` or `stop` to stop the kit, this allows us to handle Windows, Linux and Mac environments in a more consistent way. To ensure that it's working we've updated the test suite to use this when it stops kits.
