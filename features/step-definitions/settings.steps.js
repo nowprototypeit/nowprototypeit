@@ -1,90 +1,30 @@
 const { Given, When, Then } = require('@cucumber/cucumber')
-const { By } = require('selenium-webdriver')
-const { expect, standardTimeout } = require('./utils')
-const { mediumActionTimeout, waitForConditionToBeMet } = require('./utils')
-const { sleep } = require('../../lib/utils')
+const { expect, waitForConditionToBeMet } = require('./utils')
+const { standardTimeout, mediumActionTimeout, tinyTimeout } = require('./setup-helpers/timeouts')
 
 Given('I am on the plugin settings page for the {string} plugin', standardTimeout, async function (pluginName) {
   await this.browser.openUrl('/manage-prototype/settings')
-  const subNavItems = await this.browser.queryClass('nowprototypeit-sub-nav-item')
-  const links = await Promise.all(subNavItems.map(async (item) => {
-    const $a = (await item.findElements(By.tagName('a')))[0]
-    const $subtext = (await item.findElements(By.className('nowprototypeit-sub-nav-item__subtext')))[0]
-    if (!$a) {
-      return {}
-    }
-    return {
-      text: await $a.getText(),
-      href: await $a.getAttribute('href'),
-      subText: $subtext ? await $subtext.getText() : undefined,
-      linkElement: $a
-    }
-  }))
-
-  const link = links.find(({ text }) => text === pluginName)
-  if (!link) {
-    throw new Error(`Could not find link for ${pluginName}`)
-  }
-  await link.linkElement.click()
+  await this.browser.clickPluginSettingsForPluginName(pluginName)
 })
-
-When('I fill in {string} with {string}', standardTimeout, async function (fieldId, value) {
-  const field = await this.browser.queryId(fieldId)
-  await field.sendKeys(value)
-})
-
-async function findFieldByNameAndValue (browser, fieldName, fieldValue) {
-  let fields = []
-  const start = Date.now()
-  do {
-    await sleep(100)
-    await browser.refresh()
-    fields = await Promise.all((await browser.queryAttribute('name', fieldName)).map(async (field) => {
-      return {
-        value: await field.getAttribute('value'),
-        field
-      }
-    }))
-  } while (fields.length === 0 && Date.now() - start < (mediumActionTimeout.timeout - 600))
-  return fields.find(({ value }) => value === fieldValue)
-}
 
 When('I turn off the {string} setting', mediumActionTimeout, async function (fieldName) {
   const browser = this.browser
-  const chosenField = await findFieldByNameAndValue(browser, fieldName, 'false')
-  if (!chosenField) {
-    throw new Error(`Could not find field with name ${fieldName} and value false`)
-  }
-  await chosenField.field.click()
+  await browser.selectRadioButtonBySelector(`input[type=radio][name=${fieldName}][value=false]`)
 })
 
 When('I press {string}', standardTimeout, async function (buttonText) {
-  const buttons = await Promise.all((await this.browser.queryTag('button')).map(async (button) => {
-    return {
-      text: await button.getText(),
-      element: button
-    }
-  }))
-  const button = buttons.find(({ text }) => text === buttonText)
-  if (!button) {
-    throw new Error(`Could not find button with text ${buttonText}`)
-  }
-  await button.element.click()
+  await this.browser.clickButtonWithText(buttonText)
 })
 
 Then('I should see the settings saved message', standardTimeout, async function () {
   let lastKnownContent
   const expectedContent = 'Settings saved'
   await waitForConditionToBeMet({ timeout: standardTimeout.timeout * 0.9 }, async () => {
-    const toast = (await this.browser.queryClass('nowprototypeit-toast'))[0]
-    if (!toast) {
-      return false
-    }
-    lastKnownContent = await toast.getText()
+    lastKnownContent = await this.browser.getTextFromSelector('.nowprototypeit-toast', tinyTimeout)
     return lastKnownContent.includes(expectedContent)
-  }, () => {
+  }, (reject) => {
     const summary = lastKnownContent ? `[${lastKnownContent}]` : 'never found'
-    throw new Error(`Expected toast message to be [${expectedContent}], but was ${summary}`)
+    reject(new Error(`Expected toast message to be [${expectedContent}], but was ${summary}`))
   })
 })
 
@@ -103,13 +43,10 @@ Then('I should see {string} as the service name in the GOV.UK header', standardT
 Then('the service name in the GOV.UK header should become {string}', standardTimeout, async function (string) {
   let actual = null
   await waitForConditionToBeMet(standardTimeout, async () => {
-    const serviceNameElement = (await this.browser.queryClass('govuk-header__service-name'))[0]
-    if (!serviceNameElement) {
-      return null
-    }
-    actual = await serviceNameElement.getText()
+    actual = await this.browser.getTextFromSelector('.govuk-header__service-name', tinyTimeout)
+
     return actual === string
-  }, () => {
-    throw new Error(`Expected service name to be ${string}, but was ${actual}`)
+  }, (reject) => {
+    reject(new Error(`Gave up waiting for service name to become [${string}], it was [${actual}]`))
   })
 })

@@ -36,6 +36,6 @@ Feature: Not respecting file extensions when experiment is off
     And I replace "__your__file__path__here__" with "includes/really-basic-example.html" in the file "app/views/fixture-example.njk"
     When I visit "/fixture-example"
     Then I should see an error page
-    And the error details should contain "File path" "app/views/fixture-example.njk"
-    And the error details should contain "Error type" "Template render error"
-    And the error details should contain "template not found" "includes/really-basic-example.html"
+    And the error details should contain "File path:" "app/views/fixture-example.njk"
+    And the error details should contain "Error type:" "Template render error"
+    And the error details should contain "Error message:" "template not found: includes/really-basic-example.html"

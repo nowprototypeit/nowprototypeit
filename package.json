@@ -30,7 +30,7 @@
   "scripts": {
     "start": "echo 'This project cannot be started, in order to test this project please create a prototype kit using the cli.'",
     "build:destructive": "./scripts/build-destructive",
-    "lint": "standard . bin/cli scripts/create-prototype-and-run.js scripts/release-from-main",
+    "lint": "standard . bin/cli scripts/create-prototype-and-run.js scripts/release",
     "lint:fix": "npm run lint -- --fix",
     "test:unit": "jest --detectOpenHandles lib bin",
     "test:browser:all": "cucumber-js",
@@ -39,7 +39,8 @@
     "test:empty-cucumber-test": "cucumber-js --tags \"@nothing\"",
     "test:e2e": "cucumber-js --tags \"@integration\"",
     "test:integration": "cross-env CREATE_KIT_TIMEOUT=240000 jest --detectOpenHandles --testTimeout=60000 __tests__",
-    "test": "npm run lint && npm run test:unit && npm run test:browser:all"
+    "test:perf": "__tests__/run-performance-test.js",
+    "test": "npm run lint && npm run test:unit && npm run test:browser:all && npm run test:perf"
   },
   "dependencies": {
     "@nowprototypeit/design-system": "1.0.8",
@@ -75,6 +76,7 @@
     "glob": "^11.0.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
+    "playwright": "^1.52.0",
     "proper-lockfile": "^4.1.2",
     "selenium-webdriver": "^4.16.0",
     "standard": "^17.1.0"

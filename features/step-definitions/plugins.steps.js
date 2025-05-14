@@ -1,10 +1,12 @@
 const { Given, When, Then } = require('@cucumber/cucumber')
-const { kitStartTimeout, expect, pluginActionPageTimeout, pluginActionTimeout, mediumActionTimeout, standardTimeout } = require('./utils')
-const { By } = require('selenium-webdriver')
+const { expect, waitForConditionToBeMet } = require('./utils')
 const { exec } = require('../../lib/exec')
 const fsp = require('fs').promises
 const path = require('path')
-const { sleep } = require('../../lib/utils')
+const {
+  pluginActionPageTimeout, pluginActionTimeout, kitStartTimeout, mediumActionTimeout, standardTimeout,
+  tinyTimeout
+} = require('./setup-helpers/timeouts')
 const currentKitVersion = require('../../package.json').version
 
 Given('I have the {string} \\({string}\\) plugin installed', pluginActionPageTimeout, async function (pluginName, pluginRef) {
@@ -32,7 +34,11 @@ When('I visit the available plugins page', mediumActionTimeout, async function (
 
 Then('I should see the plugin {string} in the list', mediumActionTimeout, async function (pluginName) {
   const pluginDetails = await this.browser.getPluginDetails()
-  ;(await expect(pluginDetails.map(({ name }) => name))).to.contain(pluginName)
+  const pluginNames = pluginDetails.map(({ name }) => name)
+  const success = pluginNames.includes(pluginName)
+  if (!success) {
+    throw new Error(`Plugin [${pluginName}] not found in list of plugins [${pluginNames.join(', ')}]`)
+  }
 })
 
 Then('I should have no plugins installed', standardTimeout, async function () {
@@ -63,44 +69,33 @@ Then('The {string} plugin should not be tagged as {string}', standardTimeout, as
 })
 
 async function waitForPluginInstallUpdateOrUninstall (browser) {
-  await browser.wait(async () => {
-    const $progressBar = (await browser.driver.findElements(By.className('nowprototypeit-progress-bar')))[0]
-    if ($progressBar) {
-      const progressBarValue = await $progressBar.getAttribute('value')
-      const progressBarMax = await $progressBar.getAttribute('max')
-      return progressBarValue === progressBarMax
-    }
-    return false
-  }, pluginActionPageTimeout.timeout)
+  let progressBarValue = -1
+  await waitForConditionToBeMet(pluginActionPageTimeout, async () => {
+    const { value, max } = (await browser.getProgressBarValueAndMax())
+    progressBarValue = value
+    return progressBarValue === max
+  }, (reject) => {
+    reject(new Error(`Gave up waiting for progress bar to complete. Progress bar value was [${progressBarValue}]`))
+  })
 }
 
 function loadPluginDetailsForPluginRef (browser, pluginRef) {
   return browser.openUrl(`/manage-prototype/plugin/${pluginRef.split(':').map(encodeURIComponent).join(':')}`)
 }
 
-async function getActionButton (browser, pluginRef, buttonId, timeout) {
-  const start = Date.now()
-  let actionButton
-
-  while (actionButton === undefined && (start + timeout) > Date.now()) {
-    await sleep(100)
-    await loadPluginDetailsForPluginRef(browser, pluginRef)
-    try {
-      actionButton = await browser.queryId(buttonId)
-    } catch (e) {
-    }
-  }
-  if (!actionButton) {
-    throw new Error(`There is no [${buttonId}] button for plugin [${pluginRef}]`)
-  }
-  return actionButton
-}
-
 const visitPluginPageAndRunAction = async (browser, pluginRef, buttonId, expectToWaitForAction) => {
-  const $actionButton = await getActionButton(browser, pluginRef, buttonId, pluginActionTimeout.timeout / 3)
-  await $actionButton.click()
+  await loadPluginDetailsForPluginRef(browser, pluginRef)
+  await browser.clickId(buttonId)
   if (expectToWaitForAction) {
     await waitForPluginInstallUpdateOrUninstall(browser)
+    const successMessage = await browser.getTextFromSelector('#instructions-complete h3', tinyTimeout).catch(() => undefined)
+    const errorPanelText = await browser.getTextFromSelector('.panel-error', tinyTimeout).catch(() => undefined)
+    if (errorPanelText) {
+      throw new Error(`Error panel found after install, text was [${errorPanelText.split('\n')[0]}]`)
+    }
+    if (!successMessage?.startsWith('Successfully installed')) {
+      throw new Error('No success message')
+    }
   }
 }
 
@@ -156,17 +151,15 @@ When('I uninstall the {string} plugin using the console', pluginActionPageTimeou
 })
 
 When('I should be informed that {string} will also be installed', standardTimeout, async function (pluginName) {
-  const $bannerHeading = (await this.browser.queryClass('notification-banner'))[0]
-  if ($bannerHeading) {
-    ;(await expect((await $bannerHeading.getText()).trim())).to.eq('To update this plugin, you also need to install another plugin')
-  }
-  const affectedPluginNames = await Promise.all((await this.browser.queryClass('affected-plugin')).map(async $li => await $li.getText()))
-  ;(await expect(affectedPluginNames)).to.contain(pluginName)
+  const content = await this.browser.getTextFromSelector('.notification-banner')
+  ;(await expect(content)).to.eq('To update this plugin, you also need to install another plugin')
+
+  const contentArr = await this.browser.getTextFromSelectorAll('.affected-plugin')
+  ;(await expect(contentArr)).to.contain(pluginName)
 })
 
 const continueWithUpdateInstallOrUninstall = async function () {
-  const $button = await this.browser.queryId('plugin-action-button')
-  await $button.click()
+  this.browser.clickButtonWithId('plugin-action-button')
   await waitForPluginInstallUpdateOrUninstall(this.browser)
 }
 When('I continue with the update', pluginActionPageTimeout, continueWithUpdateInstallOrUninstall)
