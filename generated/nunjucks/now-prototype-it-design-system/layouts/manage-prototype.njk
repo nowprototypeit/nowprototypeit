@@ -1,0 +1,26 @@
+{% set htmlClasses = htmlClasses | default('') %}
+{% set htmlClasses = htmlClasses ~ ' ' ~ 'now-prototype-it-manage-prototype-page' %}
+
+{% set headerSubNavItems = [
+  {
+    url: "/",
+    name: "View your prototype"
+  },
+  {
+    url: "/manage-prototype",
+    name: "Manage your prototype"
+  },
+  {
+    url: "https://nowprototype.it/govuk/hosting",
+    name: "Find out about hosting",
+    newTab: true
+  }
+] %}
+
+
+{% extends "now-prototype-it-design-system/layouts/standard.njk" %}
+
+{% block footerContent %}
+  <p>You're using a Prototype Kit from Now Prototype It, this kit is designed to be used across UK Government and beyond find out more at <a href="https://nowprototype.it/govuk" target="_blank">nowprototype.it/govuk</a>.</p>
+
+{% endblock %}
