@@ -36,7 +36,9 @@ Then('the main heading should read {string}', standardTimeout, async function (e
 
 Then('the page should include a paragraph that reads {string}', standardTimeout, async function (expectedHeading) {
   const allPText = await this.browser.getTextFromSelectorAll('p')
-  ;(await expect(allPText)).to.include(expectedHeading)
+  if (!allPText.includes(expectedHeading)) {
+    throw new Error(`Expected to find paragraph with text [${expectedHeading}] but found [${allPText.join(', ')}]`)
+  }
 })
 
 Then('the first paragraph should read {string}', standardTimeout, async function (expectedHeading) {

@@ -16,18 +16,18 @@ function resetMessages () {
 const messagesRouter = express.Router()
 resetMessages()
 
-messagesRouter.get('/:version', (req, res) => {
+messagesRouter.get('/v1/messages/npi/:version', (req, res) => {
   const version = req.params.version
   const messages = messagesByKitVersion[version] || replaceVarsInDefaultMessage({ version })
   res.json(messages)
 })
 
-messagesRouter.put('/__default__', [express.json()], (req, res) => {
+messagesRouter.put('/v1/messages/npi/__default__', [express.json()], (req, res) => {
   defaultMessagesResponse = { ...req.body }
   res.send({ success: true })
 })
 
-messagesRouter.put('/:version', [express.json()], (req, res) => {
+messagesRouter.put('/v1/messages/npi/:version', [express.json()], (req, res) => {
   messagesByKitVersion[req.params.version] = { ...req.body, version: req.params.version }
   res.send({ success: true })
 })

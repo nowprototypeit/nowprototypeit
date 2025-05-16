@@ -63,6 +63,9 @@ function getVariantConfig (variantTag) {
   return result
 }
 
+Before(standardTimeout, async function () {
+  console.log('') // without this the 'first' dot in each run is actually the cleanup from the last run.
+})
 const configuredToLogEachStep = process.env.LOG_EACH_STEP === 'true'
 if (configuredToLogEachStep) {
   BeforeStep(standardTimeout, async function (scenario) {
@@ -154,6 +157,7 @@ After(kitStartTimeout, async function (scenario) {
   }
   if (!this.kit?.neverReuseThisKit) {
     await this.kit?.reset()
+    await this.fakeApi?.reset()
     await this.browser?.openUrl('about:blank')
   }
   if (process.env.DELAY_BETWEEN_TESTS) {
@@ -186,6 +190,8 @@ AfterAll(kitStartTimeout, async function () {
     console.log('')
   }
 
+  console.log('')
+  console.log('')
   console.log('Starting cleanup')
   await runShutdownFunctions()
   console.log('Cleanup complete')

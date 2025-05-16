@@ -8,6 +8,14 @@ Given('the API contains a message for this version of the kit saying {string}', 
   ])
 })
 
+Given('Hosting is enabled for this version of the kit with logged out message {string}', standardTimeout, async function (message) {
+  await this.fakeApi.setHostingConfigForVersion(this.kit.version, true, message)
+})
+
+Given('Hosting is disabled for this version of the kit with message {string}', standardTimeout, async function (message) {
+  await this.fakeApi.setHostingConfigForVersion(this.kit.version, false, message)
+})
+
 When('I visit the manage prototype homepage', standardTimeout, async function () {
   await this.browser.openUrl('/manage-prototype')
 })

@@ -25,7 +25,7 @@
   <p>To start hosting you'll need to log in to your nowprototype.it account.</p>
 
   {% if loggedOutMessage %}
-    <p>{{ loggedOutMessage | safe }}</p>
+    {{ loggedOutMessage | safe }}
   {% endif %}
   {% if errorSplash %}
     {{ nowPrototypeItError({

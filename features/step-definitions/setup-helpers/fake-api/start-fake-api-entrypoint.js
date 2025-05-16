@@ -3,6 +3,7 @@ if (require.main === module) {
   listenForShutdown('opensource api setup for tests')
   const express = require('express')
   const { resetMessages, messagesRouter } = require('./routers/messages.js')
+  const { resetHosting, hostingRouter } = require('./routers/hosting.js')
 
   const app = express()
   const port = process.env.PORT
@@ -22,9 +23,12 @@ if (require.main === module) {
 
   app.post('/__reset-everything__', (req, res) => {
     resetMessages()
+    resetHosting()
+    res.send({ success: true })
   })
 
-  app.use('/v1/messages/npi/', messagesRouter)
+  app.use(messagesRouter)
+  app.use(hostingRouter)
 
   app.use((req, res) => {
     res.status(405)
