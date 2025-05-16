@@ -230,3 +230,6 @@ When('I restart my prototype by updating the file {string}', { timeout: 30 * 100
 Then('I intentionally fail the tests', function () {
   throw new Error('Intentional failure')
 })
+Given('I fully restart my prototype', standardTimeout, function () {
+  return this.kit.restart()
+})
