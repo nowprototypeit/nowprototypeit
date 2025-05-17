@@ -1,0 +1,112 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - main
+      - support/*
+  pull_request:
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: linux
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run lint
+
+  unit-test:
+    name: Unit (${{ matrix.os }})
+    needs: lint
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    timeout-minutes: 5
+    steps:
+      - run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node v22
+        uses: actions/setup-node@v4
+        with:
+          cache: 'npm'
+          node-version: 22
+
+      - run: npm ci
+
+      - run: npm run test:unit && npm run test:unit
+
+  browser-test:
+    name: Browser ${{ matrix.type }}, v${{ matrix.node-version }} (${{ matrix.os }})
+    needs: unit-test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [18.x, 22.x]
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        type: [acceptance, integration]
+
+        include:
+          - os: ubuntu-latest
+            node-version: 20.x
+            type: acceptance
+          - os: ubuntu-latest
+            node-version: 20.x
+            type: integration
+        exclude:
+          - os: macos-latest
+            node-version: 22.x
+
+    timeout-minutes: 25
+    steps:
+      - run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node v${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          cache: 'npm'
+          node-version: ${{ matrix.node-version }}
+
+      - run: npm ci
+
+      - run: npx playwright install
+
+      - run: npm run test:browser:${{ matrix.type }}
+        env:
+          ADDITIONAL_TIMEOUT_MULTIPLIER: 3
+
+  performance:
+    name: Performance
+    runs-on: linux
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          cache: 'npm'
+          node-version: 20
+
+      - run: npm install
+
+      - run: npm run
+
+      - run: npm run test:perf
