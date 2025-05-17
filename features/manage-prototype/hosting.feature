@@ -17,6 +17,16 @@ Scenario: Hosting page with a different message
 @no-variant
 @hosting-experiment-on
 Scenario: Incompatible version
-  Given Hosting is disabled for this version of the kit with message "<p>Please <a href='/'>update your kit</a> to use the hosting platform.</p>"
+  Given Hosting is disabled for this version of the kit with message "This **should** be *formatted* and can include links (link:/manage-prototype/plugin/npm:nowprototypeit)"
   When I visit "/manage-prototype/hosting"
-  Then the page should include a paragraph that reads "Please update your kit to use the hosting platform."
+  Then the page should include a paragraph that reads "This should be formatted and can include links /manage-prototype/plugin/npm:nowprototypeit"
+  And the page should contain bold text saying "should"
+  And the page should contain italic text saying "formatted"
+  And the page should contain a link with URL and text of "/manage-prototype/plugin/npm:nowprototypeit"
+
+@no-variant
+@hosting-experiment-on
+Scenario: Incompatible version with a different message
+  Given Hosting is disabled for this version of the kit with message "Basic message"
+  When I visit "/manage-prototype/hosting"
+  Then the page should include a paragraph that reads "Basic message"

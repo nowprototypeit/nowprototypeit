@@ -235,3 +235,29 @@ Then('I intentionally fail the tests', function () {
 Given('I fully restart my prototype', standardTimeout, function () {
   return this.kit.restart()
 })
+
+Then('the page should contain bold text saying {string}', standardTimeout, async function (boldTextContent) {
+  const boldText = await this.browser.getTextFromSelectorAll('strong')
+  if (!boldText.includes(boldTextContent)) {
+    throw new Error(`Expected bold text to contain [${boldTextContent}], but found [${boldText.join(', ')}]`)
+  }
+})
+
+Then('the page should contain italic text saying {string}', standardTimeout, async function (boldTextContent) {
+  const boldText = await this.browser.getTextFromSelectorAll('em')
+  if (!boldText.includes(boldTextContent)) {
+    throw new Error(`Expected bold text to contain [${boldTextContent}], but found [${boldText.join(', ')}]`)
+  }
+})
+
+Then('the page should contain a link with URL and text of {string}', standardTimeout, async function (linkTextAndUrl) {
+  const linkTextAndUrlList = await this.browser.getLinkTextAndUrlFromSelectorAll('a')
+  const index = linkTextAndUrlList.findIndex(x => x.text === linkTextAndUrl)
+  if (index === -1) {
+    throw new Error(`Expected link to contain [${linkTextAndUrl}], but found [${linkTextAndUrlList.map(x => x.text).join(', ')}]`)
+  }
+  const found = linkTextAndUrlList[index]
+  if (found.text !== found.url) {
+    throw new Error(`Expected link text to be the same as the URL, but found text [${found.text}] and url [${found.url}]`)
+  }
+})

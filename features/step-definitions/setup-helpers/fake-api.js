@@ -30,7 +30,7 @@ async function setupFakeApi () {
       body.loggedOutMessage = message
       body.hostingBaseUrl = 'https://localhost:9999999' // I've specified an out of range port as we don't have a real URL yet
     }
-    body.messageHtml = message
+    body.messageFormattedText = message
 
     await fetch(baseUrl + `/v1/hosting-config-for-nowprototypeit/${encodeURIComponent(version)}`, {
       method: 'PUT',
