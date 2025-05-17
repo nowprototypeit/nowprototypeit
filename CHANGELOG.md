@@ -6,6 +6,11 @@
 
  - The messages from the API was [broken in release 0.10.0](https://github.com/nowprototypeit/nowprototypeit/compare/v0.9.5...v0.10.0#diff-d5109920b34c2b2e141bd41232d8876432a17479c388e142d8a036bb7b36ea62L94-L105) and we didn't have a test for it.  We have now introduced a fake API into the tests in order to cover behaviour which relies on the API.  These messages are intended to encourage users to keep their Now Prototype It version up-to-date and to inform them if any issues become known about earlier versions - including security issues and incompatabilities.
 
+### Improvements
+
+ - Previously messages from the API could only be plain text and could have a link URL specified.  Now they can use a limited set of rich text and provide links.  For security reasons link ULRs are shown to the user and formatting is limited to bold and italic.
+ - Previously the API could send any HTML elements to communicate with the user when their prototype was using a dependency which was too old, that's now using the same minimalist rich text format as the messages.  This is to prevent the API from being able to send unexpected HTML to the user.
+
 ## 0.12.0
 
 ### New Features
