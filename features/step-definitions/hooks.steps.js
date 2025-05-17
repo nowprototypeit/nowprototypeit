@@ -76,6 +76,7 @@ if (configuredToLogEachStep) {
 }
 
 Before(kitStartTimeout, async function (scenario) {
+  console.log('') // without this the 'first' dot in each run is actually the cleanup from the last run.
   const tagNames = scenario.pickle.tags.map(x => x.name)
   const variantTags = tagNames.filter(x => x.endsWith('-variant') || x.startsWith('@kit-update'))
   if (variantTags.length > 1) {
@@ -123,9 +124,9 @@ After(kitStartTimeout, async function (scenario) {
     anyFailures = true
     console.log('')
     console.log(' - - - ')
-    console.log('Full kit stderr:')
+    console.log('Full kit stdout & stderr:')
     console.log('')
-    console.log(this.kit?.getFullStderr())
+    console.log(this.kit?.getFullStdoutAndStdErr())
     console.log('')
     console.log(' - - - ')
     console.log('')
@@ -154,6 +155,7 @@ After(kitStartTimeout, async function (scenario) {
   }
   if (!this.kit?.neverReuseThisKit) {
     await this.kit?.reset()
+    await this.fakeApi?.reset()
     await this.browser?.openUrl('about:blank')
   }
   if (process.env.DELAY_BETWEEN_TESTS) {
@@ -186,6 +188,8 @@ AfterAll(kitStartTimeout, async function () {
     console.log('')
   }
 
+  console.log('')
+  console.log('')
   console.log('Starting cleanup')
   await runShutdownFunctions()
   console.log('Cleanup complete')

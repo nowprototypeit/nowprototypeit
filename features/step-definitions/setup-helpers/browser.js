@@ -104,6 +104,13 @@ async function getBrowser (config = {}) {
       const elemContents = await Promise.all($$elems.map(async x => await x.textContent()))
       return elemContents.map(x => x?.trim())
     },
+    getLinkTextAndUrlFromSelectorAll: async (selector, timeoutDeclaration = standardTimeout) => {
+      const $$elems = await page.$$(selector)
+      return await Promise.all($$elems.map(async x => ({
+        text: (await x.textContent())?.trim(),
+        url: await x.getAttribute('href')
+      })))
+    },
     getTitle: async () => {
       return await page.title()
     },

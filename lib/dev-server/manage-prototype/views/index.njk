@@ -23,13 +23,7 @@
     <ul class="nowprototypeit-manage-prototype-messages nowprototypeit-bullet-list">
       {% for message in messages %}
         <li class="nowprototypeit-manage-prototype-messages__item">
-          {% if message.html %}
-            {{ message.html | safe }}
-          {% elseif message.url %}
-            <a href="{{ message.url }}">{{ message.text }}</a>
-          {% else %}
-            {{ message.text }}
-          {% endif %}
+          {{ message.html | safe }}
         </li>
       {% endfor %}
     </ul>

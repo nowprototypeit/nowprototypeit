@@ -9,6 +9,7 @@ const chaiPromise = import('chai')
 const { flattenArray } = require('../../lib/utils/arrayTools')
 const { getBrowser } = require('./setup-helpers/browser')
 const { setupKit } = require('./setup-helpers/kit')
+const { setupFakeApi } = require('./setup-helpers/fake-api')
 
 const kitAndBrowserStore = (() => {
   const store = {}
@@ -76,7 +77,7 @@ function waitForConditionToBeMet (timeoutDeclaration, isCorrect, errorCallback) 
     const maxTimeout = timeoutDeclaration.timeout - 500
     const timeoutTimestamp = Date.now() + maxTimeout
 
-    const delayBetweenRetries = 150
+    const delayBetweenRetries = timeoutDeclaration.delayBetweenRetries ?? 150
     let lastRunError = null
     const timeoutCallback = async () => {
       let result = false
@@ -109,12 +110,23 @@ function waitForConditionToBeMet (timeoutDeclaration, isCorrect, errorCallback) 
 }
 
 async function setupKitAndBrowserForTestScope (that, options) {
-  that.browser = that.browser || await getBrowser({
-    afterCleanup: () => {
-      that.browser = null
+  const [browser, fakeApi] = await Promise.all([
+    that.browser || await getBrowser({
+      afterCleanup: () => {
+        that.browser = null
+      }
+    }),
+    that.fakeApi || setupFakeApi()
+  ])
+  that.browser = browser
+  that.fakeApi = fakeApi
+  that.kit = await setupKit({
+    ...options,
+    env: {
+      ...(options?.env || {}),
+      NPI_API_BASE_URL: fakeApi.baseUrl
     }
   })
-  that.kit = await setupKit(options)
   that.browser.setBaseUrl(that.kit.url)
   if (!that.browser) {
     throw new Error('No browser set up, something is wrong')

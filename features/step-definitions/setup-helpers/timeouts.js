@@ -8,7 +8,7 @@ const standardTimeout = { timeout: 5 * 1000 * timeoutMultiplier }
 
 module.exports = {
   timeoutMultiplier,
-  kitStartTimeout: { timeout: (process.env.TEST_KIT_DEPENDENCY ? 90 : 40) * 1000 * timeoutMultiplier },
+  kitStartTimeout: { timeout: (process.env.TEST_KIT_DEPENDENCY ? 30 : 20) * 1000 * timeoutMultiplier },
   standardTimeout,
   tinyTimeout: { timeout: 0.5 * 1000 * timeoutMultiplier },
   pluginActionTimeout: { timeout: 60 * 1000 * timeoutMultiplier },

@@ -30,6 +30,7 @@ async function setupKit (options) {
     ...options.appConfigAdditions || {}
   }
   await fsp.writeFile(configPath, JSON.stringify(newConfig), 'utf8')
+  const versionPromise = fsp.readFile(path.join(kitDir, 'node_modules', 'nowprototypeit', 'package.json')).then(JSON.parse).then(x => x?.version)
 
   const kitThread = fork(path.join(kitDir, 'node_modules', 'nowprototypeit', 'bin', 'cli'), {
     args: [
@@ -40,7 +41,8 @@ async function setupKit (options) {
     hideStderr: !showKitStdio,
     cwd: kitDir,
     env: {
-      PORT: port
+      PORT: port,
+      ...(options?.env || {})
     }
   })
 
@@ -70,9 +72,12 @@ async function setupKit (options) {
   }
   kitThread.stdio.stdout.on('data', listener)
 
-  let fullStderr = ''
+  let fullStdoutAndStderr = ''
   kitThread.stdio.stderr.on('data', (data) => {
-    fullStderr += data.toString()
+    fullStdoutAndStderr += data.toString()
+  })
+  kitThread.stdio.stdout.on('data', (data) => {
+    fullStdoutAndStderr += data.toString()
   })
 
   await kitStartedPromiseParts.promise
@@ -122,13 +127,23 @@ async function setupKit (options) {
     }
     kitThread.stdio.stdout.on('data', listener)
   }
+
+  const restart = () => new Promise(resolve => {
+    addNextKitRestartListener(() => {
+      resolve()
+    })
+    kitThread.stdio.stdin.write('rs\n')
+  })
+
   return {
     url,
     dir: kitDir,
+    version: await versionPromise,
     close,
     reset: close,
     addNextKitRestartListener,
-    getFullStderr: () => fullStderr
+    getFullStdoutAndStdErr: () => fullStdoutAndStderr,
+    restart
   }
 }
 
@@ -138,7 +153,7 @@ async function createKit ({
   targetDir,
   providedOptions
 }) {
-  const handledRootKeys = ['variantPluginName', 'appConfigAdditions', 'variantPluginDependency', 'neverReuseThisKit', 'unique']
+  const handledRootKeys = ['variantPluginName', 'appConfigAdditions', 'variantPluginDependency', 'neverReuseThisKit', 'unique', 'env']
   const unhandledRootKeys = Object.keys(providedOptions || {}).filter((key) => !handledRootKeys.includes(key))
 
   if (unhandledRootKeys.length > 0) {
