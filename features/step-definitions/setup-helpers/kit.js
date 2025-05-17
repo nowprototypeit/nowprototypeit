@@ -72,9 +72,12 @@ async function setupKit (options) {
   }
   kitThread.stdio.stdout.on('data', listener)
 
-  let fullStderr = ''
+  let fullStdoutAndStderr = ''
   kitThread.stdio.stderr.on('data', (data) => {
-    fullStderr += data.toString()
+    fullStdoutAndStderr += data.toString()
+  })
+  kitThread.stdio.stdout.on('data', (data) => {
+    fullStdoutAndStderr += data.toString()
   })
 
   await kitStartedPromiseParts.promise
@@ -139,7 +142,7 @@ async function setupKit (options) {
     close,
     reset: close,
     addNextKitRestartListener,
-    getFullStderr: () => fullStderr,
+    getFullStdoutAndStdErr: () => fullStdoutAndStderr,
     restart
   }
 }
