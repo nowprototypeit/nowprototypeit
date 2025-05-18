@@ -1,13 +1,15 @@
 if (require.main === module) {
-  const { listenForShutdown } = require('../../../../lib/utils/shutdownHandlers')
+  global.isRunningAsPartOfFakeApiProcess = true
+  const { listenForShutdown } = require('../../../lib/utils/shutdownHandlers')
   listenForShutdown('opensource api setup for tests')
   const express = require('express')
   const { resetMessages, messagesRouter } = require('./routers/messages.js')
-  const { resetHosting, hostingRouter } = require('./routers/hosting.js')
+  const { resetHosting, hostingRouter, setBaseUrlForHostingRouter } = require('./routers/hosting-config.js')
+  const { authRouter, resetAuth, setBaseUrlForAuthRouter } = require('./routers/auth')
 
   const app = express()
   const port = process.env.PORT
-  const logAllRequests = process.env.NPI_OS_API__LOG_ALL_REQUESTS === 'true'
+  const logAllRequests = process.env.NPI_FAKE_API__LOG_ALL_REQUESTS === 'true'
 
   if (!port || isNaN(port)) {
     console.error('No valid PORT environment variable provided')
@@ -24,11 +26,13 @@ if (require.main === module) {
   app.post('/__reset-everything__', (req, res) => {
     resetMessages()
     resetHosting()
+    resetAuth()
     res.send({ success: true })
   })
 
   app.use(messagesRouter)
   app.use(hostingRouter)
+  app.use(authRouter)
 
   app.use((req, res) => {
     res.status(405)
@@ -37,6 +41,9 @@ if (require.main === module) {
   })
 
   const listener = app.listen(port, () => {
-    console.log(`Fake API is listening on http://localhost:${listener.address().port}/`)
+    const baseUrl = `http://localhost:${listener.address().port}`
+    console.log(`Fake API is listening on ${baseUrl}/`)
+    setBaseUrlForAuthRouter(baseUrl)
+    setBaseUrlForHostingRouter(baseUrl)
   })
 }
