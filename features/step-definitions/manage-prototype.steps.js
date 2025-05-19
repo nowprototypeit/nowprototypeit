@@ -1,5 +1,6 @@
 const { Given, Then, When } = require('@cucumber/cucumber')
 const { standardTimeout } = require('./setup-helpers/timeouts')
+const { waitForConditionToBeMet } = require('./utils')
 
 Given('the API contains a message for this version of the kit with text {string}', standardTimeout, async function (messageText) {
   await this.fakeApi.setMessagesForVersion(this.kit.version, false, [
@@ -57,4 +58,35 @@ Then('the first message should contain a link to {string}', standardTimeout, asy
   if (found.text !== found.url) {
     throw new Error(`Expected link text to be the same as the URL, but found text [${found.text}] and url [${found.url}]`)
   }
+})
+
+When('I login with username as {string} in the fake website popup window', standardTimeout, async function (username) {
+  await this.browser.loginInFakeWebsitePopupWindow(username)
+})
+When('I enter the one-time-password as {string} in the fake website popup window', standardTimeout, async function (otp) {
+  await this.browser.enterOtpFakeWebsitePopupWindow(otp)
+})
+When('the popup window should be closed', standardTimeout, async function () {
+  let number = -1
+  await waitForConditionToBeMet(standardTimeout, async () => {
+    number = await this.browser.getNumberOfFakeWebsitePopupWindows()
+    return number === 0
+  }, (reject) => {
+    reject(new Error(`Expected one popup window, found [${number}]`))
+  })
+})
+Given('the fake api expects a login from {string} with {int}\\/{int} prototypes used', standardTimeout, async function (username, usedPrototypes, totalPrototypeAllowance) {
+  await this.fakeApi.setupFakeUser(username, {
+    uploadCapacity: totalPrototypeAllowance,
+    uploadedCount: usedPrototypes
+  })
+})
+Then('the username on the page should be {string}', standardTimeout, async function (username) {
+  let foundUsername
+  await waitForConditionToBeMet(standardTimeout, async () => {
+    foundUsername = await this.browser.getTextFromSelector('.nowprototypeit-user-name')
+    return foundUsername === username
+  }, (reject) => {
+    reject(new Error(`Expected username [${username}], but found [${foundUsername}]`))
+  })
 })

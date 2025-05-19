@@ -2,11 +2,16 @@ const express = require('express')
 
 const hostingConfigResponseByKitVersion = {}
 let defaultHostingConfigResponse = {}
+let baseUrl
+
+function setBaseUrlForHostingRouter (url) {
+  baseUrl = url
+}
 
 function resetHosting () {
   defaultHostingConfigResponse = {
-    isCompatible: false,
-    messageHtml: 'This is the default for the fake API'
+    isCompatible: true,
+    loggedOutMessage: 'This is the **default** for the fake API'
   }
   Object.keys(hostingConfigResponseByKitVersion).forEach(key => {
     delete hostingConfigResponseByKitVersion[key]
@@ -28,14 +33,19 @@ hostingRouter.put('/v1/hosting-config-for-nowprototypeit/__default__', [express.
 })
 
 hostingRouter.put('/v1/hosting-config-for-nowprototypeit/:version', [express.json()], (req, res) => {
-  hostingConfigResponseByKitVersion[req.params.version] = { ...req.body }
+  const config = { ...req.body }
+  if (config.hostingBaseUrl?.includes('{{SELF_URL}}')) {
+    config.hostingBaseUrl = config.hostingBaseUrl.replace('{{SELF_URL}}', baseUrl)
+  }
+  hostingConfigResponseByKitVersion[req.params.version] = config
   console.log(`set hosting config for version [${req.params.version}]`, hostingConfigResponseByKitVersion[req.params.version])
   res.send({ success: true })
 })
 
 module.exports = {
   resetHosting,
-  hostingRouter
+  hostingRouter,
+  setBaseUrlForHostingRouter
 }
 
 function replaceVarsInDefaultMessage (vars = {}) {

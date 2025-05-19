@@ -48,7 +48,7 @@
 
     <form action="{{ uploadPrototypeUrl }}" method="post" data-dom-widget="replaceElementsOnSubmit" data-replace-elem="page-to-replace-on-submit" data-with-elem="spinner-to-replace-with-on-submit" data-also-hide-class="nowprototypeit-manage-prototype-navigation__list">
       <h1>Upload your prototype to Now Prototype It's hosting platform</h1>
-      <p>You can upload {{ uploadCapacity }} {% if uploadedCount > 0 %} more {% endif %} prototypes. If this isn't
+      <p>You can upload {{ remainingUploadCapacity }} {% if uploadedCount > 0 %} more {% endif %} prototype{% if remainingUploadCapacity !== 1 %}s{% endif %}. If this isn't
         enough please <strong><a target="_blank"
                                  href="/manage-prototype/hosting/redirect-to-logged-in-url/set-up-account-for-increased-hosting">visit
             your profile on the Now Prototype It website</a></strong> where you can remove unused prototypes or increase

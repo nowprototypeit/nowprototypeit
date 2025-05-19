@@ -30,14 +30,17 @@ Given('I refresh the browser', standardTimeout, async function () {
 })
 
 Then('the main heading should read {string}', standardTimeout, async function (expectedHeading) {
-  const actualH1 = await this.browser.getTextFromSelector('h1')
+  const actualH1 = await this.browser.getTextFromSelector('h1:visible')
   ;(await expect(actualH1)).to.equal(expectedHeading)
 })
 
 Then('the page should include a paragraph that reads {string}', standardTimeout, async function (expectedHeading) {
-  const allPText = await this.browser.getTextFromSelectorAll('p')
+  const allPText = (await this.browser.getTextFromSelectorAll('p')).map(standardSpaces)
   if (!allPText.includes(expectedHeading)) {
     throw new Error(`Expected to find paragraph with text [${expectedHeading}] but found [${allPText.join(', ')}]`)
+  }
+  function standardSpaces (text) {
+    return text.replace(/\s+/g, ' ').trim()
   }
 })
 
@@ -49,13 +52,8 @@ Then('the first paragraph should read {string}', standardTimeout, async function
 Then('the main heading should be updated to {string}', mediumActionTimeout, async function (expectedHeading) {
   let actualH1
   return waitForConditionToBeMet(mediumActionTimeout, async () => {
-    try {
-      actualH1 = await (await this.browser.getTextFromSelector('h1'))
-      verboseLog('Waiting for h1 [%s] to be [%s]}:', actualH1, expectedHeading)
-    } catch (e) {
-      verboseLog('Error looking up H1:', e)
-      actualH1 = undefined
-    }
+    actualH1 = await (await this.browser.getTextFromSelector('h1:visible'))
+    verboseLog('Waiting for h1 [%s] to be [%s]}:', actualH1, expectedHeading)
     return actualH1 === expectedHeading
   }, function (reject) {
     verboseLog('Gave up waiting for h1 [%s] to be [%s]}:', actualH1, expectedHeading)
@@ -184,6 +182,9 @@ When('I select the {string} radio button', standardTimeout, async function (radi
 
 When('I click the link with text {string}', standardTimeout, async function (linkText) {
   await this.browser.clickLinkWithText(linkText)
+})
+When('I click the button with text {string}', standardTimeout, async function (buttonText) {
+  await this.browser.clickButtonWithText(buttonText)
 })
 
 When('I log the page URL', standardTimeout, async function () {
