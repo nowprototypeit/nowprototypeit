@@ -36,7 +36,7 @@ Scenario: Incompatible version with a different message
 
   @no-variant
   @hosting-experiment-on
-  Scenario: Hosting page with a different message
+  Scenario: Hosting page with a different message and no prototypes
     Given Hosting is enabled for this version of the kit with logged out message "Basic text"
     And the fake api expects a login from "nowprototypeit" with 0/0 prototypes used
     When I visit "/manage-prototype/hosting"
@@ -51,7 +51,7 @@ Scenario: Incompatible version with a different message
 
   @no-variant
   @hosting-experiment-on
-  Scenario: Hosting page with a different message
+  Scenario: Hosting page when the user has upload capacity
     Given Hosting is enabled for this version of the kit with logged out message "Basic text"
     And the fake api expects a login from "nowprototypeit" with 2/3 prototypes used
     When I visit "/manage-prototype/hosting"

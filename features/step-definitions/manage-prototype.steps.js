@@ -63,8 +63,8 @@ Then('the first message should contain a link to {string}', standardTimeout, asy
 When('I login with username as {string} in the fake website popup window', standardTimeout, async function (username) {
   await this.browser.loginInFakeWebsitePopupWindow(username)
 })
-When('I enter the one-time-password as {string} in the fake website popup window', standardTimeout, async function (username) {
-  await this.browser.enterOtpFakeWebsitePopupWindow(username)
+When('I enter the one-time-password as {string} in the fake website popup window', standardTimeout, async function (otp) {
+  await this.browser.enterOtpFakeWebsitePopupWindow(otp)
 })
 When('the popup window should be closed', standardTimeout, async function () {
   let number = -1
