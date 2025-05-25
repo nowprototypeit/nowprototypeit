@@ -70,7 +70,8 @@ async function runPerformanceTest (command, numberOfRuns, benchmark = undefined)
     ...execArgs,
     env: {
       ...(execArgs.env || {}),
-      NPI_PERF_BENCHMARK_MS: benchmark
+      NPI_PERF__BENCHMARK_MS: benchmark,
+      NPI_PERF__SKIP_LOG_CHECK: benchmark ? 'false' : 'true'
     }
   })
   let result =
