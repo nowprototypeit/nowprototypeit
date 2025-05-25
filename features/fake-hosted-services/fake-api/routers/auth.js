@@ -87,7 +87,7 @@ if (global.isRunningAsPartOfFakeApiProcess) {
     const statusId = req.query.statusId
     const status = statuses[statusId]
     if (!status) {
-      console.error('No status found for ID', statusId)
+      console.error('No status found for ID (a)', statusId, req.originalUrl, req.query)
       return res.status(404).send({
         error: 'status not found'
       })
@@ -154,7 +154,7 @@ if (global.isRunningAsPartOfFakeApiProcess) {
     if (otp === '1234') {
       const statusObj = statuses[statusId]
       if (!statusObj) {
-        console.error('No status found for ID', statusId)
+        console.error('No status found for ID (b)', statusId)
         return res.status(404).send({
           error: 'status not found'
         })
