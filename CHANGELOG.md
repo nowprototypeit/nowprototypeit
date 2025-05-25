@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### New Features
+
+- Introduced a `userInput` variable which can be used to access user input from forms.  This is a variable that was previously known as `data` in the GOV.UK Prototype Kit, we plan to phase that out over a long period of time.  The addition of `userInput` allows us to add this to our documentation so that new users get used to that while existing users can continue to use `data` for the time being.
+
 ### Fixes
 
  - The messages from the API was [broken in release 0.10.0](https://github.com/nowprototypeit/nowprototypeit/compare/v0.9.5...v0.10.0#diff-d5109920b34c2b2e141bd41232d8876432a17479c388e142d8a036bb7b36ea62L94-L105) and we didn't have a test for it.  We have now introduced a fake API into the tests in order to cover behaviour which relies on the API.  These messages are intended to encourage users to keep their Now Prototype It version up-to-date and to inform them if any issues become known about earlier versions - including security issues and incompatabilities.

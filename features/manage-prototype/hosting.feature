@@ -61,6 +61,6 @@ Scenario: Incompatible version with a different message
     Then the main heading should be updated to "You're in the process of logging in"
     When I enter the one-time-password as "1234" in the fake website popup window
     Then the popup window should be closed
-    And the main heading should read "Upload your prototype to Now Prototype It's hosting platform"
+    And the main heading should be updated to "Upload your prototype to Now Prototype It's hosting platform"
     And the page should include a paragraph that reads "You can upload 1 more prototype. If this isn't enough please visit your profile on the Now Prototype It website where you can remove unused prototypes or increase your limit."
     And the username on the page should be "nowprototypeit"
