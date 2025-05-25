@@ -4,6 +4,7 @@
 
 ### New Features
 
+- Updating Node.js supported versions, we are now in line with the versions Node.js themselves support.  v20, v22, v24.  We do support older versions with limited functionality. We're still testing Node 18 but we will drop full support for that if supporting it becomes a burden. We recommend using Node 24 for your prototypes.
 - Introduced a `userInput` variable which can be used to access user input from forms.  This is a variable that was previously known as `data` in the GOV.UK Prototype Kit, we plan to phase that out over a long period of time.  The addition of `userInput` allows us to add this to our documentation so that new users get used to that while existing users can continue to use `data` for the time being.
 
 ### Fixes
