@@ -5,6 +5,17 @@ const { addShutdownFn } = require('../../../lib/utils/shutdownHandlers')
 const { verboseLog } = require('../../../lib/utils/verboseLogger')
 
 let singleSharedBrowser = null
+
+async function getFakeWebsitePopup (browserContextPromise, page) {
+  const pages = (await browserContextPromise).pages()
+  const popupPage = pages.find(page => page.url().includes('__fake-website__'))
+  if (!popupPage) {
+    throw new Error('Popup window not found')
+  }
+  await popupPage.bringToFront()
+  return popupPage
+}
+
 async function getBrowser (config = {}) {
   if (singleSharedBrowser) {
     verboseLog('Reusing shared browser')
@@ -14,8 +25,9 @@ async function getBrowser (config = {}) {
   const browserPromise = chromium.launch({
     headless: process.env.SHOW_BROWSER !== 'true'
   })
-  const pagePromise = browserPromise
+  const browserContextPromise = browserPromise
     .then(browser => browser.newContext())
+  const pagePromise = browserContextPromise
     .then(context => context.newPage())
 
   addShutdownFn(async () => {
@@ -96,6 +108,10 @@ async function getBrowser (config = {}) {
       return !!element
     },
     getTextFromSelector: async (selector, timeoutDeclaration = standardTimeout) => {
+      const numberOfElements = (await page.$$(selector)).length
+      if (numberOfElements !== 1) {
+        throw new Error(`Expected one element with selector [${selector}] but found [${numberOfElements}]`)
+      }
       const text = (await page.textContent(selector, { timeout: timeoutDeclaration.timeout }))?.trim()
       return replaceNonBreakingSpaces(text)
     },
@@ -324,6 +340,21 @@ async function getBrowser (config = {}) {
       await page.getByRole('textbox', { name: 'Editor content;Press Alt+F1' }).press('ControlOrMeta+a')
       await page.getByRole('textbox', { name: 'Editor content;Press Alt+F1' }).press('Delete')
       await page.getByRole('textbox', { name: 'Editor content;Press Alt+F1' }).fill(val)
+    },
+    loginInFakeWebsitePopupWindow: async (username) => {
+      const popupPage = await getFakeWebsitePopup(browserContextPromise, page)
+      await popupPage.fill('input[name=username]', username)
+      await popupPage.click('button[type=submit]')
+    },
+    enterOtpFakeWebsitePopupWindow: async (otp) => {
+      const popupPage = await getFakeWebsitePopup(browserContextPromise, page)
+      await popupPage.fill('input[name=otp]', otp)
+      await popupPage.click('button[type=submit]')
+    },
+    getNumberOfFakeWebsitePopupWindows: async () => {
+      const pages = (await browserContextPromise).pages()
+      const popupPages = pages.filter(page => page.url().includes('__fake-website__'))
+      return popupPages.length
     }
   }
 
