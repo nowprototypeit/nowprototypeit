@@ -16,7 +16,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
       - run: npm ci
       - run: npm run lint
 
@@ -38,11 +38,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Use Node v22
+      - name: Use Node v24
         uses: actions/setup-node@v4
         with:
           cache: 'npm'
-          node-version: 22
+          node-version: 24
 
       - run: npm ci
 
@@ -55,7 +55,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [18.x, 22.x]
+        node-version: [18.x, 24.x]
         os: [windows-latest, ubuntu-latest, macos-latest]
         type: [acceptance, integration]
 
@@ -65,6 +65,12 @@ jobs:
             type: acceptance
           - os: ubuntu-latest
             node-version: 20.x
+            type: integration
+          - os: ubuntu-latest
+            node-version: 22.x
+            type: acceptance
+          - os: ubuntu-latest
+            node-version: 22.x
             type: integration
         exclude:
           - os: macos-latest

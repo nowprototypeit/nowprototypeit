@@ -16,6 +16,9 @@ let anyPasses = false
 setDefaultTimeout(1)
 
 const experimentTagSettings = {
+  '@auto-refresh-off': {
+    autoReloadPages: false
+  },
   '@respect-file-extensions-experiment-on': {
     respectFileExtensions: true
   },

@@ -1,6 +1,7 @@
 @plugin-routers
 Feature: Routers from plugins
 
+  @auto-refresh-off
   @no-variant
   Scenario: MPJ Info pages - read more
     Given I have the demo plugin "marsha-p-johnson" installed
@@ -10,6 +11,7 @@ Feature: Routers from plugins
     And I submit the form
     Then the main heading should be updated to "Step two"
 
+  @auto-refresh-off
   @no-variant
   Scenario: MPJ Info pages - End early
     Given I have the demo plugin "marsha-p-johnson" installed

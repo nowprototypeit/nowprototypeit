@@ -30,7 +30,7 @@ if (!command) {
   process.exit(1)
 }
 
-const benchmark = Number(process.env.NPI_PERF_BENCHMARK_MS)
+const benchmark = Number(process.env.NPI_PERF__BENCHMARK_MS)
 
 const reportsToHandle = []
 
@@ -145,6 +145,10 @@ function display ({ message, mean, median, nintythPercentile }) {
 }
 
 function errorIfLogLinesDidNotMatch (logLinesFromEachRun) {
+  if (process.env.NPI_PERF__SKIP_LOG_CHECK === 'true') {
+    console.log('Skipping log lines check as per NPI_PERF__SKIP_LOG_CHECK')
+    return
+  }
   const summary = logLinesFromEachRun.reduce((accum, logLines) => {
     if (!accum[logLines]) {
       accum[logLines] = 0

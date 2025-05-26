@@ -1,6 +1,5 @@
 const http = require('node:http')
 
-const url = require('node:url')
 const fs = require('node:fs')
 const fsp = fs.promises
 const path = require('path')
@@ -38,12 +37,12 @@ async function removeKit (kit) {
 
 function makeGetRequest (requestUrl) {
   return new Promise((resolve, reject) => {
-    const parsedUrl = url.parse(requestUrl)
+    const parsedUrl = new URL(requestUrl)
 
     const options = {
       hostname: parsedUrl.hostname,
       port: parsedUrl.port || (parsedUrl.protocol === 'https:' ? 443 : 80),
-      path: parsedUrl.path,
+      path: parsedUrl.pathname,
       method: 'GET'
     }
 
