@@ -269,3 +269,8 @@ Then('the page should contain a link with URL and text of {string}', standardTim
     throw new Error(`Expected link text to be the same as the URL, but found text [${found.text}] and url [${found.url}]`)
   }
 })
+
+When('I clear my session data', standardTimeout, async function () {
+  await this.browser.openUrl('/manage-prototype/clear-data')
+  await this.browser.clickButtonWithText('Clear session data')
+})
