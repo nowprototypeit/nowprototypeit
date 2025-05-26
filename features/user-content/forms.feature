@@ -35,3 +35,6 @@ Feature: Forms
     And I submit the form
     And I visit "/form-receiver"
     Then the main heading should be updated to "You entered: This is from a post"
+    When I clear my session data
+    And I visit "/form-receiver"
+    And the main heading should be updated to "You entered:"

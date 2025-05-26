@@ -245,7 +245,7 @@ app.get('/manage-prototype/clear-data', function (req, res) {
 })
 
 app.post('/manage-prototype/clear-data', function (req, res) {
-  req.session.data = {}
+  req.session.data = req.session.userInput = {}
   res.render('prototype-core/views/clear-data.njk', {
     ...req.app.locals,
     stage: 'completed',
