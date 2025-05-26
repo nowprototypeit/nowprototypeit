@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+
+<h1>State info</h1>
+<h2>Current state</h2>
+<p>text: {{ userInput.text | default("empty") }}</p>
+<p>checkboxes: {% for value in (userInput.checkboxes | default(["empty"])) %}{% if loop.index > 1 %}, {% endif %}{{ value }}{% endfor %}</p>
+<p>radio: {{ userInput.radio | default("empty") }}</p>
+
+<form method="post">
+  <label for="text">Text input</label>
+  <input type="text" id="text" name="text" value="{{ userInput.text }}">
+
+  <fieldset>
+    <legend>Checkboxes</legend>
+    <label>
+      <input type="checkbox" name="checkboxes" id="abc" value="abc" {% if 'abc' in (userInput.checkboxes | default([])) %}checked{% endif %}>
+      ABC
+    </label>
+    <label>
+      <input type="checkbox" name="checkboxes" id="def" value="def" {% if 'def' in (userInput.checkboxes | default([])) %}checked{% endif %}>
+      DEF
+    </label>
+    <label>
+      <input type="checkbox" name="checkboxes" id="ghi" value="ghi" {% if 'ghi' in (userInput.checkboxes | default([])) %}checked{% endif %}>
+      GHI
+    </label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Radio buttons</legend>
+    <label>
+      <input type="radio" name="radio" value="jkl" id="jkl" {% if userInput.radio == 'jkl' %}checked{% endif %}>
+      JKL
+    </label>
+    <label>
+      <input type="radio" name="radio" value="mno" id="mno" {% if userInput.radio == 'mno' %}checked{% endif %}>
+      MNO
+    </label>
+    <label>
+      <input type="radio" name="radio" value="pqr" id="pqr" {% if userInput.radio == 'pqr' %}checked{% endif %}>
+      PQR
+    </label>
+  </fieldset>
+
+  <button type="submit">Submit</button>
+</form>

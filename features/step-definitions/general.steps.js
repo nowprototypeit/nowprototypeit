@@ -35,10 +35,13 @@ Then('the main heading should read {string}', standardTimeout, async function (e
 })
 
 Then('the page should include a paragraph that reads {string}', standardTimeout, async function (expectedHeading) {
-  const allPText = (await this.browser.getTextFromSelectorAll('p')).map(standardSpaces)
-  if (!allPText.includes(expectedHeading)) {
-    throw new Error(`Expected to find paragraph with text [${expectedHeading}] but found [${allPText.join(', ')}]`)
-  }
+  await waitForConditionToBeMet(standardTimeout, async () => {
+    const allPText = (await this.browser.getTextFromSelectorAll('p')).map(standardSpaces)
+    if (!allPText.includes(expectedHeading)) {
+      throw new Error(`Expected to find paragraph with text [${expectedHeading}] but found [${allPText.join(', ')}]`)
+    }
+    return true
+  })
   function standardSpaces (text) {
     return text.replace(/\s+/g, ' ').trim()
   }
@@ -174,6 +177,10 @@ When('I submit the form', standardTimeout, async function () {
 
 When('I submit the form with ID {string}', standardTimeout, async function (formId) {
   await this.browser.submitFormBySelector(`#${formId}`, standardTimeout)
+})
+
+When('I select the {string} checkbox', standardTimeout, async function (checkboxElementId) {
+  await this.browser.selectCheckboxById(checkboxElementId)
 })
 
 When('I select the {string} radio button', standardTimeout, async function (radioElementId) {

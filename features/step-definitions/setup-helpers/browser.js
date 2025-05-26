@@ -3,6 +3,7 @@ const uuid = require('uuid')
 const { standardTimeout } = require('./timeouts')
 const { addShutdownFn } = require('../../../lib/utils/shutdownHandlers')
 const { verboseLog } = require('../../../lib/utils/verboseLogger')
+const { retryableErrorLog } = process.env.NPI_TEST__LOG_RETRIABLE_ERRORS === 'true' ? console.log : () => {}
 
 let singleSharedBrowser = null
 
@@ -85,24 +86,24 @@ async function getBrowser (config = {}) {
       return false
     }
     if (error.message.includes('Cannot find context with')) {
-      console.log('found retryable error (a):', error.message)
+      retryableErrorLog('found retryable error (a):', error.message)
       return true
     }
     if (error.message.includes('Element is not attached to the DOM')) {
-      console.log('found retryable error (b):', error.message)
+      retryableErrorLog('found retryable error (b):', error.message)
       return true
     }
     if (error.message.includes('Execution context was destroyed, most likely because of a navigation')) {
-      console.log('found retryable error (c):', error.message)
+      retryableErrorLog('found retryable error (c):', error.message)
       return true
     }
     if (error.message.includes('Expected one element with selector [.panel-error] but found [0]')) {
       return false
     }
-    console.log('error is not retryable:', error.message)
-    console.log('type', typeof error, error.type)
-    console.log('code', error.code)
-    console.log('full error', error)
+    retryableErrorLog('error is not retryable:', error.message)
+    retryableErrorLog('type', typeof error, error.type)
+    retryableErrorLog('code', error.code)
+    retryableErrorLog('full error', error)
     return false
   }
 
@@ -350,7 +351,21 @@ async function getBrowser (config = {}) {
         await self.selectRadioButtonBySelector(`#${id}`, timeoutDeclaration)
       })
     },
+    selectCheckboxById: async (id, timeoutDeclaration = standardTimeout) => {
+      return await autoRetry(async () => {
+        await self.selectCheckboxBySelector(`#${id}`, timeoutDeclaration)
+      })
+    },
     selectRadioButtonBySelector: async (selector, timeoutDeclaration = standardTimeout) => {
+      return await autoRetry(async () => {
+        const element = await page.$(selector, { timeout: timeoutDeclaration.timeout })
+        if (!element) {
+          throw new Error(`Element with selector [${selector}] not found`)
+        }
+        await element.check()
+      })
+    },
+    selectCheckboxBySelector: async (selector, timeoutDeclaration = standardTimeout) => {
       return await autoRetry(async () => {
         const element = await page.$(selector, { timeout: timeoutDeclaration.timeout })
         if (!element) {
