@@ -3,7 +3,7 @@ const uuid = require('uuid')
 const { standardTimeout } = require('./timeouts')
 const { addShutdownFn } = require('../../../lib/utils/shutdownHandlers')
 const { verboseLog } = require('../../../lib/utils/verboseLogger')
-const { retryableErrorLog } = process.env.NPI_TEST__LOG_RETRIABLE_ERRORS === 'true' ? console.log : () => {}
+const retryableErrorLog = process.env.NPI_TEST__LOG_RETRIABLE_ERRORS === 'true' ? console.log : () => {}
 
 let singleSharedBrowser = null
 
