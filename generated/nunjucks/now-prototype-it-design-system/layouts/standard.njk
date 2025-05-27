@@ -1,0 +1,86 @@
+{% from "now-prototype-it-design-system/components/label.njk" import nowPrototypeItLabel %}
+{% from "now-prototype-it-design-system/components/radio-buttons.njk" import nowPrototypeItRadioButtons %}
+{% from "now-prototype-it-design-system/components/submit-button.njk" import nowPrototypeItSubmitButton %}
+{% from "now-prototype-it-design-system/components/text-input.njk" import nowPrototypeItTextInput %}
+{% from "now-prototype-it-design-system/components/plugin-card.njk" import nowPrototypeItPluginCard %}
+{% from "now-prototype-it-design-system/components/header.njk" import nowPrototypeItHeader %}
+{% from "now-prototype-it-design-system/components/nav.njk" import nowPrototypeItNav %}
+
+<!DOCTYPE html>
+<html class="nowprototypeit-page no-js {{ htmlClasses }}">
+<head>
+  {% block head %}
+    {% block meta %}{% endblock %}
+    {% block stylesheets %}
+      {% if nowPrototypeItStylesheetInclude %}
+        {% include nowPrototypeItStylesheetInclude %}
+      {% else %}
+        <link rel="stylesheet" href="{{ nowPrototypeItAssetsPath }}/style.css">
+      {% endif %}
+    {% endblock %}
+  {% endblock %}
+  <title>
+    {% block pageTitle %}
+      {% if pageName %}{{ pageName }} - {% endif %} Now Prototype It
+    {% endblock %}
+  </title>
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ nowPrototypeItDesignSystemAssetsPath }}/icons/apple-touch-icon.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ nowPrototypeItDesignSystemAssetsPath }}/icons/favicon-32x32.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ nowPrototypeItDesignSystemAssetsPath }}/icons/favicon-16x16.png"/>
+  <link rel="manifest" href="{{ nowPrototypeItDesignSystemAssetsPath }}/icons/site.webmanifest"/>
+  <link rel="mask-icon" href="{{ nowPrototypeItDesignSystemAssetsPath }}/icons/safari-pinned-tab.svg" color="#5bbad5"/>
+  <link rel="shortcut icon" href="{{ nowPrototypeItDesignSystemAssetsPath }}/icons/favicon.ico"/>
+</head>
+<body class="{{ bodyClasses }}">
+{% block header %}
+  {{ nowPrototypeItHeader({
+    logoLink: nowPrototypeItLogoLink,
+    nowPrototypeItDesignSystemAssetsPath: nowPrototypeItDesignSystemAssetsPath,
+    mainNavItems: headerMainNavItems,
+    subText: headerSubText
+  }) }}
+{% endblock %}
+{% block headerNav %}
+  {% if headerSubNavItems | length > 0 %}
+    {{ nowPrototypeItNav({
+      items: headerSubNavItems,
+      listClasses: "nowprototypeit-manage-prototype-navigation__list",
+      itemClasses: "nowprototypeit-manage-prototype-navigation__list-item",
+      currentItemClasses: "nowprototypeit-manage-prototype-navigation__list-item--current",
+      pinToTop: true
+    }) }}
+  {% endif %}
+{% endblock %}
+<main class="{{ mainClasses }}">
+  {% block beforeContent %}{% endblock %}
+  {% block content %}{% endblock %}
+</main>
+{% block footer %}
+  <footer class="nowprototypeit-footer">
+    {% block footerContent %}
+    {% endblock %}
+    {% if isWebsite %}
+      {{ nowPrototypeItNav({
+        items: [
+          { url: "https://nowprototype.it/privacy", name: "Privacy", newTab: true },
+          { url: "https://nowprototype.it/terms", name: "Terms", newTab: true }
+        ],
+        navClasses: "nowprototypeit-legal-links",
+        listClasses: "nowprototypeit-manage-prototype-navigation__list nowprototypeit-legal-links-list",
+        itemClasses: "nowprototypeit-manage-prototype-navigation__list-item nowprototypeit-legal-links-list-item",
+        pinToTop: true
+      }) }}
+    {% endif %}
+    <p class="nowprototypeit-footer-copyright {% if isWebsite %}nowprototypeit-website-footer-copyright{% endif %}"><small>&copy;2024 Now Prototype It</small></p>
+  </footer>
+{% endblock %}
+{% block bodyEnd %}
+  {% block scripts %}
+    {% if nowPrototypeItScriptInclude %}
+      {% include nowPrototypeItScriptInclude %}
+    {% endif %}
+    {% block pageScripts %}{% endblock %}
+  {% endblock %}
+{% endblock %}
+</body>
+</html>
