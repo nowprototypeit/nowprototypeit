@@ -7,6 +7,7 @@
 - Form inputs now keep their values when the page is auto-refreshed.  We were already maintaining your scroll position, now if you're halfway through completing a form and realise a change you want to make, you can make that change and carry on as you were.
 - Updating Node.js supported versions, we are now in line with the versions Node.js themselves support.  v20, v22, v24.  We do support older versions with limited functionality. We're still testing Node 18 but we will drop full support for that if supporting it becomes a burden. We recommend using Node 24 for your prototypes.
 - Introduced a `userInput` variable which can be used to access user input from forms.  This is a variable that was previously known as `data` in the GOV.UK Prototype Kit, we plan to phase that out over a long period of time.  The addition of `userInput` allows us to add this to our documentation so that new users get used to that while existing users can continue to use `data` for the time being.
+- Plugin-specific settings are now available via `require('nowprototypeit').config.getPluginSpecificConfig('the-plugin-name')`, this is inspired by the need for a govuk-rebrand setting and can be used any time a plugin-specific setting is needed in the Node layer e.g. routers and Nunjucks Filters/Functions.
 
 ### Fixes
 
