@@ -12,6 +12,11 @@ When('I turn off the {string} setting', mediumActionTimeout, async function (fie
   await browser.selectRadioButtonBySelector(`input[type=radio][name=${fieldName}][value=false]`)
 })
 
+When('I turn on the {string} setting', mediumActionTimeout, async function (fieldName) {
+  const browser = this.browser
+  await browser.selectRadioButtonBySelector(`input[type=radio][name=${fieldName}][value=true]`)
+})
+
 When('I press {string}', standardTimeout, async function (buttonText) {
   await this.browser.clickButtonWithText(buttonText)
 })
