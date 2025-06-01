@@ -32,8 +32,21 @@
     "importNunjucksMacrosInto": [
       "/nunjucks/marsha-p-johnson/layouts/example-layout.njk"
     ],
+    "nunjucksFunctions": [
+      "/filters.js"
+    ],
     "expressRouters": [
       "/mpj-routes.js"
-    ]
+    ],
+    "settings": {
+      "value": false,
+      "isDefault": true,
+      "userInterface": {
+        "key": "upperCaseTitles",
+        "name": "Upper case titles",
+        "hintText": "This controls a filter which is used to turn titles uppercase (in specific situations).",
+        "type": "bool"
+      }
+    }
   }
 }

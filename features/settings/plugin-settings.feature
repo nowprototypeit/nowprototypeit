@@ -21,3 +21,15 @@ Feature: Plugin settings
     Then I should see the settings saved message
     When I visit "/style-example"
     Then the first paragraph margin top should become "10px"
+
+  @mpj-variant
+  Scenario: Filters looking up settings
+    Given I create a file "app/views/filter-example.njk" based on the fixture file "nunjucks/filter-fron-settings-example.njk"
+    And I visit "/filter-example"
+    And the main heading should read "This heading goes through a filter"
+    When I am on the plugin settings page for the "Marsha P Johnson" plugin
+    And I turn on the "upperCaseTitles" setting
+    And I press "Save changes"
+    And I should see the settings saved message
+    And I visit "/filter-example"
+    Then the main heading should be updated to "THIS HEADING GOES THROUGH A FILTER"
