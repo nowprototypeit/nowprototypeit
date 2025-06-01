@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.13.0-rc.1
+
 ### New Features
 
 - Form inputs now keep their values when the page is auto-refreshed.  We were already maintaining your scroll position, now if you're halfway through completing a form and realise a change you want to make, you can make that change and carry on as you were.
