@@ -8,9 +8,21 @@ on:
   pull_request:
 
 jobs:
+  check-version:
+    name: Check Version
+    runs-on: linux
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm run check:version
+
   lint:
     name: Lint
     runs-on: linux
+    needs: check-version
     steps:
       - uses: actions/checkout@v4
       - name: Install Node.js
@@ -103,6 +115,7 @@ jobs:
   performance:
     name: Performance
     runs-on: linux
+    needs: check-version
     steps:
       - uses: actions/checkout@v3
 
