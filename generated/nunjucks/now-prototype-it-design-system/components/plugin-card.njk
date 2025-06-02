@@ -1,0 +1,51 @@
+{% macro nowPrototypeItPluginCard(config) %}
+  <li class="nowprototypeit-manage-prototype-plugin-list__item"
+      data-plugin-package-name="{{ config.plugin.packageName }}">
+    {% if config.plugin.error %}
+      <div class="plugin-details-link" href="{{ config.plugin.pluginDetailsLink }}">
+        <h4>An error occurred while loading this plugin</h4>
+        {% if config.plugin.errorDetails %}
+          <p>{{ config.plugin.errorDetails }}</p>
+        {% endif %}
+        {% if config.plugin.additionalDetails %}
+          <p class="plugin-details__additional-error-details">{{ config.plugin.additionalDetails }}</p>
+        {% endif %}
+      </div>
+    {% else %}
+    <a class="plugin-details-link" href="{{ config.plugin.pluginDetailsLink }}">
+      <div class="nowprototypeit-manage-prototype-plugin-list-item-heading">
+        <h4 class="nowprototypeit-manage-prototype-plugin-list-plugin-name">
+          {{ config.plugin.name }}
+        </h4>
+        {% if config.plugin.scope %}
+          <div class="nowprototypeit-manage-prototype-plugin-list-plugin-scope">
+            From {{ config.plugin.scope }}
+          </div>
+        {% endif %}
+      </div>
+      <div class="nowprototypeit-manage-prototype-plugin-list-item-description">
+        {% if config.plugin.description %}
+          <div class="">
+            {{ config.plugin.description }}
+          </div>
+        {% endif %}
+      </div>
+      {% if config.plugin.isInstalled %}
+        <div class="nowprototypeit-manage-prototype-plugin-list-item-installed-details">
+          <p>
+            Version {{ config.plugin.installedVersion }} is
+            installed{% if not config.plugin.updateAvailable %}, you are on the latest version{% endif -%}.
+          </p>
+          {% if config.plugin.updateAvailable %}
+            <div class="nowprototypeit-info-box update-available">
+              <p>
+                Update available
+              </p>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    </a>
+    {% endif %}
+  </li>
+{% endmacro %}
