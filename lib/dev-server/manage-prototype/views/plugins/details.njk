@@ -17,33 +17,6 @@
     </p>
   {% endif %}
 
-  <form action="{{ currentUrl }}" method="post">
-    {% if installLink %}
-      {{ nowPrototypeItSubmitButton({
-        nameAndId: 'action-install',
-        text: installLinkText | default('Install'),
-        classes: '',
-        href: installLink
-      }) }}
-    {% endif %}
-    {% if updateLink %}
-      {{ nowPrototypeItSubmitButton({
-        nameAndId: 'action-update',
-        text: 'Update',
-        classes: 'nowprototypeit-plugin-update-button',
-        href: updateLink
-      }) }}
-    {% endif %}
-    {% if uninstallLink %}
-      {{ nowPrototypeItSubmitButton({
-        nameAndId: 'action-uninstall',
-        text: 'Uninstall',
-        classes: 'nowprototypeit-plugin-uninstall-button',
-        href: uninstallLink
-      }) }}
-    {% endif %}
-  </form>
-
   {% if plugin.releaseDateTime or preparedPluginLinks.releaseNotes or preparedPluginLinks.versionHistory %}
     <div>
       {% if plugin.releaseDateTime %}
