@@ -97,6 +97,10 @@ async function getBrowser (config = {}) {
       retryableErrorLog('found retryable error (c):', error.message)
       return true
     }
+    if (error.message.includes('net::ERR_ABORTED')) {
+      retryableErrorLog('found retryable error (d):', error.message)
+      return true
+    }
     if (error.message.includes('Expected one element with selector [.panel-error] but found [0]')) {
       return false
     }
@@ -472,6 +476,15 @@ async function getBrowser (config = {}) {
         const pages = (await browserContextPromise).pages()
         const popupPages = pages.filter(page => page.url().includes('__fake-website__'))
         return popupPages.length
+      })
+    },
+    getAllButtonTexts: async (timeoutDeclaration = standardTimeout) => {
+      return await autoRetry(async () => {
+        const $$buttons = await page.$$('button,.nowprototypeit-form-submit-button-link', { timeout: timeoutDeclaration.timeout })
+        return await Promise.all($$buttons.map(async (button) => {
+          const text = (await button.textContent())?.trim()
+          return replaceNonBreakingSpaces(text)
+        }))
       })
     }
   }
