@@ -176,6 +176,18 @@ Then('I should be using version {string} of the kit from NPM', standardTimeout, 
   ;(await expect(parsedPackageJson.dependencies.nowprototypeit)).to.eq(version)
 })
 
+Then('I should see the {string} button', standardTimeout, async function (buttonText) {
+  const buttonTextList = await this.browser.getAllButtonTexts()
+  if (!buttonTextList.includes(buttonText)) {
+    throw new Error(`Expected to find button with text [${buttonText}] but found [${buttonTextList.join(', ')}]`)
+  }
+})
+
+Then('I should not see the {string} button', standardTimeout, async function (version) {
+  const buttonTextList = await this.browser.getAllButtonTexts()
+  ;(await expect(buttonTextList)).not.to.include(version)
+})
+
 function getDependencyBeingTested () {
   return process.env.TEST_KIT_DEPENDENCY || path.join(__dirname, '..', '..')
 }

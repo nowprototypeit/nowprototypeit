@@ -8,5 +8,32 @@
     {% if plugin.version %}
       <p class="plugin-version">Version {{ plugin.version }}</p>
     {% endif %}
+    <form action="{{ currentUrl }}" method="post" class="side-by-side-form-submits">
+      {% if installLink %}
+        {{ nowPrototypeItSubmitButton({
+          nameAndId: 'action-install',
+          text: installLinkText | default('Install'),
+          classes: '',
+          href: installLink
+        }) }}
+      {% endif %}
+      {% if updateLink %}
+        {{ nowPrototypeItSubmitButton({
+          nameAndId: 'action-update',
+          text: 'Install the latest version',
+          classes: 'nowprototypeit-plugin-update-button',
+          href: updateLink
+        }) }}
+      {% endif %}
+      {% if uninstallLink %}
+        {{ nowPrototypeItSubmitButton({
+          nameAndId: 'action-uninstall',
+          text: 'Uninstall',
+          classes: 'nowprototypeit-plugin-uninstall-button',
+          href: uninstallLink
+        }) }}
+      {% endif %}
+    </form>
+
   </div>
 </div>
