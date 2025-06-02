@@ -473,6 +473,15 @@ async function getBrowser (config = {}) {
         const popupPages = pages.filter(page => page.url().includes('__fake-website__'))
         return popupPages.length
       })
+    },
+    getAllButtonTexts: async (timeoutDeclaration = standardTimeout) => {
+      return await autoRetry(async () => {
+        const $$buttons = await page.$$('button,.nowprototypeit-form-submit-button-link', { timeout: timeoutDeclaration.timeout })
+        return await Promise.all($$buttons.map(async (button) => {
+          const text = (await button.textContent())?.trim()
+          return replaceNonBreakingSpaces(text)
+        }))
+      })
     }
   }
 
