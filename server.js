@@ -72,6 +72,7 @@ plugins.getAppLocalModifiers().forEach(item => {
 // Support session data storage
 const sessionMiddleware = sessionUtils.getSessionMiddleware();
 app.use('/main/appeals', sessionMiddleware)
+app.use('/main/appeals/clear-filters', sessionMiddleware)
 // use cookie middleware for reading authentication cookie
 app.use(cookieParser())
 
