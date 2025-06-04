@@ -50,11 +50,10 @@ const variantConfigs = {
     neverReuseThisKit: true,
     variantPluginName: '@nowprototypeit/design-system'
   },
-  '@kit-update-from-0.9.4': {
+  '@kit-update-from-0.12.0': {
     neverReuseThisKit: true,
     variantPluginName: '@nowprototypeit/design-system',
-    kitDependency: 'nowprototypeit@0.9.4',
-    kitCreateVersionSetting: '0.9.4'
+    kitCreateVersionSetting: '0.12.0'
   }
 }
 
@@ -87,7 +86,7 @@ Before(kitStartTimeout, async function (scenario) {
   }
   const variantTag = variantTags[0]
   if (!variantTag) {
-    throw new Error('No variant tag found')
+    throw new Error('No variant tag found ' + JSON.stringify(tagNames))
   }
   const variantConfig = getVariantConfig(variantTag)
 

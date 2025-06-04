@@ -46,6 +46,7 @@ const isDryRun = argv.options['dry-run']
   await exec('git clone git@github.com:nowprototypeit/nowprototypeit.git', { cwd: tmpDir })
   await execInKitDir(`git checkout ${branchName}`)
   await checkForUnpublishedDependencies(kitDir)
+  await checkForCorrectVersion(kitDir)
   await execInKitDir(`git checkout -b release-prep-${Date.now()}`)
   await execInKitDir('npm install')
   await execInKitDir('npm run lint')
@@ -254,6 +255,10 @@ async function checkForUnpublishedDependencies (kitDir) {
     process.exit(11)
   }
   console.log('No unpublished dependencies detected, continuing.')
+}
+
+async function checkForCorrectVersion (kitDir) {
+  await execAndPrintStdout('npm run check:version', { cwd: kitDir })
 }
 
 async function getNewVersionName (releaseType, kitDir) {

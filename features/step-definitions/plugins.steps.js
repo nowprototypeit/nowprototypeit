@@ -124,24 +124,20 @@ When('I install the {string} version of the kit from NPM', pluginActionTimeout, 
 })
 When('I install the version of the kit being tested', pluginActionTimeout, async function () {
   const dependencyBeingTested = getDependencyBeingTested()
-  console.log('dependency dir (when)', dependencyBeingTested)
   await visitPluginPageAndRunAction(this.browser, `fs:${dependencyBeingTested}`, 'action-install', true)
 })
 
 Then('I should be using version of the kit being tested', pluginActionTimeout, async function () {
   const dependencyBeingTested = getDependencyBeingTested()
-  console.log('dependency dir (then)', dependencyBeingTested)
   const packageJson = await fsp.readFile(path.join(this.kit.dir, 'package.json'), 'utf8')
   const parsedPackageJson = JSON.parse(packageJson)
 
-  kitDependencyMatches(dependencyBeingTested, parsedPackageJson.dependencies.nowprototypeit)
+  kitDependencyMatches(path.relative(this.kit.dir, dependencyBeingTested), parsedPackageJson.dependencies.nowprototypeit)
 
   await this.browser.openUrl('/manage-prototype/version')
-  const kitVersion = await (await this.browser.queryId('kit-version')).getText()
-  const kitDependency = await (await this.browser.queryId('npi-dependency')).getText()
+  const kitVersion = await this.browser.getTextFromSelector('#kit-version')
 
   ;(await expect(kitVersion)).to.eq(currentKitVersion)
-  kitDependencyMatches(dependencyBeingTested, kitDependency)
 })
 
 When('I uninstall the {string} plugin using the console', pluginActionPageTimeout, async function (pluginName) {
@@ -170,10 +166,30 @@ Given('I view the plugin details for the {string} plugin', pluginActionPageTimeo
   await loadPluginDetailsForPluginRef(this.browser, pluginRef)
 })
 
+Given('I view the plugin details for the {string} fixture plugin', pluginActionPageTimeout, async function (fixturePluginName) {
+  const fixturePluginPath = path.join(__dirname, '..', 'fixtures', 'plugins', fixturePluginName)
+  await loadPluginDetailsForPluginRef(this.browser, `fs:${fixturePluginPath}`)
+})
+
 Then('I should be using version {string} of the kit from NPM', standardTimeout, async function (version) {
   const packageJson = await fsp.readFile(path.join(this.kit.dir, 'package.json'), 'utf8')
   const parsedPackageJson = JSON.parse(packageJson)
-  ;(await expect(parsedPackageJson.dependencies.nowprototypeit)).to.eq(version)
+  await (await expect(parsedPackageJson.dependencies.nowprototypeit)).to.eq(version)
+})
+
+Then('I should see the {string} button', standardTimeout, async function (buttonText) {
+  await waitForConditionToBeMet(standardTimeout, async () => {
+    const buttonTextList = await this.browser.getAllButtonTexts()
+    if (!buttonTextList.includes(buttonText)) {
+      throw new Error(`Expected to find button with text [${buttonText}] but found [${buttonTextList.join(', ')}]`)
+    }
+    return true
+  })
+})
+
+Then('I should not see the {string} button', standardTimeout, async function (version) {
+  const buttonTextList = await this.browser.getAllButtonTexts()
+  ;(await expect(buttonTextList)).not.to.include(version)
 })
 
 function getDependencyBeingTested () {
@@ -182,9 +198,10 @@ function getDependencyBeingTested () {
 
 function kitDependencyMatches (dependencyBeingTested, kitDependency) {
   const kitDepExpectedStart = 'file:'
-  const kitDepExpectedEnd = dependencyBeingTested
+  const kitDepExpectedEnd = dependencyBeingTested.replaceAll('\\', '/')
+  const preparedKitDependency = kitDependency.replaceAll('\\', '/')
 
-  if (!kitDependency.startsWith(kitDepExpectedStart) || !kitDependency.endsWith(kitDepExpectedEnd)) {
-    throw new Error(`Expected kit dependency to start with [${kitDepExpectedStart}] and end with [${kitDepExpectedEnd}], but got [${kitDependency}]`)
+  if (!preparedKitDependency.startsWith(kitDepExpectedStart) || !preparedKitDependency.endsWith(kitDepExpectedEnd)) {
+    throw new Error(`Expected kit dependency to start with [${kitDepExpectedStart}] and end with [${kitDepExpectedEnd}], but got [${preparedKitDependency}]`)
   }
 }

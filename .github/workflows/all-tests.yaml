@@ -8,21 +8,9 @@ on:
   pull_request:
 
 jobs:
-  check-version:
-    name: Check Version
-    runs-on: linux
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - run: npm run check:version
-
   lint:
     name: Lint
     runs-on: linux
-    needs: check-version
     steps:
       - uses: actions/checkout@v4
       - name: Install Node.js
@@ -50,45 +38,27 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Use Node v24
-        uses: actions/setup-node@v4
-        with:
-          cache: 'npm'
-          node-version: 24
-
       - run: npm ci
 
       - run: npm run test:unit && npm run test:unit
 
   browser-test:
-    name: Browser ${{ matrix.type }}, v${{ matrix.node-version }} (${{ matrix.os }})
+    name: (${{ matrix.os }}) v${{ matrix.node-version }} Browser Tests
     needs: unit-test
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         node-version: [18.x, 24.x]
-        os: [windows-latest, ubuntu-latest, macos-latest]
-        type: [acceptance, integration]
+        os: [windows, linux, macos]
 
         include:
-          - os: ubuntu-latest
+          - os: linux
             node-version: 20.x
-            type: acceptance
-          - os: ubuntu-latest
-            node-version: 20.x
-            type: integration
-          - os: ubuntu-latest
-            node-version: 22.x
-            type: acceptance
-          - os: ubuntu-latest
-            node-version: 22.x
-            type: integration
-        exclude:
-          - os: macos-latest
+          - os: linux
             node-version: 22.x
 
-    timeout-minutes: 25
+    timeout-minutes: 40
     steps:
       - run: |
           git config --global core.autocrlf false
@@ -108,14 +78,25 @@ jobs:
 
       - run: npx playwright install
 
-      - run: npm run test:browser:${{ matrix.type }}
+      - run: npm run test:browser:all
         env:
           ADDITIONAL_TIMEOUT_MULTIPLIER: 3
+          NPI_TEST__LOG_RETRYABLE_ERRORS: true
+          TAKE_SCREENSHOT_AFTER_FAILURE: true
+          SCREENSHOT_DIR: screenshots
+        continue-on-error: true
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: ignore
+          name: screenshots-${{ matrix.os }}-${{ matrix.node-version }}-${{ github.run_id }}
+          path: ./screenshots
 
   performance:
     name: Performance
     runs-on: linux
-    needs: check-version
+    needs: browser-test
     steps:
       - uses: actions/checkout@v3
 

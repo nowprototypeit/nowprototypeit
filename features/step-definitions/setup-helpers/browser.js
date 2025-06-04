@@ -3,7 +3,7 @@ const uuid = require('uuid')
 const { standardTimeout } = require('./timeouts')
 const { addShutdownFn } = require('../../../lib/utils/shutdownHandlers')
 const { verboseLog } = require('../../../lib/utils/verboseLogger')
-const retryableErrorLog = process.env.NPI_TEST__LOG_RETRIABLE_ERRORS === 'true' ? console.log : () => {}
+const retryableErrorLog = process.env.NPI_TEST__LOG_RETRYABLE_ERRORS === 'true' ? console.log : () => {}
 
 let singleSharedBrowser = null
 
@@ -97,6 +97,14 @@ async function getBrowser (config = {}) {
       retryableErrorLog('found retryable error (c):', error.message)
       return true
     }
+    if (error.message.includes('net::ERR_ABORTED')) {
+      retryableErrorLog('found retryable error (d):', error.message)
+      return true
+    }
+    if (error.message.includes('Unable to adopt element handle from a different document')) {
+      retryableErrorLog('found retryable error (e):', error.message)
+      return true
+    }
     if (error.message.includes('Expected one element with selector [.panel-error] but found [0]')) {
       return false
     }
@@ -136,16 +144,22 @@ async function getBrowser (config = {}) {
     },
     getFullUrl,
     openUrl: async (url, timeoutDeclaration = standardTimeout) => {
-      await page.goto(getFullUrl(url), { timeout: timeoutDeclaration.timeout })
+      await autoRetry(async () => {
+        await page.goto(getFullUrl(url), { timeout: timeoutDeclaration.timeout })
+      })
     },
     getCurrentUrl: () => {
       return page.url()
     },
     takeScreenshot: async (filePath) => {
-      await page.screenshot({ path: filePath, fullPage: true })
+      await autoRetry(async () => {
+        await page.screenshot({ path: filePath, fullPage: true })
+      })
     },
     refresh: async () => {
-      await page.reload()
+      await autoRetry(async () => {
+        await page.reload()
+      })
     },
     hasSelector: async (selector, timeout = standardTimeout) => {
       const element = await autoRetry(async () => {
@@ -472,6 +486,15 @@ async function getBrowser (config = {}) {
         const pages = (await browserContextPromise).pages()
         const popupPages = pages.filter(page => page.url().includes('__fake-website__'))
         return popupPages.length
+      })
+    },
+    getAllButtonTexts: async (timeoutDeclaration = standardTimeout) => {
+      return await autoRetry(async () => {
+        const $$buttons = await page.$$('button,.nowprototypeit-form-submit-button-link', { timeout: timeoutDeclaration.timeout })
+        return await Promise.all($$buttons.map(async (button) => {
+          const text = (await button.textContent())?.trim()
+          return replaceNonBreakingSpaces(text)
+        }))
       })
     }
   }

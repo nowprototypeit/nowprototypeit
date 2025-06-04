@@ -4,14 +4,12 @@
   <h1>
     Manage your prototype
   </h1>
-  <p class="nowprototypeit-manage-prototype-version">
-    Now Prototype It - GOV.UK Kit {{ releaseVersion }}
+  <p>
+    Now Prototype It is a low-code, high fidelity prototype kit powered by your design system.
   </p>
-  {% if kitUpdateAvailable %}
+  {% if docsUrl %}
     <p>
-      <a href="{{ latestKitUrl }}">
-        New version available: v{{ latestAvailableKit }}
-      </a>
+      <a target="_blank" href="{{ docsUrl }}">To find out more take a look at our documentation</a>.
     </p>
   {% endif %}
   </div>

@@ -34,6 +34,6 @@ Feature: Testing variants that only exist for these tests
     And my project should be set up to use git
     And the file "app/routes.js" should contain "https://docs.nowprototype.it/(kit_version)/routers/create-routes"
     When I visit '/hello-world-from-lma'
-    Then the main heading should read "Luisa May Alcott"
+    Then the main heading should be updated to "Luisa May Alcott"
     When I visit "/"
     Then I should see the GOV.UK Header

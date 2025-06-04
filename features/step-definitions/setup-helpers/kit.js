@@ -153,7 +153,7 @@ async function createKit ({
   targetDir,
   providedOptions
 }) {
-  const handledRootKeys = ['variantPluginName', 'appConfigAdditions', 'variantPluginDependency', 'neverReuseThisKit', 'unique', 'env']
+  const handledRootKeys = ['variantPluginName', 'appConfigAdditions', 'variantPluginDependency', 'neverReuseThisKit', 'unique', 'env', 'kitCreateVersionSetting']
   const unhandledRootKeys = Object.keys(providedOptions || {}).filter((key) => !handledRootKeys.includes(key))
 
   if (unhandledRootKeys.length > 0) {
@@ -171,7 +171,7 @@ async function createKit ({
   }
   const args = [
     'create',
-    '--version=local',
+    `--version=${providedOptions?.kitCreateVersionSetting || 'local'}`,
     targetDir
   ]
   if (providedOptions && providedOptions.variantPluginName) {
