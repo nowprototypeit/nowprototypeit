@@ -3,9 +3,9 @@
     "meta": {
       "description": "Quickly make interactive, accessible and realistic prototypes.",
       "urls": {
-        "documentation": "https://nowprototype.it/",
-        "versionHistory": "https://github.com/nowprototypeit/govuk/blob/main/CHANGELOG.md",
-        "releaseNotes": "https://github.com/nowprototypeit/govuk/releases/tag/{{version}}"
+        "documentation": "https://docs.nowprototype.it/",
+        "versionHistory": "https://github.com/nowprototypeit/nowprototypeit/blob/main/CHANGELOG.md",
+        "releaseNotes": "https://github.com/nowprototypeit/nowprototypeit/releases/tag/v{{version}}"
       }
     },
     "assets": [
