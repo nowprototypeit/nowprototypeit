@@ -14,7 +14,7 @@ const resultsByTag = {}
 const maxAllowableFailures = Number(process.env.MAX_FAILURES || '99999999')
 let totalFailures = 0
 let anyPasses = false
-let totalSkipped = false
+let totalSkipped = 0
 
 setDefaultTimeout(1)
 
