@@ -9,6 +9,7 @@ const os = require('os')
 const { runShutdownFunctions } = require('../../lib/utils/shutdownHandlers')
 const standardTimeout = require('./utils')
 const { kitStartTimeout } = require('./setup-helpers/timeouts')
+const { getTotalKitSetupTime, getSavableKitSetupTime } = require('./setup-helpers/kit')
 const resultsByTag = {}
 const maxAllowableFailures = Number(process.env.MAX_FAILURES || '99999999')
 let totalFailures = 0
@@ -216,6 +217,10 @@ AfterAll(kitStartTimeout, async function () {
     console.log('')
   }
 
+  console.log('')
+  console.log('')
+  console.log('Total kit startup time', `${Math.round(getTotalKitSetupTime() / 1000)} seconds`)
+  console.log('Time that could be saved by reusing kits', `${Math.round(getSavableKitSetupTime() / 1000)} seconds`)
   console.log('')
   console.log('')
   console.log('Starting cleanup')
