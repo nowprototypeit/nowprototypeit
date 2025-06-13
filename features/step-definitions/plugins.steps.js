@@ -1,6 +1,6 @@
 const { Given, When, Then } = require('@cucumber/cucumber')
 const { expect, waitForConditionToBeMet } = require('./utils')
-const { exec, execv2 } = require('../../lib/exec')
+const { exec } = require('../../lib/exec')
 const fsp = require('fs').promises
 const path = require('path')
 const os = require('os')
@@ -176,15 +176,12 @@ Given('I view the plugin details for the tar.gz version of the {string} fixture 
   const fixturePluginPath = path.join(__dirname, '..', 'fixtures', 'plugins', fixturePluginName)
   const dir = path.join(os.tmpdir(), 'npi', 'test-fixture-plugin-tar', '' + Date.now())
   await fsp.mkdir(dir, { recursive: true })
-  const execResult = execv2('npm pack --pack-destination=' + dir, { passThroughEnv: true, cwd: fixturePluginPath, hideStdio: true })
   const outputLines = []
-  execResult.stdio.stdout.on('data', (data) => {
+  const stdoutAndStderrHandler = (data) => {
     outputLines.push(data.toString())
-  })
-  execResult.stdio.stderr.on('data', (data) => {
-    outputLines.push(data.toString())
-  })
-  await execResult.finishedPromise
+  }
+
+  await exec(`npm pack --pack-destination=${dir}`, { cwd: fixturePluginPath }, stdoutAndStderrHandler, stdoutAndStderrHandler)
   const fileName = outputLines.join('\n').split('\n').filter(x => !!x).at(-1)
   const tgzPath = path.join(dir, fileName)
   await loadPluginDetailsForPluginRef(this.browser, `fs:${tgzPath}`)

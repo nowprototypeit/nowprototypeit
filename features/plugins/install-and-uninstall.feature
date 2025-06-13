@@ -56,7 +56,8 @@ Feature: Installing and uninstalling plugins
     And I should not see the "Install the latest version" button
 
   @govuk-variant
-  Scenario: Provide specific install button for a plugin where a different version is installed (even if the version numbers match)
+  @smoke
+  Scenario: Provide specific install button for a plugin where a different version is installed (even if the version numbers match, .tar.gz version)
     When I view the plugin details for the tar.gz version of the "fake-gpk-common-templates" fixture plugin
     Then I should see the "Install this version" button
     And I should see the "Uninstall" button
