@@ -112,7 +112,9 @@ async function runBrowserTests (dependency) {
     env: {
       ...process.env,
       TEST_KIT_DEPENDENCY: dependency,
-      SHOW_BROWSER: 'true'
+      SHOW_BROWSER: 'true',
+      TAKE_SCREENSHOT_AFTER_FAILURE: true,
+      SCREENSHOT_DIR: path.join(__dirname, '..', '..', 'release-test-screenshots')
     },
     cwd: path.join(__dirname, '..')
   })

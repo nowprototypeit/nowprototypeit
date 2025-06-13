@@ -1,10 +1,6 @@
 name: Tests
 
 on:
-  push:
-    branches:
-      - main
-      - support/*
   pull_request:
 
 jobs:
@@ -13,10 +9,6 @@ jobs:
     runs-on: linux
     steps:
       - uses: actions/checkout@v4
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
       - run: npm ci
       - run: npm run lint
 
@@ -27,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        os: [windows, linux, macos]
     timeout-minutes: 5
     steps:
       - run: |
@@ -42,21 +34,15 @@ jobs:
 
       - run: npm run test:unit && npm run test:unit
 
-  browser-test:
-    name: (${{ matrix.os }}) v${{ matrix.node-version }} Browser Tests
+  smoke-test:
+    name: (${{ matrix.os }}) v${{ matrix.node-version }} Smoke Tests
     needs: unit-test
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        node-version: [18.x, 24.x]
-        os: [windows, linux, macos]
-
-        include:
-          - os: linux
-            node-version: 20.x
-          - os: linux
-            node-version: 22.x
+        node-version: [18.x, 20.x, 22.x]
+        os: [linux, windows, mac]
 
     timeout-minutes: 40
     steps:
@@ -76,27 +62,117 @@ jobs:
 
       - run: npm ci
 
-      - run: npx playwright install
-
-      - run: npm run test:browser:all
+      - run: npm run test:browser:smoke -- --retry=2
         env:
-          ADDITIONAL_TIMEOUT_MULTIPLIER: 3
+          ADDITIONAL_TIMEOUT_MULTIPLIER: 2
           NPI_TEST__LOG_RETRYABLE_ERRORS: true
           TAKE_SCREENSHOT_AFTER_FAILURE: true
           SCREENSHOT_DIR: screenshots
-        continue-on-error: true
+          MAX_FAILURES: 1
+          DELAY_BETWEEN_TEST_STEPS: 333
 
       - name: Upload screenshots
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           if-no-files-found: ignore
-          name: screenshots-${{ matrix.os }}-${{ matrix.node-version }}-${{ github.run_id }}
+          name: smoke-${{ matrix.os }}-${{ matrix.node-version }}-${{ github.run_id }}
+          path: ./screenshots
+
+  acceptance-test:
+    name: (${{ matrix.os }}) v${{ matrix.node-version }} Acceptance Tests
+    needs: smoke-test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [24.x]
+        os: [linux, windows, mac]
+
+    timeout-minutes: 40
+    steps:
+      - run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node v${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          cache: 'npm'
+          node-version: ${{ matrix.node-version }}
+
+      - run: npm ci
+
+      - run: npm run test:browser:acceptance -- --retry=2
+        env:
+          ADDITIONAL_TIMEOUT_MULTIPLIER: 2
+          NPI_TEST__LOG_RETRYABLE_ERRORS: true
+          TAKE_SCREENSHOT_AFTER_FAILURE: true
+          SCREENSHOT_DIR: screenshots
+          MAX_FAILURES: 1
+          DELAY_BETWEEN_TEST_STEPS: 333
+
+      - name: Upload screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: ignore
+          name: acceptance-${{ matrix.os }}-${{ matrix.node-version }}-${{ github.run_id }}
+          path: ./screenshots
+
+  integration-test:
+    name: (${{ matrix.os }}) v${{ matrix.node-version }} Integration Tests
+    needs: acceptance-test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [24.x]
+        os: [linux, windows, mac]
+
+    timeout-minutes: 40
+    steps:
+      - run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node v${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          cache: 'npm'
+          node-version: ${{ matrix.node-version }}
+
+      - run: npm ci
+
+      - run: npm run test:browser:integration -- --retry=2
+        env:
+          ADDITIONAL_TIMEOUT_MULTIPLIER: 2
+          NPI_TEST__LOG_RETRYABLE_ERRORS: true
+          TAKE_SCREENSHOT_AFTER_FAILURE: true
+          SCREENSHOT_DIR: screenshots
+          MAX_FAILURES: 1
+          DELAY_BETWEEN_TEST_STEPS: 333
+
+      - name: Upload screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: ignore
+          name: integration-${{ matrix.os }}-${{ matrix.node-version }}-${{ github.run_id }}
           path: ./screenshots
 
   performance:
     name: Performance
     runs-on: linux
-    needs: browser-test
+    needs: integration-test
     steps:
       - uses: actions/checkout@v3
 

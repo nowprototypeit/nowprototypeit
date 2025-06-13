@@ -3,6 +3,7 @@ Feature: Routes
 
   @no-variant
   @auto-reload
+  @smoke
   Scenario: Custom get route - auto reload
     Given I visit "/example2"
     Then the main heading should be updated to "Page not found"

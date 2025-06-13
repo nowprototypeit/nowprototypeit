@@ -55,3 +55,15 @@ Then('the service name in the GOV.UK header should become {string}', standardTim
     reject(new Error(`Gave up waiting for service name to become [${string}], it was [${actual}]`))
   })
 })
+
+Then('the service name in the GOV.UK header should become {string} on the URL {string}', standardTimeout, async function (headerText, url) {
+  let actual = null
+  await waitForConditionToBeMet(standardTimeout, async () => {
+    await this.browser.openUrl(url)
+    actual = await this.browser.getTextFromSelector('.govuk-header__service-name', tinyTimeout)
+
+    return actual === headerText
+  }, (reject) => {
+    reject(new Error(`Gave up waiting for service name to become [${headerText}], it was [${actual}]`))
+  })
+})

@@ -12,9 +12,39 @@ listenForShutdown('kit setup for tests')
 const showKitStdio = process.env.SHOW_KIT_STDIO === 'true'
 const kitShouldBeDeleted = process.env.LEAVE_KIT_AFTER_TEST !== 'true'
 
+let totalKitSetupTime = 0
+let requiredKitSetupTime = 0
+const seenKitConfigs = []
+
+function getTotalKitSetupTime () {
+  return totalKitSetupTime
+}
+function getSavableKitSetupTime () {
+  return totalKitSetupTime - requiredKitSetupTime
+}
+
 async function setupKit (options) {
+  const setupKitStartTime = Date.now()
   const kitDir = path.join(os.tmpdir(), 'npi-browser-tests', `nowprototypeit-govuk-cucumberjs-${randomUUID()}`)
   const port = await findAvailablePortWithoutUser()
+
+  const cacheKey = JSON.stringify({
+    variantPluginName: options?.variantPluginName,
+    variantPluginDependency: options?.variantPluginDependency,
+    kitCreateVersionSetting: options?.kitCreateVersionSetting,
+    unique: options?.unique
+  })
+
+  const couldReusePreviousKitSetup = seenKitConfigs.includes(cacheKey)
+  if (!couldReusePreviousKitSetup && !options?.neverReuseThisKit) {
+    seenKitConfigs.push(cacheKey)
+  }
+
+  if (couldReusePreviousKitSetup) {
+    console.log('!!! Could reuse a previous kit setup !!!')
+  } else {
+    console.log('!!! New kit setup required !!!')
+  }
 
   await createKit({
     projectDir: packageDir,
@@ -135,6 +165,12 @@ async function setupKit (options) {
     kitThread.stdio.stdin.write('rs\n')
   })
 
+  const kitSetupTime = Date.now() - setupKitStartTime
+  totalKitSetupTime += kitSetupTime
+  if (!couldReusePreviousKitSetup) {
+    requiredKitSetupTime += kitSetupTime
+  }
+
   return {
     url,
     dir: kitDir,
@@ -195,7 +231,9 @@ async function createKit ({
 }
 
 module.exports = {
-  setupKit
+  setupKit,
+  getTotalKitSetupTime,
+  getSavableKitSetupTime
 }
 
 function validateStdout (fullStdout, targetDir) {

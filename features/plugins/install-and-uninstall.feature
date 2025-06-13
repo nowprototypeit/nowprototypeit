@@ -25,6 +25,7 @@ Feature: Installing and uninstalling plugins
     Then I should not see the plugin "Common Templates" in the list
 
   @no-variant
+  @smoke
   Scenario: Installed - show on installed plugins
     Given I install the "npm:jquery" plugin
     When I visit the installed plugins page

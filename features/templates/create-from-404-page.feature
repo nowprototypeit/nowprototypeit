@@ -2,6 +2,7 @@
 Feature: Templates
 
   @mpj-variant
+  @smoke
   Scenario: Create link on 404 page
     And I am viewing a 404 page at "/this/page/does-not/exist"
     When I click the link with text "create this page using a template"
