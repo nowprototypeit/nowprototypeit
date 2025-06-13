@@ -2,6 +2,7 @@
 Feature: Styles
 
   @no-variant
+  @smoke
   Scenario: Updating styles on page from plugin (when the plugin is well set up)
     Given I have the demo plugin "marsha-p-johnson" installed
     And I create a file "app/views/example.njk" based on the fixture file "nunjucks/mpj-example.njk"

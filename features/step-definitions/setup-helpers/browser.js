@@ -105,6 +105,10 @@ async function getBrowser (config = {}) {
       retryableErrorLog('found retryable error (e):', error.message)
       return true
     }
+    if (error.message.includes('net::ERR_HTTP_RESPONSE_CODE_FAILURE')) {
+      retryableErrorLog('found retryable error (f):', error.message)
+      return true
+    }
     if (error.message.includes('Expected one element with selector [.panel-error] but found [0]')) {
       return false
     }

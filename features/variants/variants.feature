@@ -29,6 +29,7 @@ Feature: Testing variants that only exist for these tests
     And the file "app/routes.js" should contain "https://docs.nowprototype.it/(kit_version)/routers/create-routes"
 
   @lma-variant
+  @smoke
   Scenario: Louisa May Alcott variant, built in view
     Then I should have no plugins installed
     And my project should be set up to use git

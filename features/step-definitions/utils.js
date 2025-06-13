@@ -76,7 +76,7 @@ function waitForConditionToBeMet (timeoutDeclaration, isCorrect, errorCallback) 
     const maxTimeout = timeoutDeclaration.timeout - 500
     const timeoutTimestamp = Date.now() + maxTimeout
 
-    const delayBetweenRetries = timeoutDeclaration.delayBetweenRetries ?? 150
+    const delayBetweenRetries = timeoutDeclaration.delayBetweenRetries ?? ((timeoutDeclaration.timeout / 30) || 300)
     let lastRunError = null
     const timeoutCallback = async () => {
       let result = false

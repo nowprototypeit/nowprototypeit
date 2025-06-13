@@ -10,8 +10,10 @@ const { runShutdownFunctions } = require('../../lib/utils/shutdownHandlers')
 const standardTimeout = require('./utils')
 const { kitStartTimeout } = require('./setup-helpers/timeouts')
 const resultsByTag = {}
-let anyFailures = false
+const maxAllowableFailures = Number(process.env.MAX_FAILURES || '99999999')
+let totalFailures = 0
 let anyPasses = false
+let totalSkipped = false
 
 setDefaultTimeout(1)
 
@@ -78,6 +80,9 @@ if (configuredToLogEachStep) {
 }
 
 Before(kitStartTimeout, async function (scenario) {
+  if (totalFailures >= maxAllowableFailures) {
+    return 'skipped'
+  }
   console.log('') // without this the 'first' dot in each run is actually the cleanup from the last run.
   const tagNames = scenario.pickle.tags.map(x => x.name)
   const variantTags = tagNames.filter(x => x.endsWith('-variant') || x.startsWith('@kit-update'))
@@ -103,7 +108,7 @@ Before(kitStartTimeout, async function (scenario) {
   await setupKitAndBrowserForTestScope(this, variantConfig)
 })
 
-const ms = parseInt(process.env.DELAY_BETWEEN_TESTS, 10)
+const ms = parseInt(process.env.DELAY_BETWEEN_TEST_STEPS, 10)
 AfterStep({ timeout: ms + 1000 }, async function (info) {
   if (configuredToLogEachStep) {
     if (info.result.status === 'PASSED') {
@@ -114,16 +119,23 @@ AfterStep({ timeout: ms + 1000 }, async function (info) {
     }
   }
 
-  if (process.env.DELAY_BETWEEN_TESTS) {
+  if (process.env.DELAY_BETWEEN_TEST_STEPS) {
     await sleep(ms)
   }
 })
 
 After(kitStartTimeout, async function (scenario) {
   const isFailure = scenario.result.status === 'FAILED'
+  const isPassed = scenario.result.status === 'PASSED'
+  const isSkipped = scenario.result.status === 'SKIPPED'
   const scenarioName = scenario.pickle.name
+  if (isSkipped) {
+    totalSkipped++
+  }
   if (isFailure) {
-    anyFailures = true
+    if (!scenario.willBeRetried) {
+      totalFailures++
+    }
     console.log('')
     console.log(' - - - ')
     console.log('Full kit stdout & stderr:')
@@ -132,6 +144,20 @@ After(kitStartTimeout, async function (scenario) {
     console.log('')
     console.log(' - - - ')
     console.log('')
+    console.error(scenario.pickle.name)
+    if (scenario.willBeRetried) {
+      console.error('Will be retried.')
+    }
+    console.log('')
+    console.log(' - - - ')
+    console.log('')
+    console.error(scenario.result.message)
+    console.log('')
+    console.log(' - - - ')
+    console.log('')
+    console.error(scenario.result.exception.type)
+    console.error(scenario.result.exception.message)
+    console.error(scenario.result.exception.stackTrace)
   } else {
     anyPasses = true
   }
@@ -142,8 +168,8 @@ After(kitStartTimeout, async function (scenario) {
   console.log('')
 
   scenario.pickle.tags.forEach(tag => {
-    resultsByTag[tag.name] = resultsByTag[tag.name] || { successes: 0, failures: 0 }
-    resultsByTag[tag.name][isFailure ? 'failures' : 'successes']++
+    resultsByTag[tag.name] = resultsByTag[tag.name] || { successes: 0, failures: 0, other: 0 }
+    resultsByTag[tag.name][isFailure ? 'failures' : isPassed ? 'successes' : 'other']++
   })
   if (isFailure) {
     if (process.env.TAKE_SCREENSHOT_AFTER_FAILURE === 'true') {
@@ -169,7 +195,7 @@ AfterAll(kitStartTimeout, async function () {
   if (configuredToLogEachStep) {
     console.log('starting after all')
   }
-  if (anyFailures) {
+  if (totalFailures > 0) {
     console.log('')
     console.log('----')
     console.log('')
@@ -195,7 +221,10 @@ AfterAll(kitStartTimeout, async function () {
   console.log('Starting cleanup')
   await runShutdownFunctions()
   console.log('Cleanup complete')
-  if (!anyPasses && !anyFailures) {
+  if (totalSkipped > 0) {
+    process.exitCode = 99
+  }
+  if (!anyPasses && totalFailures === 0) {
     console.log('')
     console.log('No tests run, failing.')
     console.log('')

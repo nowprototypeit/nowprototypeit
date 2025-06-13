@@ -7,8 +7,7 @@ Feature: Plugin settings
     And I press "Save changes"
     And I wait for the prototype to reload
     Then I should see the settings saved message
-    When I visit the homepage
-    Then the service name in the GOV.UK header should become "An example service"
+    Then the service name in the GOV.UK header should become "An example service" on the URL "/"
 
   @govuk-variant
   Scenario: GOV.UK Global styles
@@ -23,6 +22,7 @@ Feature: Plugin settings
     Then the first paragraph margin top should become "10px"
 
   @mpj-variant
+  @smoke
   Scenario: Filters looking up settings
     Given I create a file "app/views/filter-example.njk" based on the fixture file "nunjucks/filter-fron-settings-example.njk"
     And I visit "/filter-example"

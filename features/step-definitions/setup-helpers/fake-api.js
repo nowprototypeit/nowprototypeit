@@ -8,6 +8,7 @@ let singletonFakeApi = null
 
 async function setupFakeApi () {
   if (singletonFakeApi) {
+    await singletonFakeApi.reset()
     return singletonFakeApi
   }
   const port = await findAvailablePortWithoutUser()

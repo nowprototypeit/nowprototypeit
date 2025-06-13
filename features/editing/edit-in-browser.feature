@@ -2,6 +2,7 @@
 @no-variant
 @edit-in-browser-experiment-on
 @nunjucks
+@smoke
   Feature: Edit numjucks in-browser
     Scenario: Edit a nunjucks file
       Given I create a file "app/views/basic.njk" based on the fixture file "nunjucks/basic-example.njk"

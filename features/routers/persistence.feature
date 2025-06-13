@@ -20,6 +20,7 @@ Feature: Persistence in routers
     And the main heading should be updated to "No items in todo or done"
 
   @npi-variant
+  @smoke
   Scenario: Todo app with persistence
     And I create a file "app/views/todo/get.njk" based on the fixture file "nunjucks/todo-page.njk"
     Given I replace the file "app/routes.js" based on the fixture file "routes/todo-routes-with-persistence_js"

@@ -3,6 +3,7 @@ Feature: Error handling
 
   @no-variant
   @nunjucks
+  @smoke
   Scenario: Template error, broken nunjucks
     Given I create a file "app/views/broken-example.njk" based on the fixture file "nunjucks/broken/no-brace-on-block.njk"
     When I visit "/broken-example"

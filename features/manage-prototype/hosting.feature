@@ -2,6 +2,7 @@ Feature: Hosting
 
 @no-variant
 @hosting-experiment-on
+@smoke
 Scenario: Hosting message
   Given Hosting is enabled for this version of the kit with logged out message "This is *an example* **from the fake API**. The format was introduced in (link:https://github.com/nowprototypeit/nowprototypeit/pull/87)."
   When I visit "/manage-prototype/hosting"
