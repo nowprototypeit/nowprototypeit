@@ -47,7 +47,7 @@
   "dependencies": {
     "@nowprototypeit/design-system": "1.0.8",
     "body-parser": "^1.20.2",
-    "chokidar": "^3.6.0",
+    "chokidar": "^4.0.3",
     "cookie-parser": "^1.4.6",
     "cross-spawn": "^7.0.3",
     "csrf-csrf": "^3.0.8",
@@ -82,6 +82,11 @@
     "proper-lockfile": "^4.1.2",
     "selenium-webdriver": "^4.16.0",
     "standard": "^17.1.0"
+  },
+  "overrides": {
+    "nunjucks": {
+      "chokidar": "^4.0.3"
+    }
   },
   "standard": {
     "ignore": [
