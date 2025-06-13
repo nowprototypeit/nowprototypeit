@@ -158,11 +158,13 @@ function mockFileSystem (rootPath) {
     jest.spyOn(fs, 'lstatSync').mockImplementation(lstatImplementation)
     jest.spyOn(fs, 'readdirSync').mockImplementation(readdirImplementation)
     jest.spyOn(fs, 'existsSync').mockImplementation(existsImplementation)
+    jest.spyOn(fs, 'statSync').mockImplementation(lstatImplementation)
     jest.spyOn(fse, 'existsSync').mockImplementation(existsImplementation)
     jest.spyOn(fse, 'exists').mockImplementation(promiseWrap(existsImplementation))
     jest.spyOn(fs.promises, 'readFile').mockImplementation(promiseWrap(readFileImplementation))
     jest.spyOn(fs.promises, 'writeFile').mockImplementation(promiseWrap(writeFileImplementation))
     jest.spyOn(fs.promises, 'lstat').mockImplementation(promiseWrap(lstatImplementation))
+    jest.spyOn(fs.promises, 'stat').mockImplementation(promiseWrap(lstatImplementation))
     jest.spyOn(fs.promises, 'readdir').mockImplementation(promiseWrap(readdirImplementation))
     if (fs.promises.rm) {
       jest.spyOn(fs.promises, 'rm').mockImplementation(promiseWrap(rm))
@@ -178,10 +180,12 @@ function mockFileSystem (rootPath) {
     spiesToTearDown.push(fs.writeFileSync)
     spiesToTearDown.push(fs.existsSync)
     spiesToTearDown.push(fs.lstatSync)
+    spiesToTearDown.push(fs.statSync)
     spiesToTearDown.push(fse.exists)
     spiesToTearDown.push(fs.promises.readFile)
     spiesToTearDown.push(fs.promises.writeFile)
     spiesToTearDown.push(fs.promises.lstat)
+    spiesToTearDown.push(fs.promises.stat)
   }
   return {
     writeFile,

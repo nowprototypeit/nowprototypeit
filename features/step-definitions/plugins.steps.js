@@ -1,8 +1,9 @@
 const { Given, When, Then } = require('@cucumber/cucumber')
 const { expect, waitForConditionToBeMet } = require('./utils')
-const { exec } = require('../../lib/exec')
+const { exec, execv2 } = require('../../lib/exec')
 const fsp = require('fs').promises
 const path = require('path')
+const os = require('os')
 const {
   pluginActionPageTimeout, pluginActionTimeout, kitStartTimeout, mediumActionTimeout, standardTimeout,
   tinyTimeout
@@ -169,6 +170,24 @@ Given('I view the plugin details for the {string} plugin', pluginActionPageTimeo
 Given('I view the plugin details for the {string} fixture plugin', pluginActionPageTimeout, async function (fixturePluginName) {
   const fixturePluginPath = path.join(__dirname, '..', 'fixtures', 'plugins', fixturePluginName)
   await loadPluginDetailsForPluginRef(this.browser, `fs:${fixturePluginPath}`)
+})
+
+Given('I view the plugin details for the tar.gz version of the {string} fixture plugin', pluginActionPageTimeout, async function (fixturePluginName) {
+  const fixturePluginPath = path.join(__dirname, '..', 'fixtures', 'plugins', fixturePluginName)
+  const dir = path.join(os.tmpdir(), 'npi', 'test-fixture-plugin-tar', '' + Date.now())
+  await fsp.mkdir(dir, { recursive: true })
+  const execResult = execv2('npm pack --pack-destination=' + dir, { passThroughEnv: true, cwd: fixturePluginPath, hideStdio: true })
+  const outputLines = []
+  execResult.stdio.stdout.on('data', (data) => {
+    outputLines.push(data.toString())
+  })
+  execResult.stdio.stderr.on('data', (data) => {
+    outputLines.push(data.toString())
+  })
+  await execResult.finishedPromise
+  const fileName = outputLines.join('\n').split('\n').filter(x => !!x).at(-1)
+  const tgzPath = path.join(dir, fileName)
+  await loadPluginDetailsForPluginRef(this.browser, `fs:${tgzPath}`)
 })
 
 Then('I should be using version {string} of the kit from NPM', standardTimeout, async function (version) {
