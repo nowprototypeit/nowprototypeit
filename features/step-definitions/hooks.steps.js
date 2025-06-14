@@ -53,10 +53,10 @@ const variantConfigs = {
     neverReuseThisKit: true,
     variantPluginName: '@nowprototypeit/design-system'
   },
-  '@kit-update-from-0.12.0': {
+  '@kit-update-from-0.14.0-rc.7': {
     neverReuseThisKit: true,
     variantPluginName: '@nowprototypeit/design-system',
-    kitCreateVersionSetting: '0.12.0'
+    kitCreateVersionSetting: '0.14.0-rc.7' // the earliest version that supports looking up local .tgz files
   }
 }
 
