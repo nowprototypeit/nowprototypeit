@@ -1,0 +1,20 @@
+{% extends "now-prototype-it-design-system/layouts/manage-prototype.njk" %}
+
+{% block content %}
+    {% block introduction %}{% endblock %}
+    <div class="nowprototypeit-grid-row">
+        <div class="nowprototypeit-grid-column-one-third-first">
+            {% if pinSideBar %}
+            <div data-dom-widget="pin-to-page-top-on-scroll" data-distance-from-top="{{ pinnedDistanceFromTop | default(40) }}" class="nowprototypeit-no-top-margin-on-first-element">
+                {% endif %}
+                {% block sideBar %}{% endblock %}
+                {% if pinSideBar %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="nowprototypeit-grid-column-two-thirds">
+            {% block mainPanel %}{% endblock %}
+        </div>
+    </div>
+{% endblock %}
