@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.14.0
+
 ### New Features
 
  - Plugin-specific settings are now available via `require('nowprototypeit').config.getPluginSpecificConfig('the-plugin-name')`, this is inspired by the need for a govuk-rebrand setting and can be used any time a plugin-specific setting is needed in the Node layer e.g. routers and Nunjucks Filters/Functions.
