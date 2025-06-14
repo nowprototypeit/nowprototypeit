@@ -22,9 +22,6 @@ jobs:
         os: [windows, linux, macos]
     timeout-minutes: 5
     steps:
-      - run: |
-          git config --global core.autocrlf false
-          git config --global core.eol lf
 
       - uses: actions/checkout@v4
         with:
@@ -46,9 +43,6 @@ jobs:
 
     timeout-minutes: 40
     steps:
-      - run: |
-          git config --global core.autocrlf false
-          git config --global core.eol lf
 
       - uses: actions/checkout@v4
         with:
@@ -69,7 +63,6 @@ jobs:
           TAKE_SCREENSHOT_AFTER_FAILURE: true
           SCREENSHOT_DIR: screenshots
           MAX_FAILURES: 1
-          DELAY_BETWEEN_TEST_STEPS: 333
 
       - name: Upload screenshots
         if: failure()
@@ -91,9 +84,6 @@ jobs:
 
     timeout-minutes: 40
     steps:
-      - run: |
-          git config --global core.autocrlf false
-          git config --global core.eol lf
 
       - uses: actions/checkout@v4
         with:
@@ -114,7 +104,6 @@ jobs:
           TAKE_SCREENSHOT_AFTER_FAILURE: true
           SCREENSHOT_DIR: screenshots
           MAX_FAILURES: 1
-          DELAY_BETWEEN_TEST_STEPS: 333
 
       - name: Upload screenshots
         if: failure()
@@ -136,9 +125,6 @@ jobs:
 
     timeout-minutes: 40
     steps:
-      - run: |
-          git config --global core.autocrlf false
-          git config --global core.eol lf
 
       - uses: actions/checkout@v4
         with:
@@ -159,7 +145,6 @@ jobs:
           TAKE_SCREENSHOT_AFTER_FAILURE: true
           SCREENSHOT_DIR: screenshots
           MAX_FAILURES: 1
-          DELAY_BETWEEN_TEST_STEPS: 333
 
       - name: Upload screenshots
         if: failure()
