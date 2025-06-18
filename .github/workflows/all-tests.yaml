@@ -12,6 +12,23 @@ jobs:
       - run: npm ci
       - run: npm run lint
 
+  release-dry-run:
+    name: Release Dry Run
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - run: npm ci
+
+      - run: |
+          git config --global user.email support@nowprototype.it
+          git config --global user.name "Now Prototype It (automated)"
+
+      - run: ./scripts/release --release-candidate --branch=${{ github.head_ref }} --skip-tests --dry-run --skip-changelog-check --use-https-for-git
+
   unit-test:
     name: Unit (${{ matrix.os }})
     needs: lint
@@ -33,7 +50,9 @@ jobs:
 
   smoke-test:
     name: (${{ matrix.os }}) v${{ matrix.node-version }} Smoke Tests
-    needs: unit-test
+    needs:
+      - unit-test
+      - release-dry-run
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false

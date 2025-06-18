@@ -3,23 +3,28 @@
 const os = require('node:os')
 const path = require('node:path')
 const fsp = require('node:fs').promises
+const tar = require('tar')
 
 const execTools = require('../lib/exec')
 const { sleep } = require('../lib/utils')
 const argvParser = require('../bin/utils/argv-parser')
 
 const argv = argvParser.parse(process.argv, {
-  booleans: ['dry-run', 'release-candidate', 'skip-tests']
+  booleans: ['dry-run', 'release-candidate', 'skip-tests', 'skip-changelog-check', 'use-https-for-git']
 })
 
 console.log('argv', argv)
 
 const branch = argv.options.branch ?? 'main'
 const isRc = argv.options['release-candidate']
+const isDryRun = argv.options['dry-run']
 const skipTests = argv.options['skip-tests']
+const skipChangelogCheck = argv.options['skip-changelog-check']
+const useHttpsForGit = argv.options['use-https-for-git']
+
 if (branch !== 'main' && !isRc) {
   console.error('The branch name must be main unless this is a release candidate (--release-candidate).')
-  process.exit(1)
+  process.exit(2)
 }
 
 if (skipTests && !isRc) {
@@ -27,10 +32,17 @@ if (skipTests && !isRc) {
   process.exit(2)
 }
 
-const branchName = branch
+if (skipChangelogCheck && !isDryRun) {
+  console.error('The --skip-changelog-check option is only available for dry runs.')
+  process.exit(2)
+}
 
-const isDryRun = argv.options['dry-run']
-;(async () => {
+if (useHttpsForGit && (!isDryRun || !skipChangelogCheck)) {
+  console.error('The --use-https-for-git option is only available for dry runs with --skip-changelog-check.')
+  process.exit(2)
+}
+
+(async () => {
   console.log(`${isDryRun ? 'DRY RUN: ' : ''}Releasing from [${branch}] branch${isRc ? ' as release candidate' : ''}.`)
 
   const tmpDir = await mkTmpDir()
@@ -43,8 +55,10 @@ const isDryRun = argv.options['dry-run']
       cwd: kitDir
     })
   }
-  await exec('git clone git@github.com:nowprototypeit/nowprototypeit.git', { cwd: tmpDir })
-  await execInKitDir(`git checkout ${branchName}`)
+
+  const gitClonableStr = useHttpsForGit ? 'https://github.com/nowprototypeit/nowprototypeit' : 'git@github.com:nowprototypeit/nowprototypeit.git'
+  await exec('git clone ' + gitClonableStr, { cwd: tmpDir })
+  await execInKitDir(`git checkout ${branch}`)
   await checkForUnpublishedDependencies(kitDir)
   await checkForCorrectVersion(kitDir)
   await execInKitDir(`git checkout -b release-prep-${Date.now()}`)
@@ -57,11 +71,16 @@ const isDryRun = argv.options['dry-run']
     cwd: kitDir
   })
   const dependency = path.join(kitDir, result)
+  await assertCoreFilesExist(dependency, kitDir)
   console.log('dependency:', dependency)
   if (!skipTests) {
-    await runBrowserTests(dependency)
+    await runBrowserTests(dependency, kitDir)
   }
-  await updateChangelogAndPublish(kitDir)
+  if (!(isDryRun && skipChangelogCheck)) {
+    await updateChangelogAndPublish(kitDir)
+  } else {
+    console.log('Skipping changelog update and publish due to dry run or skip-changelog-check option.')
+  }
 })()
 
 async function mkTmpDir () {
@@ -107,7 +126,47 @@ async function exec (command, options) {
   await result.finishedPromise
 }
 
-async function runBrowserTests (dependency) {
+async function assertCoreFilesExist (dependency, kitDir) {
+  const getEntryFilenamesSync = tarballFilename => { // Based on an example from https://www.npmjs.com/package/tar
+    const expectedRootDir = 'package/'
+    const filenames = []
+    tar.t({
+      file: tarballFilename,
+      onReadEntry: entry => {
+        if (entry.path.startsWith(expectedRootDir)) {
+          filenames.push(entry.path.slice(expectedRootDir.length))
+        } else {
+          throw new Error('Unexpected path outside root directory: ' + entry.path)
+        }
+      },
+      sync: true
+    })
+    return filenames
+  }
+  const expectedFiles = [
+    'CHANGELOG.md',
+    'README.md',
+    'LICENCE.txt',
+    'package.json',
+    'npm-shrinkwrap.json',
+    'now-prototype-it.config.json'
+  ]
+  const filesListedInPackageJson = JSON.parse(await fsp.readFile(path.join(kitDir, 'package.json'), 'utf8')).files
+  const tarContents = getEntryFilenamesSync(dependency)
+  const missingExpectedFiles = expectedFiles.filter(file => !tarContents.includes(file))
+  const listedInPackageJsonButMissingInTar = (filesListedInPackageJson || []).filter(file => file.endsWith('/') ? !tarContents.some(x => x.startsWith(file)) : !tarContents.includes(file))
+  if (missingExpectedFiles.length > 0 || listedInPackageJsonButMissingInTar.length > 0) {
+    console.error('The following expected core files were not found in the package tar:', missingExpectedFiles)
+    console.error('The following files listed in package.json "files" array were not found in the tar:', listedInPackageJsonButMissingInTar)
+    throw new Error('Required files are missing from the package tar.')
+  }
+  if (!filesListedInPackageJson || !Array.isArray(filesListedInPackageJson) || filesListedInPackageJson.length === 0) {
+    throw new Error(`The package.json "files" array is missing, not an array or empty [${JSON.stringify(filesListedInPackageJson ?? 'undefined')}].`)
+  }
+  console.log('All listed files exist in the tar')
+}
+
+async function runBrowserTests (dependency, kitDir) {
   await exec('npm run test:browser:all -- --retry=2', {
     env: {
       ...process.env,
@@ -116,7 +175,7 @@ async function runBrowserTests (dependency) {
       TAKE_SCREENSHOT_AFTER_FAILURE: true,
       SCREENSHOT_DIR: path.join(__dirname, '..', '..', 'release-test-screenshots')
     },
-    cwd: path.join(__dirname, '..')
+    cwd: kitDir
   })
 }
 
