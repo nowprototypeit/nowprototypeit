@@ -134,11 +134,10 @@ async function assertCoreFilesExist (dependency, kitDir) {
       file: tarballFilename,
       onReadEntry: entry => {
         if (entry.path.startsWith(expectedRootDir)) {
-          entry.path = entry.path.slice(expectedRootDir.length)
+          filenames.push(entry.path.slice(expectedRootDir.length))
         } else {
           throw new Error('Unexpected path outside root directory: ' + entry.path)
         }
-        filenames.push(entry.path)
       },
       sync: true
     })
@@ -155,7 +154,7 @@ async function assertCoreFilesExist (dependency, kitDir) {
   const filesListedInPackageJson = JSON.parse(await fsp.readFile(path.join(kitDir, 'package.json'), 'utf8')).files
   const tarContents = getEntryFilenamesSync(dependency)
   const missingExpectedFiles = expectedFiles.filter(file => !tarContents.includes(file))
-  const listedInPackageJsonButMissingInTar = filesListedInPackageJson.filter(file => file.endsWith('/') ? !tarContents.some(x => x.startsWith(file)) : !tarContents.includes(file))
+  const listedInPackageJsonButMissingInTar = (filesListedInPackageJson || []).filter(file => file.endsWith('/') ? !tarContents.some(x => x.startsWith(file)) : !tarContents.includes(file))
   if (missingExpectedFiles.length > 0 || listedInPackageJsonButMissingInTar.length > 0) {
     console.error('The following expected core files were not found in the package tar:', missingExpectedFiles)
     console.error('The following files listed in package.json "files" array were not found in the tar:', listedInPackageJsonButMissingInTar)
