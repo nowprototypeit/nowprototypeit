@@ -3,6 +3,7 @@
 const os = require('node:os')
 const path = require('node:path')
 const fsp = require('node:fs').promises
+const tar = require('tar')
 
 const execTools = require('../lib/exec')
 const { sleep } = require('../lib/utils')
@@ -57,9 +58,10 @@ const isDryRun = argv.options['dry-run']
     cwd: kitDir
   })
   const dependency = path.join(kitDir, result)
+  await assertCoreFilesExist(dependency, kitDir)
   console.log('dependency:', dependency)
   if (!skipTests) {
-    await runBrowserTests(dependency)
+    await runBrowserTests(dependency, kitDir)
   }
   await updateChangelogAndPublish(kitDir)
 })()
@@ -107,7 +109,48 @@ async function exec (command, options) {
   await result.finishedPromise
 }
 
-async function runBrowserTests (dependency) {
+async function assertCoreFilesExist (dependency, kitDir) {
+  const getEntryFilenamesSync = tarballFilename => { // Based on an example from https://www.npmjs.com/package/tar
+    const expectedRootDir = 'package/'
+    const filenames = []
+    tar.t({
+      file: tarballFilename,
+      onReadEntry: entry => {
+        if (entry.path.startsWith(expectedRootDir)) {
+          entry.path = entry.path.slice(expectedRootDir.length)
+        } else {
+          throw new Error('Unexpected path outside root directory: ' + entry.path)
+        }
+        filenames.push(entry.path)
+      },
+      sync: true
+    })
+    return filenames
+  }
+  const expectedFiles = [
+    'CHANGELOG.md',
+    'README.md',
+    'LICENCE.txt',
+    'package.json',
+    'npm-shrinkwrap.json',
+    'now-prototype-it.config.json'
+  ]
+  const filesListedInPackageJson = JSON.parse(await fsp.readFile(path.join(kitDir, 'package.json'), 'utf8')).files
+  const tarContents = getEntryFilenamesSync(dependency)
+  const missingExpectedFiles = expectedFiles.filter(file => !tarContents.includes(file))
+  const listedInPackageJsonButMissingInTar = filesListedInPackageJson.filter(file => file.endsWith('/') ? !tarContents.some(x => x.startsWith(file)) : !tarContents.includes(file))
+  if (missingExpectedFiles.length > 0 || listedInPackageJsonButMissingInTar.length > 0) {
+    console.error('The following expected core files were not found in the package tar:', missingExpectedFiles)
+    console.error('The following files listed in package.json "files" array were not found in the tar:', listedInPackageJsonButMissingInTar)
+    throw new Error('Required files are missing from the package tar.')
+  }
+  if (!filesListedInPackageJson || !Array.isArray(filesListedInPackageJson) || filesListedInPackageJson.length === 0) {
+    throw new Error(`The package.json "files" array is missing, not an array or empty [${JSON.stringify(filesListedInPackageJson ?? 'undefined')}].`)
+  }
+  console.log('All listed files exist in the tar')
+}
+
+async function runBrowserTests (dependency, kitDir) {
   await exec('npm run test:browser:all -- --retry=2', {
     env: {
       ...process.env,
@@ -116,7 +159,7 @@ async function runBrowserTests (dependency) {
       TAKE_SCREENSHOT_AFTER_FAILURE: true,
       SCREENSHOT_DIR: path.join(__dirname, '..', '..', 'release-test-screenshots')
     },
-    cwd: path.join(__dirname, '..')
+    cwd: kitDir
   })
 }
 
