@@ -2,10 +2,6 @@
 
 ## Unreleased
 
-### Fixes
-
- - Included npm-shrinkwrap.json in the repository so that users of Now Prototype It have the same dependency versions that we tested against.  This helps to protect against supply chain attacks.
-
 ## 0.14.0
 
 ### New Features
