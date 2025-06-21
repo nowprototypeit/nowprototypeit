@@ -7,7 +7,8 @@ const fs = require('node:fs')
 const { readFixtureFile, writePrototypeFile } = require('./utils')
 const { By } = require('selenium-webdriver')
 const { verboseLog } = require('../../lib/utils/verboseLogger')
-const { standardTimeout, mediumActionTimeout, intentionalDelayTimeout, tinyTimeout } = require('./setup-helpers/timeouts')
+const { standardTimeout, mediumActionTimeout, intentionalDelayTimeout, tinyTimeout, pluginActionTimeout } = require('./setup-helpers/timeouts')
+const { exec } = require('../../lib/exec')
 
 const { promises: fsp } = fs
 const kitVersion = require('../../package.json').version
@@ -273,4 +274,8 @@ Then('the page should contain a link with URL and text of {string}', standardTim
 When('I clear my session data', standardTimeout, async function () {
   await this.browser.openUrl('/manage-prototype/clear-data')
   await this.browser.clickButtonWithText('Clear session data')
+})
+
+When('I install the npm dependency {string} using the command line', pluginActionTimeout, async function (dependencyName) {
+  await exec(`npm install ${dependencyName}`, { cwd: this.kit.dir })
 })

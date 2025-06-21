@@ -5,6 +5,7 @@
 ### Fixes
 
  - Included npm-shrinkwrap.json in the repository so that users of Now Prototype It have the same dependency versions that we tested against.  This helps to protect against supply chain attacks.
+ - Hide non-plugins from the plugin pages.  Previously we were incorrectly treating every NPM dependency as a plugin which caused some problems, now we only show plugins.
 
 ## 0.14.0
 
