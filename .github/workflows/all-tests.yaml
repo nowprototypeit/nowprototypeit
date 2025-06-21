@@ -57,7 +57,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [18.x, 20.x, 22.x, 24.x]
         os: [linux, windows, mac]
 
     timeout-minutes: 40
@@ -82,6 +82,7 @@ jobs:
           TAKE_SCREENSHOT_AFTER_FAILURE: true
           SCREENSHOT_DIR: screenshots
           MAX_FAILURES: 1
+          REUSE_KITS: ${{ (matrix.os == 'windows' && matrix.node-version == '18.x') && 'false' || 'true' }}
 
       - name: Upload screenshots
         if: failure()

@@ -5,28 +5,98 @@ const os = require('node:os')
 const fsp = require('node:fs').promises
 const { fork } = require('../../../lib/exec')
 const { packageDir } = require('../../../lib/utils/paths')
-const { listenForShutdown } = require('../../../lib/utils/shutdownHandlers')
+const { listenForShutdown, addShutdownFn } = require('../../../lib/utils/shutdownHandlers')
 const { setupPromise, sleep } = require('../../../lib/utils')
 listenForShutdown('kit setup for tests')
 
 const showKitStdio = process.env.SHOW_KIT_STDIO === 'true'
-const kitShouldBeDeleted = process.env.LEAVE_KIT_AFTER_TEST !== 'true'
+const kitShouldBeDeletedAtCleanup = process.env.LEAVE_KIT_AFTER_TEST !== 'true'
 
 let totalKitSetupTime = 0
-let requiredKitSetupTime = 0
-const seenKitConfigs = []
+let savedStartupTime = 0
 
 function getTotalKitSetupTime () {
   return totalKitSetupTime
 }
-function getSavableKitSetupTime () {
-  return totalKitSetupTime - requiredKitSetupTime
+
+function getSavedKitSetupTime () {
+  return savedStartupTime
+}
+
+const { addKitToCache, getKitFromCache, setStartupTimeForCacheKey, getStartupTimeForCacheKey } = (function () {
+  const kitCache = new Map()
+
+  function addKitToCache (cacheKey, kit) {
+    if (!kit || !kit.dir) {
+      console.warn('Kit must have a dir property to be cached')
+      return
+    }
+    const expectedKeys = ['dir', 'kitSetupTime']
+    const incorrectKeys = Object.keys(kit).filter(key => !expectedKeys.includes(key))
+    if (incorrectKeys.length !== 0) {
+      throw new Error('Kit object has incorrect keys: ' + incorrectKeys.join(', '))
+    }
+    kitCache.set(cacheKey, kit)
+  }
+
+  function getKitFromCache (cacheKey) {
+    return kitCache.get(cacheKey)
+  }
+
+  function setStartupTimeForCacheKey (cacheKey, kitSetupTime) {
+    const kit = kitCache.get(cacheKey)
+    if (!kit) {
+      throw new Error(`No kit found in cache for key: ${cacheKey}`)
+    }
+    kit.kitSetupTime = kitSetupTime
+    kitCache.set(cacheKey, kit)
+  }
+
+  function getStartupTimeForCacheKey (cacheKey) {
+    const kit = kitCache.get(cacheKey)
+    if (!kit) {
+      throw new Error(`No kit found in cache for key: ${cacheKey}`)
+    }
+    return kit.kitSetupTime
+  }
+
+  return {
+    addKitToCache,
+    getKitFromCache,
+    setStartupTimeForCacheKey,
+    getStartupTimeForCacheKey
+  }
+}())
+
+async function cleanupKit (kitDir) {
+  const start = Date.now()
+  const giveUpTimestamp = start + 1000 * 30
+  const halfWayToGiveUpTimestamp = start + 1000 * 15
+  let succeeded = false
+  while (!succeeded && (Date.now() < giveUpTimestamp)) {
+    try {
+      const timeToForceRm = Date.now() > halfWayToGiveUpTimestamp
+      if (timeToForceRm) {
+        console.log('running force rm')
+      }
+      await fsp.rm(kitDir, { recursive: true, force: timeToForceRm })
+      succeeded = true
+    } catch (e) {
+      console.error('Failed to delete kit dir', e)
+      await sleep(300)
+    }
+  }
+  if (!succeeded) {
+    throw new Error('Failed to clean kit')
+  }
+}
+
+function generateKitPath () {
+  return path.join(os.tmpdir(), 'npi-browser-tests', `nowprototypeit-govuk-cucumberjs-${randomUUID()}`)
 }
 
 async function setupKit (options) {
   const setupKitStartTime = Date.now()
-  const kitDir = path.join(os.tmpdir(), 'npi-browser-tests', `nowprototypeit-govuk-cucumberjs-${randomUUID()}`)
-  const port = await findAvailablePortWithoutUser()
 
   const cacheKey = JSON.stringify({
     variantPluginName: options?.variantPluginName,
@@ -35,23 +105,40 @@ async function setupKit (options) {
     unique: options?.unique
   })
 
-  const couldReusePreviousKitSetup = seenKitConfigs.includes(cacheKey)
-  if (!couldReusePreviousKitSetup && !options?.neverReuseThisKit) {
-    seenKitConfigs.push(cacheKey)
-  }
+  const kitFromCache = getKitFromCache(cacheKey)
 
-  if (couldReusePreviousKitSetup) {
-    console.log('!!! Could reuse a previous kit setup !!!')
+  console.log('kit from cache:', kitFromCache)
+
+  const kitDir = generateKitPath()
+  const port = await findAvailablePortWithoutUser()
+  const cacheThisKit = process.env.REUSE_KITS !== 'false' && !options?.neverReuseThisKit
+
+  if (kitFromCache) {
+    console.log('!!! Reusing previous kit !!!')
+    await fsp.cp(kitFromCache.dir, kitDir, { recursive: true })
   } else {
     console.log('!!! New kit setup required !!!')
-  }
 
-  await createKit({
-    projectDir: packageDir,
-    port,
-    targetDir: kitDir,
-    providedOptions: options
-  })
+    await createKit({
+      projectDir: packageDir,
+      targetDir: kitDir,
+      providedOptions: options
+    })
+
+    if (cacheThisKit) {
+      const kitArchetypeDir = generateKitPath()
+      await fsp.cp(kitDir, kitArchetypeDir, { recursive: true })
+      addKitToCache(cacheKey, {
+        dir: kitArchetypeDir
+      })
+    }
+
+    if (!kitShouldBeDeletedAtCleanup) {
+      addShutdownFn(async () => {
+        await cleanupKit(kitDir)
+      })
+    }
+  }
 
   const configPath = path.join(kitDir, 'app', 'config.json')
   const existingConfig = await fsp.readFile(configPath, 'utf8')
@@ -124,29 +211,8 @@ async function setupKit (options) {
     }, 5000)
     await kitThread.finishedPromise
     clearTimeout(closeTimeout)
-    if (kitShouldBeDeleted) {
-      const start = Date.now()
-      const giveUpTimestamp = start + 1000 * 30
-      const halfWayToGiveUpTimestamp = start + 1000 * 15
-      let succeeded = false
-      while (!succeeded && (Date.now() < giveUpTimestamp)) {
-        try {
-          const timeToForceRm = Date.now() > halfWayToGiveUpTimestamp
-          if (timeToForceRm) {
-            console.log('running force rm')
-          }
-          await fsp.rm(kitDir, { recursive: true, force: timeToForceRm })
-          succeeded = true
-        } catch (e) {
-          console.error('Failed to delete kit dir', e)
-          await sleep(300)
-        }
-      }
-      if (!succeeded) {
-        throw new Error('Failed to clean kit')
-      }
-    }
   }
+
   function addNextKitRestartListener (handler) {
     const listener = (data) => {
       const str = data.toString()
@@ -167,10 +233,11 @@ async function setupKit (options) {
 
   const kitSetupTime = Date.now() - setupKitStartTime
   totalKitSetupTime += kitSetupTime
-  if (!couldReusePreviousKitSetup) {
-    requiredKitSetupTime += kitSetupTime
+  if (kitFromCache) {
+    savedStartupTime += getStartupTimeForCacheKey(cacheKey) - kitSetupTime
+  } else if (cacheThisKit) {
+    setStartupTimeForCacheKey(cacheKey, kitSetupTime)
   }
-
   return {
     url,
     dir: kitDir,
@@ -185,7 +252,6 @@ async function setupKit (options) {
 
 async function createKit ({
   projectDir,
-  port,
   targetDir,
   providedOptions
 }) {
@@ -201,9 +267,6 @@ async function createKit ({
   }
   if (!projectDir) {
     throw new Error('projectDir is required')
-  }
-  if (!port) {
-    throw new Error('port is required')
   }
   const args = [
     'create',
@@ -233,7 +296,7 @@ async function createKit ({
 module.exports = {
   setupKit,
   getTotalKitSetupTime,
-  getSavableKitSetupTime
+  getSavedKitSetupTime
 }
 
 function validateStdout (fullStdout, targetDir) {
