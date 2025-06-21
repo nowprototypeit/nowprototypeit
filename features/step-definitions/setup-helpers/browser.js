@@ -260,7 +260,7 @@ async function getBrowser (config = {}) {
           throw new Error(`Element with selector ${selector} not found`)
         }
         const className = await element.getAttribute('class')
-        return className.split(' ')
+        return className?.split(' ')
       })
     },
     getErrorDetailSummary: async (timeoutDeclaration = standardTimeout) => {

@@ -9,7 +9,7 @@ const os = require('os')
 const { runShutdownFunctions } = require('../../lib/utils/shutdownHandlers')
 const standardTimeout = require('./utils')
 const { kitStartTimeout } = require('./setup-helpers/timeouts')
-const { getTotalKitSetupTime, getSavableKitSetupTime } = require('./setup-helpers/kit')
+const { getTotalKitSetupTime, getSavedKitSetupTime } = require('./setup-helpers/kit')
 const resultsByTag = {}
 const maxAllowableFailures = Number(process.env.MAX_FAILURES || '99999999')
 let totalFailures = 0
@@ -192,6 +192,14 @@ After(kitStartTimeout, async function (scenario) {
   }
 })
 
+function displayMsTime (timeInMillis) {
+  const rounded = Math.round(timeInMillis / 1000)
+  if (rounded < 60) {
+    return `${rounded} seconds`
+  }
+  return `${Math.round(rounded / 6) / 10} minutes`
+}
+
 AfterAll(kitStartTimeout, async function () {
   if (configuredToLogEachStep) {
     console.log('starting after all')
@@ -219,8 +227,8 @@ AfterAll(kitStartTimeout, async function () {
 
   console.log('')
   console.log('')
-  console.log('Total kit startup time', `${Math.round(getTotalKitSetupTime() / 1000)} seconds`)
-  console.log('Time that could be saved by reusing kits', `${Math.round(getSavableKitSetupTime() / 1000)} seconds`)
+  console.log('Total kit startup time', displayMsTime(getTotalKitSetupTime()))
+  console.log('Time saved by reusing kits', displayMsTime(getSavedKitSetupTime()))
   console.log('')
   console.log('')
   console.log('Starting cleanup')
