@@ -2,7 +2,8 @@ const { randomUUID } = require('node:crypto')
 const { findAvailablePortWithoutUser } = require('./findPort')
 const path = require('node:path')
 const os = require('node:os')
-const fsp = require('node:fs').promises
+const fs = require('node:fs')
+const fsp = fs.promises
 const { fork } = require('../../../lib/exec')
 const { packageDir } = require('../../../lib/utils/paths')
 const { listenForShutdown, addShutdownFn } = require('../../../lib/utils/shutdownHandlers')
@@ -11,6 +12,9 @@ listenForShutdown('kit setup for tests')
 
 const showKitStdio = process.env.SHOW_KIT_STDIO === 'true'
 const kitShouldBeDeletedAtCleanup = process.env.LEAVE_KIT_AFTER_TEST !== 'true'
+const reuseBetweenTestRuns = process.env.REUSE_KITS_BETWEEN_TEST_RUNS === 'true'
+const storageBetweenTestRunsDir = process.env.KIT_CACHE_DIR || path.join(__dirname, '..', '..', '..', '..', '.test-run-kit-cache')
+const rootDirForKits = reuseBetweenTestRuns ? storageBetweenTestRunsDir : os.tmpdir()
 
 let totalKitSetupTime = 0
 let savedStartupTime = 0
@@ -25,6 +29,20 @@ function getSavedKitSetupTime () {
 
 const { addKitToCache, getKitFromCache, setStartupTimeForCacheKey, getStartupTimeForCacheKey } = (function () {
   const kitCache = new Map()
+  const kitCacheFilePath = reuseBetweenTestRuns ? path.join(storageBetweenTestRunsDir, 'kit-cache.json') : null
+
+  if (reuseBetweenTestRuns) {
+    fs.mkdirSync(storageBetweenTestRunsDir, { recursive: true })
+    const kitCacheFileContents = path.join(storageBetweenTestRunsDir, 'kit-cache.json')
+    if (fs.existsSync(kitCacheFileContents)) {
+      const cachedKits = JSON.parse(fs.readFileSync(kitCacheFileContents, 'utf8'))
+      Object.entries(cachedKits).forEach(([key, kit]) => {
+        addKitToCache(key, kit)
+      })
+    } else {
+      console.log('No kit cache file found, starting with an empty cache.', kitCacheFileContents)
+    }
+  }
 
   function addKitToCache (cacheKey, kit) {
     if (!kit || !kit.dir) {
@@ -37,6 +55,7 @@ const { addKitToCache, getKitFromCache, setStartupTimeForCacheKey, getStartupTim
       throw new Error('Kit object has incorrect keys: ' + incorrectKeys.join(', '))
     }
     kitCache.set(cacheKey, kit)
+    writeChangesToDisk()
   }
 
   function getKitFromCache (cacheKey) {
@@ -50,6 +69,7 @@ const { addKitToCache, getKitFromCache, setStartupTimeForCacheKey, getStartupTim
     }
     kit.kitSetupTime = kitSetupTime
     kitCache.set(cacheKey, kit)
+    writeChangesToDisk()
   }
 
   function getStartupTimeForCacheKey (cacheKey) {
@@ -58,6 +78,13 @@ const { addKitToCache, getKitFromCache, setStartupTimeForCacheKey, getStartupTim
       throw new Error(`No kit found in cache for key: ${cacheKey}`)
     }
     return kit.kitSetupTime
+  }
+
+  function writeChangesToDisk () {
+    if (kitCacheFilePath) {
+      const cachedKits = Object.fromEntries(kitCache.entries())
+      fs.writeFileSync(kitCacheFilePath, JSON.stringify(cachedKits, null, 2), 'utf8')
+    }
   }
 
   return {
@@ -92,7 +119,7 @@ async function cleanupKit (kitDir) {
 }
 
 function generateKitPath () {
-  return path.join(os.tmpdir(), 'npi-browser-tests', `nowprototypeit-govuk-cucumberjs-${randomUUID()}`)
+  return path.join(rootDirForKits, 'npi-browser-tests', `nowprototypeit-govuk-cucumberjs-${randomUUID()}`)
 }
 
 async function setupKit (options) {
@@ -106,8 +133,6 @@ async function setupKit (options) {
   })
 
   const kitFromCache = getKitFromCache(cacheKey)
-
-  console.log('kit from cache:', kitFromCache)
 
   const kitDir = generateKitPath()
   const port = await findAvailablePortWithoutUser()

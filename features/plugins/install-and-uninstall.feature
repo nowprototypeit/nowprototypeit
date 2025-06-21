@@ -16,6 +16,21 @@ Feature: Installing and uninstalling plugins
     Then I should see the plugin "jQuery" in the list
     And The "jQuery" plugin should be tagged as "Installed"
 
+  @integration
+  @no-variant
+  Scenario: Installed - tag as installed
+    Given I install the npm dependency "jquery" using the command line
+    When I visit the available plugins page
+    Then I should see the plugin "jQuery" in the list
+    And The "jQuery" plugin should be tagged as "Installed"
+
+  @integration
+  @no-variant
+  Scenario: Installed - tag as installed
+    Given I install the npm dependency "cowsay" using the command line
+    When I visit the available plugins page
+    Then I should not see the plugin "Cowsay" in the list
+
   @govuk-variant
   @integration
   Scenario: Uninstalled - hide on installed plugins
