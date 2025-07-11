@@ -4,8 +4,7 @@ const path = require('path')
 const fse = require('fs-extra')
 const fsp = require('fs').promises
 const { recursiveDirectoryContentsSync } = require('../lib/utils')
-const { parse } = require('./utils/argv-parser')
-const { packageJsonFormat } = require('./utils')
+const { writePackageJson } = require('./utils/setup-initial-package-json')
 const kitVersion = require('../package.json').version
 
 const gitignore = `
@@ -28,24 +27,9 @@ audit=false
 loglevel=error
 `.trimStart()
 
-const packageJson = {
-  scripts: {
-    dev: 'nowprototypeit dev || npx -y nowprototypeit@latest validate-kit dev $?',
-    serve: 'nowprototypeit serve || npx -y nowprototypeit@latest validate-kit serve $?',
-    start: 'nowprototypeit start || npx -y nowprototypeit@latest validate-kit start $?'
-
-  }
-}
-
 const installDirectory = process.cwd()
 
 ;(async () => {
-  async function updatePackageJson (packageJsonPath) {
-    let newPackageJson = Object.assign({}, packageJson)
-    newPackageJson = Object.assign(newPackageJson, await fse.readJson(packageJsonPath))
-    await fse.writeJson(packageJsonPath, newPackageJson, packageJsonFormat)
-  }
-
   async function addToConfigFile (key, value) {
     const configFileLocation = path.join(installDirectory, 'app', 'config.json')
     const config = await fse.readJson(configFileLocation)
@@ -57,7 +41,7 @@ const installDirectory = process.cwd()
     fse.writeFile(path.join(installDirectory, '.gitignore'), gitignore, 'utf8'),
     fse.writeFile(path.join(installDirectory, '.npmrc'), npmrc, 'utf8'),
     fse.copy(path.join(__dirname, '..', 'LICENCE.txt'), path.join(installDirectory, 'LICENCE.txt')),
-    updatePackageJson(path.join(installDirectory, 'package.json'))
+    writePackageJson(path.join(installDirectory, 'package.json'))
   ])
 
   await Promise.all(recursiveDirectoryContentsSync(installDirectory)

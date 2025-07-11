@@ -3,6 +3,6 @@
 // https://docs.nowprototype.it/__VERSION__/in-browser-javascript
 //
 
-window.nowPrototypeItGOVUK.documentReady(() => {
+window.nowPrototypeIt.documentReady(() => {
   // Add JavaScript here
 })

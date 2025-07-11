@@ -32,6 +32,7 @@ const currentDirectory = process.cwd()
 const kitRoot = path.join(__dirname, '..', '..')
 const packageJsonContents = require('../../package.json')
 const { verboseLog } = require('../../lib/utils/verboseLogger')
+const { validateKit } = require('./kit-validator')
 const kitVersion = packageJsonContents.version
 const kitProjectName = packageJsonContents.name
 const kitEntryPoint = packageJsonContents._cliDevEntryPoint
@@ -471,35 +472,32 @@ async function runValidatePlugin () {
   await shutdown()
 }
 
-;(async () => {
+;
+
+(async () => {
   verboseLogger(`Using kit version [${kitVersion}] for command [${argv.command}]`)
   verboseLogger('Argv:', argv)
   switch (argv.command) {
     case 'create':
-      return runCreate()
+      return await runCreate()
     case 'init':
-      return runInit()
+      return await runInit()
     case 'dev':
-      return runDev()
+      return await runDev()
     case 'start':
       return await runServe()
     case 'serve':
       return await runServe()
     case 'build':
-      return runBuild()
+      return await runBuild()
     case 'validate-plugin':
-      return runValidatePlugin()
+      return await runValidatePlugin()
     case 'failed-to-launch':
     case 'validate-kit':
-      console.log()
-      console.log('Your prototype kit failed to launch.  You might want to try running `npm install` to ensure all dependencies are installed.')
-      console.log()
-      await shutdown('cli')
-      break
+      return await validateKit()
     case 'version':
       console.log(kitVersion)
-      await shutdown('cli')
-      break
+      return await shutdown('cli')
     case 'debug-print-env-info':
       console.log('Printing debug info about the environment')
       console.log('')
@@ -520,10 +518,9 @@ async function runValidatePlugin () {
       console.log('')
       console.log('Process title')
       console.log(process.title)
-      await shutdown('cli')
-      break
+      return await shutdown('cli')
     default:
       usage()
-      await shutdown('cli', 2)
+      return await shutdown('cli', 2)
   }
 })()

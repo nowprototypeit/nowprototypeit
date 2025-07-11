@@ -6,8 +6,8 @@
   </noscript>
   {% if lastReloadTimestamp %}
     <script>
-    window.nowPrototypeItGOVUK = window.nowPrototypeItGOVUK || {}
-    window.nowPrototypeItGOVUK.lastReload={{lastReloadTimestamp}}
+    window.nowPrototypeItGOVUK = window.nowPrototypeIt = window.nowPrototypeItGOVUK || window.nowPrototypeIt || {}
+    window.nowPrototypeIt.lastReload={{lastReloadTimestamp}}
     </script>
   {% endif %}
   <script src="/manage-prototype/assets/scripts/reloader-client.js"></script>
