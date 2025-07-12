@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+ - There was a problem when using the in-browser editor, it needs enabling in the settings and when a user first enables it they should be able to use it immediately.  There was a bug which meant the prototype needed restarting before the in-browser editor would work.  This is now fixed and the in-browser editor should work immediately after enabling it.  The tests have been update to reflect both cases.
+
 ## 0.14.1
 
 ### Fixes
