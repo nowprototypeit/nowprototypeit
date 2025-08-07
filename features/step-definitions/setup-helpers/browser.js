@@ -419,7 +419,7 @@ async function getBrowser (config = {}) {
         await $submitButton.click()
       })
     },
-    clickPluginSettingsForPluginName: async (pluginName) => {
+    clickPluginSettingsForPluginNameOrSettingsCategory: async (pluginOrCategoryName) => {
       return await autoRetry(async () => {
         const $$subNavItems = await page.$$('.nowprototypeit-sub-nav-item')
         const linkInfo = await Promise.all($$subNavItems.map(async ($item) => {
@@ -436,9 +436,9 @@ async function getBrowser (config = {}) {
           }
         }))
 
-        const link = linkInfo.find(({ text }) => text === pluginName)
+        const link = linkInfo.find(({ text }) => text === pluginOrCategoryName)
         if (!link) {
-          throw new Error(`Could not find link for ${pluginName}, links were [${linkInfo.map(({ text }) => text).join(', ')}]`)
+          throw new Error(`Could not find link for ${pluginOrCategoryName}, links were [${linkInfo.map(({ text }) => text).join(', ')}]`)
         }
         await link.linkElement.click()
       })

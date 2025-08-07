@@ -4,7 +4,12 @@ const { standardTimeout, mediumActionTimeout, tinyTimeout } = require('./setup-h
 
 Given('I am on the plugin settings page for the {string} plugin', standardTimeout, async function (pluginName) {
   await this.browser.openUrl('/manage-prototype/settings')
-  await this.browser.clickPluginSettingsForPluginName(pluginName)
+  await this.browser.clickPluginSettingsForPluginNameOrSettingsCategory(pluginName)
+})
+
+Given('I am on the {string} settings page', standardTimeout, async function (pluginName) {
+  await this.browser.openUrl('/manage-prototype/settings')
+  await this.browser.clickPluginSettingsForPluginNameOrSettingsCategory(pluginName)
 })
 
 When('I turn off the {string} setting', mediumActionTimeout, async function (fieldName) {
