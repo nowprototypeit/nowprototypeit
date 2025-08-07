@@ -8,7 +8,7 @@ Given('the API contains a message for this version of the kit with text {string}
   ])
 })
 
-Given('Hosting is enabled for this version of the kit with logged out message {string}', standardTimeout, async function (message) {
+Given('The API has hosting enabled for this version of the kit with logged out message {string}', standardTimeout, async function (message) {
   await this.fakeApi.setHostingConfigForVersion(this.kit.version, true, message)
 })
 

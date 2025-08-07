@@ -16,6 +16,7 @@
     Scenario: Edit a nunjucks file (when newly enabled)
       Given I am on the "Experiments" settings page
       And I turn on the "editInBrowser" setting
+      And I press "Save changes"
       And I create a file "app/views/basic.njk" based on the fixture file "nunjucks/basic-example.njk"
       When I visit "/basic"
       And I open the in-browser editor

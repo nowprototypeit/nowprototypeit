@@ -29,6 +29,10 @@ const kitAndBrowserStore = (() => {
 })()
 
 async function removeKit (kit) {
+  if (!kit) {
+    console.warn('No kit provided to removeKit, nothing to do')
+    return
+  }
   const key = kit.storageKey
   await kit.close()
   await kit.cleanup()

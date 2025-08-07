@@ -3,8 +3,8 @@ Feature: Hosting
 @no-variant
 @hosting-experiment-on
 @smoke
-Scenario: Hosting message
-  Given Hosting is enabled for this version of the kit with logged out message "This is *an example* **from the fake API**. The format was introduced in (link:https://github.com/nowprototypeit/nowprototypeit/pull/87)."
+Scenario: Hosting message (when hosting is enabled before startup)
+  Given The API has hosting enabled for this version of the kit with logged out message "This is *an example* **from the fake API**. The format was introduced in (link:https://github.com/nowprototypeit/nowprototypeit/pull/87)."
   When I visit "/manage-prototype/hosting"
   Then the page should include a paragraph that reads "This is an example from the fake API. The format was introduced in https://github.com/nowprototypeit/nowprototypeit/pull/87."
   And the page should contain bold text saying "from the fake API"
@@ -12,9 +12,23 @@ Scenario: Hosting message
   And the page should contain a link with URL and text of "https://github.com/nowprototypeit/nowprototypeit/pull/87"
 
 @no-variant
+@smoke
+Scenario: Hosting message (when hosting is enabled after startup)
+  Given The API has hosting enabled for this version of the kit with logged out message "This is *an example* **from the fake API**. The format was introduced in (link:https://github.com/nowprototypeit/nowprototypeit/pull/87)."
+  And I am on the "Experiments" settings page
+  And I turn on the "hostingEnabled" setting
+  And I press "Save changes"
+  When I visit "/manage-prototype/hosting"
+  Then the main heading should be updated to "Prototype Hosting from Now Prototype It"
+  And the page should include a paragraph that reads "This is an example from the fake API. The format was introduced in https://github.com/nowprototypeit/nowprototypeit/pull/87."
+  And the page should contain bold text saying "from the fake API"
+  And the page should contain italic text saying "an example"
+  And the page should contain a link with URL and text of "https://github.com/nowprototypeit/nowprototypeit/pull/87"
+
+@no-variant
 @hosting-experiment-on
 Scenario: Hosting page with a different message
-  Given Hosting is enabled for this version of the kit with logged out message "Basic text"
+  Given The API has hosting enabled for this version of the kit with logged out message "Basic text"
   When I visit "/manage-prototype/hosting"
   Then the page should include a paragraph that reads "Basic text"
 
@@ -38,7 +52,7 @@ Scenario: Incompatible version with a different message
   @no-variant
   @hosting-experiment-on
   Scenario: Hosting page with a different message and no prototypes
-    Given Hosting is enabled for this version of the kit with logged out message "Basic text"
+    Given The API has hosting enabled for this version of the kit with logged out message "Basic text"
     And the fake api expects a login from "nowprototypeit" with 0/0 prototypes used
     When I visit "/manage-prototype/hosting"
     And I click the button with text "Log in"
@@ -53,7 +67,7 @@ Scenario: Incompatible version with a different message
   @no-variant
   @hosting-experiment-on
   Scenario: Hosting page when the user has upload capacity
-    Given Hosting is enabled for this version of the kit with logged out message "Basic text"
+    Given The API has hosting enabled for this version of the kit with logged out message "Basic text"
     And the fake api expects a login from "nowprototypeit" with 2/3 prototypes used
     When I visit "/manage-prototype/hosting"
     And I click the button with text "Log in"

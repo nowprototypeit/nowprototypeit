@@ -3,6 +3,14 @@ const { waitForConditionToBeMet, readFixtureFile, readPrototypeFile } = require(
 const { standardTimeout, tinyTimeout } = require('./setup-helpers/timeouts')
 
 When('I open the in-browser editor', standardTimeout, async function () {
+  await waitForConditionToBeMet(standardTimeout, async () => {
+    const text = await this.browser.getTextFromSelector('#nowprototypeit-in-browser-bar_edit-button')
+    const editInBrowserExpectedText = 'Edit this page'
+    if (!text || text !== editInBrowserExpectedText) {
+      throw new Error(`Edit in browser button not found or text is incorrect - expected [${editInBrowserExpectedText}], got [${text}]`)
+    }
+    return true
+  })
   await this.browser.clickId('nowprototypeit-in-browser-bar_edit-button')
 })
 
