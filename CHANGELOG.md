@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.14.2
+
 ### Fixes
 
  - There was a problem when using the in-browser editor and the hosting tab, they needs enabling in the settings and the user should be able to use them immediately after updating the settings.  There was a bug which meant the prototype needed restarting before the in-browser editor and the hosting tab would work.  This is now fixed.  The tests have been updated to reflect both cases.
