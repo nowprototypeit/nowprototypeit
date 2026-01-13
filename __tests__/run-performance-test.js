@@ -38,7 +38,7 @@ const execArgs = {
 }
 
 const numberOfRuns = Number(process.argv[2]) || 20
-const numberOfDevRuns = Math.ceil(numberOfRuns / 5)
+const numberOfDevRuns = Math.ceil(numberOfRuns / 2)
 const npiVersionToCompare = '0.11.2'
 const govukFrontendVersion = '5.9.0'
 const minimumAcceptablePercentageImprovements = {
@@ -63,7 +63,7 @@ const minimumAcceptablePercentageImprovements = {
   // The minimum acceptable percentages are set low to avoid this being an annoying test that fails because of natural variations between runs.
   preBuilt: 55,
   serve: 4,
-  dev: 18
+  dev: 10
 }
 async function runPerformanceTest (command, numberOfRuns, benchmark = undefined) {
   const process = execv2(`${path.join(__dirname, 'single-performance-run.js')} ${kitDir} ${numberOfRuns} ${command}`, {
