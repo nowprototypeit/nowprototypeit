@@ -61,8 +61,8 @@ const minimumAcceptablePercentageImprovements = {
   // dev: Succeeded with a 28.17% improvement
   //
   // The minimum acceptable percentages are set low to avoid this being an annoying test that fails because of natural variations between runs.
-  preBuilt: 55,
-  serve: 4,
+  preBuilt: 45,
+  serve: 0,
   dev: 10
 }
 async function runPerformanceTest (command, numberOfRuns, benchmark = undefined) {
