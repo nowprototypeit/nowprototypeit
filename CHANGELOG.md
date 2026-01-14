@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+ - Using a larger number of dev runs and a lower expected improvement on the performance test as an attempt to improve the reliability of the results.  This may become something we monitor, rather than run on a per-PR basis if the repeatability remains low - especially as other jobs starting/stopping during this run will affect the results.
+
 ## 0.14.2
 
 ### Fixes
