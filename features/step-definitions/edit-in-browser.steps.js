@@ -14,11 +14,15 @@ When('I open the in-browser editor', standardTimeout, async function () {
   await this.browser.clickId('nowprototypeit-in-browser-bar_edit-button')
 })
 
+async function getContentsFromEditor (browser) {
+  return (await browser.getTextFromSelectorAll('.nowprototypeit-in-browser-editor__editor .lines-content .view-line', tinyTimeout, false)).join('\n').replaceAll(' ', ' ')
+}
+
 Then('I should see the contents of {string} in the in-browser editor', standardTimeout, async function (fileRelativePath) {
   let actual
-  const expected = replaceWindowsLineBreaks(await readPrototypeFile(this.kit, fileRelativePath)).split('\n').join('')
+  const expected = replaceWindowsLineBreaks(await readPrototypeFile(this.kit, fileRelativePath))
   await waitForConditionToBeMet(standardTimeout, async () => {
-    actual = await this.browser.getTextFromSelector('.nowprototypeit-in-browser-editor__editor .lines-content')
+    actual = await getContentsFromEditor(this.browser)
     return actual === expected
   }, (reject) => {
     reject(new Error(`Expected editor content to equal [${expected}], but was [${actual}]`))
@@ -27,8 +31,15 @@ Then('I should see the contents of {string} in the in-browser editor', standardT
 
 When('I replace the contents of the in-browser editor with the fixture file {string}', standardTimeout, async function (fixtureFilePath) {
   const fixtureFileContents = await readFixtureFile(fixtureFilePath)
+  let lastKnownContents
 
-  await this.browser.setEditorContents(fixtureFileContents, tinyTimeout)
+  await waitForConditionToBeMet(standardTimeout, async () => {
+    await this.browser.setEditorContents(fixtureFileContents, tinyTimeout)
+    lastKnownContents = await getContentsFromEditor(this.browser)
+    return lastKnownContents === fixtureFileContents
+  }, () => {
+    throw new Error(`Failed to set editor contents to fixture file contents. Last known contents: [${lastKnownContents}], expected contents: [${fixtureFileContents}]`)
+  })
 })
 
 When('I press the save button for the in-browser editor', standardTimeout, async function () {
