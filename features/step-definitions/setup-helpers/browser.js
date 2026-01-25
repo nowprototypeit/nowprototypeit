@@ -181,11 +181,11 @@ async function getBrowser (config = {}) {
         return replaceNonBreakingSpaces(text)
       })
     },
-    getTextFromSelectorAll: async (selector, timeoutDeclaration = standardTimeout) => {
+    getTextFromSelectorAll: async (selector, timeoutDeclaration = standardTimeout, trim = true) => {
       return await autoRetry(async () => {
         const $$elems = await page.$$(selector)
         const elemContents = await Promise.all($$elems.map(async x => await x.textContent()))
-        return elemContents.map(x => x?.trim())
+        return trim ? elemContents.map(x => x?.trim()) : elemContents
       })
     },
     getLinkTextAndUrlFromSelectorAll: async (selector, timeoutDeclaration = standardTimeout) => {
