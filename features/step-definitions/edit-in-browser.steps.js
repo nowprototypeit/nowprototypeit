@@ -31,14 +31,15 @@ Then('I should see the contents of {string} in the in-browser editor', standardT
 
 When('I replace the contents of the in-browser editor with the fixture file {string}', standardTimeout, async function (fixtureFilePath) {
   const fixtureFileContents = await readFixtureFile(fixtureFilePath)
+  const standardisedFixtureFileContents = replaceWindowsLineBreaks(fixtureFileContents)
   let lastKnownContents
 
   await waitForConditionToBeMet(standardTimeout, async () => {
     await this.browser.setEditorContents(fixtureFileContents, tinyTimeout)
     lastKnownContents = await getContentsFromEditor(this.browser)
-    return lastKnownContents === fixtureFileContents
+    return lastKnownContents === standardisedFixtureFileContents
   }, () => {
-    throw new Error(`Failed to set editor contents to fixture file contents. Last known contents: [${lastKnownContents}], expected contents: [${fixtureFileContents}]`)
+    throw new Error(`Failed to set editor contents to fixture file contents. Last known contents: [${JSON.stringify(lastKnownContents)}], expected contents: [${JSON.stringify(standardisedFixtureFileContents)}]`)
   })
 })
 
