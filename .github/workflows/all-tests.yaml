@@ -75,6 +75,9 @@ jobs:
 
       - run: npm ci
 
+
+      - run: npx playwright install
+
       - run: npm run test:browser:smoke -- --retry=2
         env:
           ADDITIONAL_TIMEOUT_MULTIPLIER: 2
