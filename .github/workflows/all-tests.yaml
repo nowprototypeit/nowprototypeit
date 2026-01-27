@@ -70,10 +70,12 @@ jobs:
       - name: Use Node v${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
-          cache: 'npm'
           node-version: ${{ matrix.node-version }}
 
       - run: npm ci
+
+
+      - run: npx playwright install
 
       - run: npm run test:browser:smoke -- --retry=2
         env:
