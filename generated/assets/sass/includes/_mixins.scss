@@ -1,0 +1,48 @@
+@mixin now-prototype-it-body-font {
+  color: $fontColor;
+  font-family: "Hanken Grotesk", sans-serif;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+@mixin now-prototype-it-title-font {
+  font-family: Dosis, sans-serif;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+}
+
+@mixin column($width, $isFirst: false) {
+  box-sizing: border-box;
+  width: $width;
+  margin: 0;
+  padding: 0;
+  float: left;
+  @if (not $isFirst) {
+    padding-left: $standardSpace;
+  }
+  &:after {
+    content: ' '
+  }
+  > :first-child {
+    margin-top: 0;
+  }
+  > form:first-child .nowprototypeit-form-item-wrapper:first-child {
+    p {
+      margin-top: 0;
+    }
+    a {
+      margin-top: 5px;
+    }
+  }
+
+}
+
+@mixin visuallyHidden {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
