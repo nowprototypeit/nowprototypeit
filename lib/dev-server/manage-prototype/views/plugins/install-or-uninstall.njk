@@ -39,7 +39,7 @@
 
       <div id="panel-manual-instructions" class="nowprototypeit-manage-prototype-plugin-instructions js-hidden">
         <p>
-          In terminal, press <strong>ctrl + c</strong> to stop your prototype, then run:
+          In the command line, stop your prototype (enter "stop" or press <strong>Ctrl + C</strong>), then run:
         </p>
         <p>
           <code>{{ command }}</code>
@@ -77,16 +77,17 @@
             There was a problem {{ verb.progressive }}
           </p>
           <p>
-            <a href="https://github.com/nowprototypeit/nowprototypeit/issues" target="_blank">
-              If you think this is a problem with Now Prototype It please raise an issue.
-            </a>
+            If you think this is a problem with Now Prototype It, please 
+            <a href="https://github.com/nowprototypeit/nowprototypeit/issues" target="_blank">raise an issue on GitHub</a> 
+            or 
+            <a href="mailto:support@nowprototype.it">contact us for support</a>.
           </p>
         </div>
 
         <div hidden class="" id="instructions-complete">
           <h3>Successfully {{ verb.status }} {{ plugin.name }}</h3>
           <p>
-            If you are using Git you can commit this change.
+            If you are using Git, you can commit this change.
           </p>
           <p>
             <a href="{{ returnLink.href }}">

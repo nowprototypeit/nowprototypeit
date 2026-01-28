@@ -9,7 +9,7 @@
       <h3>Experiment stage: {{ fields[0].stage }}</h3>
       <p>
         {% if fields[0].stage == 1 %}
-          At this stage features may be added and removed, integrations with plugins may change.  It's not recommended that you use this stage in your prototypes, it's intended for early testing.
+          Stage 1 experimental features are in early testing. They might change or become unavailable, and integrations with plugins might change. We don't recommend that you use these features in your prototypes, except for testing.
         {% else %}
           (no description found for stage {{ fields[0].stage }})
         {% endif %}
@@ -44,7 +44,7 @@
               },
               {
                 value: "__default__",
-                text: "I don't have a preference"
+                text: "Keep default setting"
               }
             ]
           }) }}

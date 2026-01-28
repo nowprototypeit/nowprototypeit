@@ -88,14 +88,14 @@
 
     {% if recommendPlugin %}
       <div class="important-info">
-        <h4>We think this problem is related to a plugin</h4>
-        <p>The plugin we think is causing the problem is {% if recommendPluginRef %}
+        <h4>This problem might be caused by a plugin</h4>
+        <p>The plugin that seems to be causing the problem is {% if recommendPluginRef %}
             <a href="/manage-prototype/plugin/{{ recommendPluginRef }}">{{ recommendPlugin }}</a>
         {% else %}
             {{ recommendPlugin }}
-        {% endif %}.  You could try installing, uninstalling or updating it.</p>
+        {% endif %}. You could try reinstalling or updating it.</p>
         {% if recommendPluginRef %}
-          <p><a href="/manage-prototype/plugin/{{ recommendPluginRef }}">Manage the plugin {{ recommendPlugin }}</a></p>
+          <p><a href="/manage-prototype/plugin/{{ recommendPluginRef }}">Manage the {{ recommendPlugin }}</a> plugin.</p>
         {% endif %}
       </div>
 
@@ -118,7 +118,7 @@
   {% endif %}
 
 
-  <p><a href="/manage-prototype">Back to Manage Your Prototype</a></p>
+  <p><a href="/manage-prototype">Back to the Prototype Manager</a></p>
   <!-- parsed by:  {{ parsedBy }} -->
 
 {% endblock %}

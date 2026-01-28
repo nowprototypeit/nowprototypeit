@@ -13,9 +13,9 @@
   {% else %}
     <h1>Clear session data</h1>
     <form action="{{ currentUrl }}" method="post">
-      <p>Clearing your session data will reset the information you've provided, this includes
-      any form inputs, any query strings.  All your pages will still be in tact, it will be just
-      like you're a new user coming to the same prototype.</p>
+      <p>Clearing your session data resets all of the information you've provided. This includes
+      any form inputs and any query strings, so that the experience is as if you are a new user coming to the same prototype. 
+      This does not affect page content, only input data.</p>
       <button type="submit">Clear your session data</button>
     </form>
   {% endif %}

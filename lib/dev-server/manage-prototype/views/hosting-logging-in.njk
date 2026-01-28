@@ -8,9 +8,11 @@
 
 {% set contentWhenStarted %}
 
-  <h1>You're in the process of logging in</h1>
+  <h1>You're already logging in</h1>
 
-  <p>Please continue that login process or <a href="/manage-prototype/hosting">start again</a>.</p>
+  <p>You already started logging in in another window. Please complete that login process. You might need to check your email inbox for a confirmation code.</p>
+  
+  <p>If you haven't recieved a code, or no longer have access to the login window, you may <a href="/manage-prototype/hosting">start again</a>.</p>
 
 {% endset %}
 
@@ -18,9 +20,9 @@
 
   {% if loginUrl %}
     <div id="phase-one">
-      <h1>A login window should have opened</h1>
+      <h1>Continue login in the popup window</h1>
 
-      <p>If it hasn't opened you can <strong><a href="{{ loginUrl }}" target="_blank" data-dom-widget="auth-process-open-window" {% if shouldAutoOpen %}data-auto-open="on"{% endif %}>try opening it again</a></strong>.</p>
+      <p>Continue your login in the new popup window. If a new window hasn't opened, <strong><a href="{{ loginUrl }}" target="_blank" data-dom-widget="auth-process-open-window" {% if shouldAutoOpen %}data-auto-open="on"{% endif %}>click here to try again</a></strong>.</p>
 
       <p>This page will automatically refresh once you're logged in.</p>
     </div>
@@ -30,7 +32,7 @@
   {% else %}
     {{ contentWhenStarted | safe }}
   {% endif %}
-  <p><a href="/manage-prototype">Back to Manage Your Prototype</a></p>
+  <p><a href="/manage-prototype">Back to the Prototype Manager</a></p>
 {% endblock %}
 
 {% block pageScripts %}

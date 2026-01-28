@@ -13,7 +13,7 @@
         value: playback.npmPackage,
         spellcheck: false,
         label: "Package name",
-        hintText: "The package name is what you'd normally put after 'npm install'."
+        hintText: "The package name, as published on NPM (what you'd put after 'npm install')."
     }) }}
     {{ nowPrototypeItTextInput({
         nameAndId: "npmVersion",
@@ -21,7 +21,7 @@
         spellcheck: false,
         isOneThird: true,
         label: "Version number",
-        hintText: "If you want to install a specific version you can enter it here e.g. 5.0.1"
+        hintText: "Optional: Specify a package version, as published on NPM (e.g. 5.0.1)."
     }) }}
 {% endset %}
 
@@ -30,19 +30,22 @@
         nameAndId: "githubOrg",
         value: playback.githubOrg,
         spellcheck: false,
-        label: "The organisation in Github"
+        label: "Organisation name",
+        hintText: "The organisation's name as it appears on GitHub."
     }) }}
     {{ nowPrototypeItTextInput({
         nameAndId: "githubProject",
         value: playback.githubProject,
         spellcheck: false,
-        label: "The project name in Github"
+        label:"Project name",
+        hintText: "The project name as it appears on GitHub."
     }) }}
     {{ nowPrototypeItTextInput({
         nameAndId: "githubBranch",
         value: playback.githubBranch,
         spellcheck: false,
-        label: "The branch name in Github (optional)"
+        label: "Branch name",
+        hintText: "Optional: The branch name as it appears on GitHub."
     }) }}
 {% endset -%}
 
@@ -52,21 +55,22 @@
         spellcheck: false,
         value: playback.fsPath,
         label: "File system path",
-        hintText: "Use this if you're working on a plugin and want to try it before releasing."
+        hintText: "Specify a path to a local directory that contains a plugin. You usually only need this option to test a plugin that you're building."
     }) }}
 {% endset -%}
 
 {% if playback.error == 'plugin-lookup-no-results' %}
     {{ nowPrototypeItError({
-        titleText: "There is a problem",
+        titleText: "Package not found",
         errorList: [
             {
-                text: "The package you requested couldn't be found"
+                text: "The package you requested couldn't be found."
             }
         ]
     }) }}
 {% endif %}
-<h2>Lookup a specific plugin</h2>
+<h2>Look up a specific plugin</h2>
+<p>Find a specific plugin package from NPM, GitHub, or your local file system.</p>
 <form action="/manage-prototype/plugin" method="post">
     {{ nowPrototypeItRadioButtons({
         nameAndId: "source",

@@ -2,21 +2,21 @@
 
 {% block content %}
   <h1>
-    Manage your prototype
+    NPI Prototype Manager
   </h1>
   <p>
     Now Prototype It is a low-code, high fidelity prototype kit powered by your design system.
   </p>
   {% if docsUrl %}
     <p>
-      <a target="_blank" href="{{ docsUrl }}">To find out more take a look at our documentation</a>.
+      To learn how to build and configure your prototype, see the <a target="_blank" href="{{ docsUrl }}">Now Prototype It documentation</a>.
     </p>
   {% endif %}
   </div>
 
   {% if messages.length > 0 %}
     <h2>
-      Messages from the Now Prototype It Team:
+      Messages from the Now Prototype It team:
     </h2>
     <ul class="nowprototypeit-manage-prototype-messages nowprototypeit-bullet-list">
       {% for message in messages %}

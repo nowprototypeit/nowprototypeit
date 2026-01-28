@@ -4,10 +4,10 @@
 
 {% block content %}
 
-  <h1>Templates</h1>
+  <h1>Page templates</h1>
 
   <p>
-    Create pages from templates
+    View your available page templates, and create new pages. 
   </p>
 
   {% if commonTemplatesDetails %}
@@ -16,8 +16,8 @@
       href: commonTemplatesDetails.installLink + '?returnTo=templates'
     }) }}
   {% elseif availableTemplates.length == 0 %}
-    <p>It looks like you don't have any plugins that provide templates. Why not <a href="/manage-prototype/plugins/discover">find
-        a plugin</a></p>
+    <p>It looks like you don't have any plugins that provide page templates. <a href="/manage-prototype/plugins/discover">Browse available
+        plugins</a> to find suitable page templates.</p>
   {% endif %}
 
   {% for plugin in availableTemplates %}

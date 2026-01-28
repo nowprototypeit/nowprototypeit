@@ -3,20 +3,20 @@
 {% set bodyClasses = 'nowprototypeit-error-page' %}
 
 {% block pageTitle %}
-  Error connecting to the hosting environment
+  Error connecting to NPI Cloud
 {% endblock %}
 
 
 {% block content %}
 
   <h1>
-    There was an error while communicating with the hosting platform
+    There was an error while communicating with NPI Cloud
   </h1>
 
   {% if message.html %}
     <p>{{ message.html | safe }}</p>
   {% endif %}
 
-  <p><a href="/manage-prototype">Back to Manage Your Prototype</a></p>
+  <p><a href="/manage-prototype">Back to the Prototype Manager</a></p>
 
 {% endblock %}

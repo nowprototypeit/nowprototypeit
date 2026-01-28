@@ -1,7 +1,7 @@
 
 <h1>Setting up your prototype</h1>
 
-<p>We have received your upload request, we are setting up your prototype now.</p>
+<p>NPI Cloud has received your upload request. Setting up your prototype now.</p>
 
 <div class="prototype-progress-wrapper">
   {% include "includes/hosting-spinner.njk" %}
@@ -12,8 +12,9 @@
     <p data-dom-widget="prototypeUploadProgressMessage" data-too-long-message-id="hosting-show-if-delay-is-too-long" data-status-id="{{ statusId }}"></p>
 
     <div id="hosting-show-if-delay-is-too-long">
-      <p>If you give up waiting you can <a href="/manage-prototype/hosting">visit the hosting page</a>.</p>
-      <p>Your upload will still be working in the background but you won't be able to check on the progress.</p>
+      <p>If you leave this page, your prototype will continue uploading, but you won't be able to check on the progress.</p>
+      <p><a href="/manage-prototype/hosting">Return to the Sharing page</a>.</p>
+
     </div>
   {% endif %}
 </div>
