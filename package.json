@@ -47,7 +47,7 @@
   "dependencies": {
     "@nowprototypeit/design-system": "1.0.8",
     "body-parser": "^1.20.2",
-    "chokidar": "^4.0.3",
+    "chokidar": "^5.0.0",
     "cookie-parser": "^1.4.6",
     "cross-spawn": "^7.0.3",
     "csrf-csrf": "^3.0.8",
