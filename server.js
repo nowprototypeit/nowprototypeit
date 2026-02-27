@@ -158,6 +158,7 @@ app.use(bodyParser.urlencoded({
 
 // Automatically store all data users enter
 if (config.useAutoStoreData) {
+  console.log('!!!! Adding autoStoreData middleware')
   app.use(sessionUtils.autoStoreData)
   sessionUtils.addCheckedFunction(nunjucksAppEnv)
 }
@@ -254,7 +255,7 @@ app.post('/manage-prototype/clear-data', function (req, res) {
 })
 
 // Strip .html, .htm and .njk if provided
-const regExp = config.respectFileExtensions ? /\.(html|htm|njk|md)$/i : /\.(html|htm|njk)$/i
+const regExp = config.respectFileExtensions ? /\.(html|htm|njk|md|php)$/i : /\.(html|htm|njk)$/i
 app.get(regExp, (req, res) => {
   let path = req.path
   const parts = path.split('.')

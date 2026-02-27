@@ -39,3 +39,15 @@ Feature: Not respecting file extensions when experiment is off
     And the error details should contain "File path:" "app/views/fixture-example.njk"
     And the error details should contain "Error type:" "Template render error"
     And the error details should contain "Error message:" "template not found: includes/really-basic-example.html"
+
+  @no-variant
+    @respect-file-extensions-experiment-on
+    @php
+  Scenario Outline: Respecting file extensions of pages when experiment is on
+    Given I create a file "app/views/fixture-example.<fileExtension>" based on the fixture file "php/basic-php-example.php"
+    When I visit "/fixture-example"
+    Then the main heading should be updated to "3 + 5 = <answer>"
+    Examples:
+      | fileExtension | answer |
+      | php           | (8)    |
+      | html          | ()     |
