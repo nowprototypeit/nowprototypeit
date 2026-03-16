@@ -1,5 +1,6 @@
 #!/bin/sh
 
-mkdir -p ~/projects/prototype-kits/now-prototype-it-companion &&
-rm -Rf ~/projects/prototype-kits/now-prototype-it-companion/* &&
-./bin/cli create --version=local --variant="marsha-p-johnson" --variant-dependency="$(pwd)/features/fixtures/plugins/marsha-p-johnson" ~/projects/prototype-kits/now-prototype-it-companion
+mkdir -p ~/projects/prototypes/now-prototype-it-companion &&
+rm -Rf ~/projects/prototypes/now-prototype-it-companion/* &&
+rm -Rf ~/projects/prototypes/now-prototype-it-companion/.tmp &&
+./bin/cli create --version=local --variant="marsha-p-johnson" --variant-dependency="$(pwd)/features/fixtures/plugins/marsha-p-johnson" ~/projects/prototypes/now-prototype-it-companion

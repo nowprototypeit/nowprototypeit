@@ -1,5 +1,6 @@
 #!/bin/sh
 
-mkdir -p ~/projects/prototype-kits/now-prototype-it-companion &&
-rm -Rf ~/projects/prototype-kits/now-prototype-it-companion/* &&
-./bin/cli create --version=local --variant="@nowprototypeit/govuk-frontend-adaptor" --variant-dependency="$(pwd)/../adaptors/govuk-frontend-adaptor" ~/projects/prototype-kits/now-prototype-it-companion
+mkdir -p ~/projects/prototypes/now-prototype-it-companion &&
+rm -Rf ~/projects/prototypes/now-prototype-it-companion/* &&
+rm -Rf ~/projects/prototypes/now-prototype-it-companion/.tmp &&
+./bin/cli create --version=local --variant="@nowprototypeit/govuk-frontend-adaptor" --variant-dependency="$(pwd)/../adaptors/govuk-frontend-adaptor" ~/projects/prototypes/now-prototype-it-companion

@@ -40,7 +40,7 @@ const execArgs = {
 const numberOfRuns = Number(process.argv[2]) || 20
 const numberOfDevRuns = Math.ceil(numberOfRuns / 2)
 const npiVersionToCompare = '0.11.2'
-const govukFrontendVersion = '5.9.0'
+const govukFrontendVersion = '6.1.0'
 const minimumAcceptablePercentageImprovements = {
   // Note: These are set quite low compared to what we're seeing.  The last run on GitHub actions (`ubuntu-latest`) was:
   //
