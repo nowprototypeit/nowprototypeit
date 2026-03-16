@@ -1,8 +1,8 @@
 {% extends "layouts/page-with-side-nav.njk" %}
-
+{% set currentSection = currentSection | default("Plugins") %}
 {% block introduction %}
   <div class="grid-row grid-standard-bottom-margin">
-    <div class="grid-column-readable-width">
+    <div class="grid-column-readable-width nowprototypeit-global-styles">
       <h1>Plugins</h1>
       <p>
         Plugins provide you with new components, styles and other features.

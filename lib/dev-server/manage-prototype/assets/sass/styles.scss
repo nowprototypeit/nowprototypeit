@@ -104,3 +104,16 @@
   display: inline-block;
   margin-right: 1rem;
 }
+
+.nowprototypeit-sidebar {
+  .nowprototypeit-sub-nav-item {
+    a:hover {
+      text-decoration: underline;
+      border-bottom: 0 none;
+    }
+  }
+}
+
+.nowprototypeit-form-secondary-button {
+  opacity: 0.8;
+}

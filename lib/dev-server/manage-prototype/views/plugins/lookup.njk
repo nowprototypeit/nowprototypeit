@@ -1,7 +1,7 @@
 {% from "components/text-input.njk" import nowPrototypeItTextInput %}
 {% from "components/radio-buttons.njk" import nowPrototypeItRadioButtons %}
 {% from "components/submit-button.njk" import nowPrototypeItSubmitButton %}
-{% from "components/error.njk" import nowPrototypeItError %}
+{% from "now-prototype-it-design-system/components/errors.njk" import nowPrototypeItErrors %}
 {% extends "layouts/plugins.njk" %}
 
 {% block mainPanel %}
@@ -57,7 +57,7 @@
 {% endset -%}
 
 {% if playback.error == 'plugin-lookup-no-results' %}
-    {{ nowPrototypeItError({
+    {{ nowPrototypeItErrors({
         titleText: "There is a problem",
         errorList: [
             {
@@ -67,6 +67,7 @@
     }) }}
 {% endif %}
 <h2>Lookup a specific plugin</h2>
+
 <form action="/manage-prototype/plugin" method="post">
     {{ nowPrototypeItRadioButtons({
         nameAndId: "source",
