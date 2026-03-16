@@ -101,7 +101,7 @@ Feature: Installing and uninstalling plugins
   @govuk-variant
   @integration
   Scenario: Only provide uninstall when the version exactly matches (will fail if new common templates version is released)
-    When I view the plugin details for the "npm:@govuk-prototype-kit/common-templates:2.0.1" plugin
+    When I view the plugin details for the "npm:@govuk-prototype-kit/common-templates" plugin
     Then I should see the "Uninstall" button
     And I should not see the "Install this version" button
     And I should not see the "Install" button

@@ -65,7 +65,7 @@ Then('the service name in the GOV.UK header should become {string} on the URL {s
   let actual = null
   await waitForConditionToBeMet(standardTimeout, async () => {
     await this.browser.openUrl(url)
-    actual = await this.browser.getTextFromSelector('.govuk-header__service-name', tinyTimeout)
+    actual = await this.browser.getTextFromSelector('.govuk-heading-xl', tinyTimeout)
 
     return actual === headerText
   }, (reject) => {
