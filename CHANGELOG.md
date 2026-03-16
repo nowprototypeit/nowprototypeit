@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+ - Using the latest version of the Now Prototype It Design System (which is shared with the website & NPI Cloud) in order to improve accessibility and improve usability.
+
 ## 0.14.3
 
 ### Fixes

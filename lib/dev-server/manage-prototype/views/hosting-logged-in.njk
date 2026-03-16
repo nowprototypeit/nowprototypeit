@@ -2,7 +2,7 @@
 {% from "components/text-input.njk" import nowPrototypeItTextInput %}
 {% from "components/radio-buttons.njk" import nowPrototypeItRadioButtons %}
 {% from "components/submit-button.njk" import nowPrototypeItSubmitButton %}
-{% from "components/error.njk" import nowPrototypeItError %}
+{% from "now-prototype-it-design-system/components/errors.njk" import nowPrototypeItErrors %}
 
 {% set pageName="Hosting" %}
 
@@ -28,7 +28,7 @@
 
 
     {% if errorSplash %}
-      {{ nowPrototypeItError({
+      {{ nowPrototypeItErrors({
         titleText: errorSplash.title,
         errorList: [
           {text: errorSplash.message}

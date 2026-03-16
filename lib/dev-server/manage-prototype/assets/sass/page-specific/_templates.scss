@@ -1,3 +1,5 @@
+@use "includes/variables" as *;
+
 .nowprototypeit-template-page {
   .plugin-name-with-scope {
     margin-bottom: 0;
@@ -16,6 +18,7 @@
   .template-list__item {
     border: 1px solid $darkFeatureColour;
     border-bottom: 0 none;
+    margin: 0;
     &:last-of-type {
       border-bottom: 1px solid $darkFeatureColour;
     }
@@ -24,5 +27,7 @@
     grid-template-columns: 10fr 1fr 1fr;
   }
 
-
+  .template-list__item-link {
+    margin-left: 1rem;
+  }
 }

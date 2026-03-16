@@ -10,8 +10,8 @@
       {% set pluginHeaderPrefix = verb.progressiveTitle + " " %}
 
 
-      <div class="js-visible" aria-live="polite"
-           class="plugin-command-runner"
+      <div aria-live="polite"
+           class="js-visible plugin-command-runner nowprototypeit-global-styles"
            data-dom-widget="plugin-command-runner"
            data-action-url="{{ currentUrl }}"
         {% if requiresUserInput %}
@@ -27,7 +27,7 @@
 
           {% if relatedPlugins|length %}
             <div>
-              <ul class="nowprototypeit-bullet-list">
+              <ul>
                 {% for plugin in relatedPlugins %}
                   <li class="affected-plugin">{{ plugin.name }}{% if plugin.scope %} from {{ plugin.scope }} {% endif %}</li>
                 {% endfor %}

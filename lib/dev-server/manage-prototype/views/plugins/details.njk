@@ -3,12 +3,14 @@
 
 {% extends "layouts/page-with-side-bar.njk" %}
 {% from "components/submit-button.njk" import nowPrototypeItSubmitButton %}
+{% set mainClasses = "nowprototypeit-manageable-width" %}
 
 {% block introduction %}
   {% include "plugins/includes/plugin-details-header.njk" %}
 {% endblock %}
 
 {% block sideBar %}
+  <div class="nowprototypeit-global-styles">
   {% if newerLink %}
     <p><a href="{{ newerLink }}">Latest version: {{ newerVersion }}</a></p>
   {% endif %}
@@ -34,9 +36,11 @@
     </div>
   {% endif %}
   <div><a href="https://github.com/nowprototypeit/nowprototypeit/issues" target="_blank">Report</a></div>
+  </div>
 {% endblock %}
             
 {% block mainPanel %}
+  <div class="nowprototypeit-global-styles">
   <h2>About this plugin</h2>
 
   <p>{{ pluginDescription | default('No description has been provided.') }}</p>
@@ -49,12 +53,12 @@
     <h3 class="nowprototypeit-heading-m">Included in this plugin</h3>
     {% for section in inThisPlugin %}
       <h4>{{ section.title }}</h4>
-      <ul class="nowprototypeit-bullet-list">
+      <ul>
         {% for item in section.items %}
           <li>{{ item }}</li>
         {% endfor %}
       </ul>
     {% endfor %}
   {% endif %}
-
+  </div>
 {% endblock %}

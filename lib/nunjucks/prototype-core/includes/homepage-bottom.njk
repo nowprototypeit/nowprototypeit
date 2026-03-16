@@ -1,6 +1,6 @@
 <p class="{{ nowPrototypeItParagraphAdditionalClasses }}">You can use the <a href="/manage-prototype" class="nowprototypeit-focus-link {{ nowPrototypeItLinkAdditionalClasses }}">management pages</a> to:</p>
 
-<ul class="nowprototypeit-bullet-list {{ nowPrototypeItListAdditionalClasses }}">
+<ul class="{{ nowPrototypeItListAdditionalClasses }}">
   <li>
     Install, uninstall, and update plugins in <a href="/manage-prototype/plugins" class="nowprototypeit-focus-link {{ nowPrototypeItLinkAdditionalClasses }}">the plugin pages</a>
   </li>
@@ -14,7 +14,7 @@
 
 {% if isRunningFromManagePrototype %}
 <p class="{{ nowPrototypeItParagraphAdditionalClasses }}">You can replace this page with your own by adding an "<strong>index.{{ defaultViewExtension }}</strong>" file in "<strong>app/views</strong>", you can also do this
-  <a href="/manage-prototype/templates" class="nowprototypeit-focus-link" {{ nowPrototypeItLinkAdditionalClasses }}>by using a template</a> and using the path "<strong>/index</strong>".</p>
+  <a href="/manage-prototype/templates?prefillUrl=%2Findex" class="nowprototypeit-focus-link" {{ nowPrototypeItLinkAdditionalClasses }}>by using a template and using the path "<strong>/index</strong>"</a>.</p>
 {% else %}
   <p class="{{ nowPrototypeItParagraphAdditionalClasses }}">You can update this page, it's in your prototype kit at <strong>app/views/index.njk</strong> or <strong>app/views/index.html</strong>.</p>
 {% endif %}
@@ -25,7 +25,7 @@
 
 {% macro showPages(pages) %}
   {% if pages.length > 0 %}
-    <ul class="nowprototypeit-bullet-list">
+    <ul class="{{ nowPrototypeItListAdditionalClasses }}">
       {% for page in pages %}
         {{ showPage(page) }}
       {% endfor %}

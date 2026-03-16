@@ -37,14 +37,14 @@
         {% if isInstalledPage %}
             <p>It looks like you don't have any plugins installed.</p>
         {% else %}
-            <p>We couldn't find any plugins, looks like something went wrong. Your options are:</p>
-            <ul class="nowprototypeit-bullet-list">
+            <p>We couldn't find any plugins. Your options are:</p>
+            <ul>
                 <li><a
-                        href="/manage-prototype/plugins/lookup">Lookup a specific plugin</a>.</li>
+                        href="/manage-prototype/plugins/lookup">Look up a specific plugin</a></li>
                 <li><a
-                            href="https://docs.nowprototype.it/plugins">Check our website for information about plugins</a>.</li>
+                        href="https://docs.nowprototype.it/plugins">Check our website for information about plugins</a></li>
                 <li><a
-                            href="https://docs.nowprototype.it/build-a-plugin">Learn about building your own plugin</a>.</li>
+                        href="https://docs.nowprototype.it/build-a-plugin">Learn about building your own plugin</a></li>
             </ul>
         {% endif %}
     {% else %}
@@ -55,6 +55,6 @@
                 plugin: plugin
             }) }}
         {% endfor %}
+        </ul>
     {% endif %}
-    </ul>
 {% endblock %}
