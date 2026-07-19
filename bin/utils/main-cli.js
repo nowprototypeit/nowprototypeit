@@ -18,7 +18,7 @@ const fse = require('fs-extra')
 const { spawn, fork, exec } = require('../../lib/exec')
 const { verboseLogger, progressLogger } = require('./loggers')
 const { npmInstall } = require('./index')
-const { projectDir } = require('../../lib/utils/paths')
+const { projectDir, packageDir } = require('../../lib/utils/paths')
 const { validatePlugin } = require('../../lib/plugins/plugin-validator')
 const { flattenArray } = require('../../lib/utils/arrayTools')
 const events = require('../../lib/dev-server/dev-server-events')
@@ -450,6 +450,13 @@ async function runDev () {
   // await shutdown('cli')
 }
 
+async function runUploader () {
+  fork(path.join(packageDir, 'lib', 'dev-server', 'init-just-upload.js'), {
+    env: { ...process.env, NPI_HOSTING_ENABLED: 'true' },
+    stdio: 'inherit'
+  })
+}
+
 async function runServe () {
   global.runningOnServerWatchNotNeeded = true
   warnIfNpmStart(argv, process.env)
@@ -481,6 +488,8 @@ async function runValidatePlugin () {
       return runInit()
     case 'dev':
       return runDev()
+    case 'uploader':
+      return runUploader()
     case 'start':
       return await runServe()
     case 'serve':
