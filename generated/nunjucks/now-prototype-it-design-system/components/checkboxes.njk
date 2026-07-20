@@ -1,0 +1,32 @@
+{% from "now-prototype-it-design-system/components/label.njk" import nowPrototypeItLabel %}
+
+{% macro nowPrototypeItCheckboxes(params) %}
+  <fieldset class="nowprototypeit-form-item-wrapper" id="{{ params.nameAndId }}" aria-describedby="{{params.nameAndId}}'-legend'">
+    {{ nowPrototypeItLabel({
+      id: params.nameAndId + '-legend',
+      isLegend: true,
+      for: params.nameAndId,
+      text: params.label,
+      hintText: params.hintText
+    }) }}
+    {% for option in params.options %}
+      {% set revealId = params.nameAndId ~ '-' ~ loop.index ~ '-reveal'%}
+      {% set fieldId = params.nameAndId ~ '-' ~ loop.index %}
+      <div class="nowprototypeit-form-checkbox-wrapper nowprototypeit-form-item-wrapper"{% if option.conditionalReveal %} data-dom-widget="conditional-reveal" data-reveal-id="{{ revealId }}" data-field-id="{{ fieldId }}" {% endif %}>
+        <input
+            type="checkbox"
+            {% if option.checked %}checked="checked"{% endif %}
+            name="{{ params.nameAndId }}"
+            value="{{ option.value }}"
+            id="{{ params.nameAndId }}-{{ loop.index }}"
+        />
+        <label class="nowprototypeit-form-label-for-checkbox" for="{{ params.nameAndId }}-{{ loop.index }}">{{ option.html | safe }}{{ option.text }}</label>
+        {% if option.conditionalReveal %}
+          <div class="nowprototypeit-form-conditional-reveal" id="{{ revealId }}">
+            {{ option.conditionalReveal | safe }}
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </fieldset>
+{% endmacro %}

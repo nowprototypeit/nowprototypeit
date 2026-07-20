@@ -1,0 +1,5 @@
+$assets-url-for-variables: null !default;
+
+@if ($assets-url-for-variables == null) {
+  @error "You must set the $assets-url-for-variables variable to the path of the design system assets.";
+}

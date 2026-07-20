@@ -9,7 +9,6 @@
       "version": "0.14.3",
       "license": "MIT",
       "dependencies": {
-        "@nowprototypeit/design-system": "1.2.0",
         "body-parser": "^1.20.2",
         "chokidar": "^4.0.3",
         "cookie-parser": "^1.4.6",
@@ -1753,12 +1752,6 @@
       "engines": {
         "node": ">= 8"
       }
-    },
-    "node_modules/@nowprototypeit/design-system": {
-      "version": "1.2.0",
-      "resolved": "https://registry.npmjs.org/@nowprototypeit/design-system/-/design-system-1.2.0.tgz",
-      "integrity": "sha512-MeUDpLTAXaooA+Ce3t4S9YcWMHZGPzIMsESA6CMNYdeWKipPJMWQ5xWdWI/a2ZgM4cXVuUvDTBZiC1HKEXav6Q==",
-      "license": "MIT"
     },
     "node_modules/@pkgjs/parseargs": {
       "version": "0.11.0",

@@ -1,0 +1,23 @@
+{% for link in sideNavLinks %}
+  <div class="nowprototypeit-sub-nav-item
+{% if link.isCurrentPage %} nowprototypeit-sub-nav-item__current {%endif%}
+{% if loop.index == 1 %} nowprototypeit-sub-nav-item__first {%endif%}
+{% if link.isDivider %} nowprototypeit-sub-nav-divider {% endif %}">
+    {% if link.isDivider %}
+      {% if link.headerText %}
+        <strong class="nowprototypeit-sub-nav-divider-header">{{ link.headerText }}</strong>
+      {% endif %}
+    {% elseif not link.isCurrentPage %}
+      <a href="{{ link.url }}">
+          {{ link.text }}
+      </a>
+    {% else %}
+      {{ link.text }}
+    {% endif %}
+    {% if link.subtext %}
+      <div class="nowprototypeit-sub-nav-item__subtext">
+        {{ link.subtext }}
+      </div>
+    {% endif %}
+  </div>
+{% endfor %}

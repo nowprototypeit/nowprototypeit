@@ -1,0 +1,12 @@
+{% macro nowPrototypeItErrors(params) %}
+    <div class="nowprototypeit-error" data-dom-widget="scroll-to-this-element">
+        <h4>{{ params.titleText }}</h4>
+        {% if params.errorList %}
+            <ul>
+                {% for error in params.errorList %}
+                    <li>{% if error.href %}<a href="{{ error.href }}">{% endif %}{% if error.html %}{{ error.html | safe }}{% else %}{{ error.text }}{% endif %}{% if error.href %}</a>{% endif %}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+{% endmacro %}

@@ -1,0 +1,33 @@
+{% set nowPrototypeItLogoLink = nowPrototypeItLogoLink | default('https://nowprototype.it/') %}
+{% set headerSubNavSelectedLink = headerSubNavSelectedLink | default(0) %}
+{% set headerSubNavItems = headerSubNavItems | default([
+  {
+    url: "/",
+    name: "Home",
+    isCurrentPage: headerSubNavSelectedLink == 1
+  },
+  {
+    url: "/prototyping",
+    name: "Prototyping",
+    isCurrentPage: headerSubNavSelectedLink == 2
+  },
+  {
+    url: "/support",
+    name: "Support Services",
+    isCurrentPage: headerSubNavSelectedLink == 3
+  },
+  {
+    url: "/govuk",
+    name: "GOV.UK",
+    isCurrentPage: headerSubNavSelectedLink == 4
+  },
+  {
+    url: "/about",
+    name: "About NPI",
+    isCurrentPage: headerSubNavSelectedLink == 5
+  }
+]) %}
+{% set htmlClasses = (htmlClasses | default("")) + " nowprototypeit-website-page" %}
+{% set mainClasses = 'nowprototypeit-global-styles' %}
+
+{% extends "now-prototype-it-design-system/layouts/standard.njk" %}

@@ -1,0 +1,11 @@
+{% macro nowPrototypeItLabel(params) %}
+  <div class="nowprototypeit-form-label {{ params.classes }} {% if params.hintText %} nowprototypeit-form-label-with-hint {% endif %}">
+    <{% if params.isLegend %}legend{% else %}label{% endif %} {% if params.for %}for="{{ params.for }}"{% endif %}{% if params.id %}id="{{ params.id }}"{% endif %}
+        class="nowprototypeit-form-label">
+      {{ params.text }}
+      </{% if params.isLegend %}legend{% else %}label{% endif %}>
+  </div>
+  {% if params.hintText %}
+    <p class="nowprototypeit-form-hint">{{ params.hintText }}</p>
+  {% endif %}
+{% endmacro %}
